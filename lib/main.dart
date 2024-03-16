@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:modis/pages/splash_screen.dart';
+import 'package:modis/providers/user.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MoDis());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MoDis extends StatelessWidget {
+  const MoDis({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => User(),
+        )
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const SplashScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const SplashScreen(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
