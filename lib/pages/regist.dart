@@ -266,7 +266,7 @@ class _RegistPageState extends State<RegistPage> {
                       value: _jenisKelamin,
                       hint: 'Jenis Kelamin',
                       prefixIcon: const Icon(
-                        Icons.group,
+                        Icons.attribution,
                         color: Color.fromRGBO(120, 120, 120, 1),
                       ),
                       items: const [
@@ -275,7 +275,7 @@ class _RegistPageState extends State<RegistPage> {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.supervised_user_circle,
+                                Icons.female,
                                 color: Color.fromRGBO(120, 120, 120, 1),
                               ),
                               Padding(
@@ -295,7 +295,7 @@ class _RegistPageState extends State<RegistPage> {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.accessible,
+                                Icons.male,
                                 color: Color.fromRGBO(120, 120, 120, 1),
                               ),
                               Padding(
