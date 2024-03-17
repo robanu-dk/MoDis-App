@@ -428,6 +428,7 @@ class _RegistPageState extends State<RegistPage> {
                               );
                             }
                           }).catchError((error) {
+                            Navigator.pop(context);
                             snackbarMessenger(
                               context,
                               MediaQuery.of(context).size.width * 0.5,
