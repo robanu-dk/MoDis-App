@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/card_implement.dart';
 import 'package:modis/components/dropdown_implement.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/pages/login.dart';
+import 'package:modis/providers/user.dart';
+import 'package:provider/provider.dart';
 
 class RegistPage extends StatefulWidget {
   const RegistPage({super.key});
@@ -343,7 +347,7 @@ class _RegistPageState extends State<RegistPage> {
                       isPassword: !_showPassword,
                     ),
                     Input(
-                      label: 'Ketik Ulang Kata Sandi',
+                      label: 'Konfirmasi Kata Sandi',
                       textController: _passwordConfirm,
                       prefixIcon: const Icon(
                         Icons.lock,
@@ -371,7 +375,67 @@ class _RegistPageState extends State<RegistPage> {
                       padding: const EdgeInsets.only(top: 35.0),
                       width: MediaQuery.of(context).size.width * 0.6,
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) => PopScope(
+                                    canPop: false,
+                                    child: AlertDialog(
+                                      backgroundColor:
+                                          const Color.fromARGB(154, 0, 0, 0),
+                                      insetPadding: EdgeInsets.all(
+                                          MediaQuery.of(context).size.width *
+                                              0.3),
+                                      content: const LoadingIndicator(
+                                        indicatorType:
+                                            Indicator.ballSpinFadeLoader,
+                                        colors: [Colors.white],
+                                      ),
+                                    ),
+                                  ));
+                          Provider.of<User>(context, listen: false)
+                              .regist(
+                            _fullName.text,
+                            _username.text,
+                            _email.text,
+                            _peran,
+                            _jenisKelamin,
+                            _password.text,
+                            _passwordConfirm.text,
+                          )
+                              .then((response) {
+                            Navigator.pop(context);
+                            if (response['status'] == 'success') {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
+                              );
+                              snackbarMessenger(
+                                context,
+                                MediaQuery.of(context).size.width * 0.5,
+                                const Color.fromARGB(255, 0, 120, 18),
+                                'Berhasil membuat akun',
+                              );
+                            } else {
+                              snackbarMessenger(
+                                context,
+                                MediaQuery.of(context).size.width * 0.4,
+                                Colors.red,
+                                response['message'],
+                              );
+                            }
+                          }).catchError((error) {
+                            snackbarMessenger(
+                              context,
+                              MediaQuery.of(context).size.width * 0.5,
+                              Colors.red,
+                              'Gagal terhubung server',
+                            );
+                          });
+                        },
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(
                             const Color.fromRGBO(248, 198, 48, 1),
@@ -427,6 +491,25 @@ class _RegistPageState extends State<RegistPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.9,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
       ),
     );
   }
