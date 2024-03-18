@@ -376,23 +376,22 @@ class _RegistPageState extends State<RegistPage> {
                       child: OutlinedButton(
                         onPressed: () {
                           showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) => PopScope(
-                                    canPop: false,
-                                    child: AlertDialog(
-                                      backgroundColor:
-                                          const Color.fromARGB(154, 0, 0, 0),
-                                      insetPadding: EdgeInsets.all(
-                                          MediaQuery.of(context).size.width *
-                                              0.3),
-                                      content: const LoadingIndicator(
-                                        indicatorType:
-                                            Indicator.ballSpinFadeLoader,
-                                        colors: [Colors.white],
-                                      ),
-                                    ),
-                                  ));
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) => PopScope(
+                              canPop: false,
+                              child: AlertDialog(
+                                backgroundColor:
+                                    const Color.fromARGB(154, 0, 0, 0),
+                                insetPadding: EdgeInsets.all(
+                                    MediaQuery.of(context).size.width * 0.3),
+                                content: const LoadingIndicator(
+                                  indicatorType: Indicator.ballSpinFadeLoader,
+                                  colors: [Colors.white],
+                                ),
+                              ),
+                            ),
+                          );
                           Provider.of<User>(context, listen: false)
                               .regist(
                             _fullName.text,
