@@ -502,7 +502,7 @@ class _RegistPageState extends State<RegistPage> {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.9,
+          bottom: MediaQuery.of(context).size.height * 0.85,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
