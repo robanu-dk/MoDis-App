@@ -89,4 +89,42 @@ class User with ChangeNotifier {
       throw error.toString();
     }
   }
+
+  Future<dynamic> forgetPassword(String email) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/forget-password');
+      var post = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email,
+        }),
+      );
+
+      var response = jsonDecode(post.body);
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> resetPassword(String email, String token) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/generate-password');
+
+      var post = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email,
+          "token": token,
+        }),
+      );
+
+      var response = jsonDecode(post.body);
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
 }
