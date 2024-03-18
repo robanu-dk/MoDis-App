@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
+import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/card_implement.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/logo.dart';
@@ -22,12 +25,28 @@ class _LoginPageState extends State<LoginPage> {
       _showPassword = false,
       _rememberMe = false;
   late Timer _timerInternet;
-  final TextEditingController _username = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final TextEditingController _username = TextEditingController(),
+      _email = TextEditingController(),
+      _password = TextEditingController(),
+      _otp1 = TextEditingController(),
+      _otp2 = TextEditingController(),
+      _otp3 = TextEditingController(),
+      _otp4 = TextEditingController();
+  final FocusNode _focusNode1 = FocusNode(),
+      _focusNode2 = FocusNode(),
+      _focusNode3 = FocusNode(),
+      _focusNode4 = FocusNode(),
+      _resetNode = FocusNode();
+  late String _kodeOtp;
 
   @override
   void initState() {
     super.initState();
+
+    otp(_otp1, _focusNode2, true);
+    otp(_otp2, _focusNode3, true);
+    otp(_otp3, _focusNode4, true);
+    otp(_otp4, _focusNode4, false);
 
     checkInternetConnection(context);
 
@@ -79,6 +98,19 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  otp(TextEditingController controller, FocusNode focusNode, bool next) {
+    controller.addListener(() {
+      if (controller.text.isNotEmpty) {
+        if (controller.text.length > 1) {
+          controller.text = controller.text[1];
+        }
+        if (next) {
+          focusNode.requestFocus();
+        }
+      }
+    });
   }
 
   Future<void> checkInternetConnection(context) async {
@@ -218,7 +250,9 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.only(top: 8),
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          forgetPassword(context);
+                        },
                         child: const Text(
                           'Lupa Sandi',
                           textAlign: TextAlign.end,
@@ -331,6 +365,350 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void forgetPassword(BuildContext context) {
+    _email.text = '';
+    showDialog(
+      context: context,
+      builder: (context) => AlertInput(
+        height: 200,
+        header: const Text(
+          'Lupa Sandi',
+          style: TextStyle(
+            fontFamily: 'crimson',
+            fontSize: 30,
+          ),
+        ),
+        headerPadding: const EdgeInsets.only(top: 8.0),
+        contents: [
+          Input(
+            textController: _email,
+            label: "Email",
+            focusNode: _resetNode,
+            prefixIcon: const Icon(Icons.email),
+          )
+        ],
+        contentAligment: 'vertical',
+        contentPadding: const EdgeInsets.only(top: 8.0),
+        actionAligment: 'horizontal',
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              _resetNode.unfocus();
+              if (_email.text != '') {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) => PopScope(
+                    canPop: false,
+                    child: AlertDialog(
+                      backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+                      insetPadding: EdgeInsets.all(
+                          MediaQuery.of(context).size.width * 0.3),
+                      content: const LoadingIndicator(
+                        indicatorType: Indicator.ballSpinFadeLoader,
+                        colors: [Colors.white],
+                      ),
+                    ),
+                  ),
+                );
+                Provider.of<User>(context, listen: false)
+                    .forgetPassword(_email.text)
+                    .then((response) {
+                  Navigator.pop(context);
+
+                  if (response['status'] == 'success') {
+                    _otp1.text = '';
+                    _otp2.text = '';
+                    _otp3.text = '';
+                    _otp4.text = '';
+
+                    setState(() {
+                      _kodeOtp = response['otp'];
+                    });
+
+                    showOtpInput(context);
+                  } else {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.5,
+                      Colors.red,
+                      response['message'],
+                    );
+                  }
+                }).catchError((error) {
+                  Navigator.pop(context);
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.5,
+                    Colors.red,
+                    "Gagal terhubung server",
+                  );
+                });
+              } else {
+                snackbarMessenger(
+                  context,
+                  MediaQuery.of(context).size.width * 0.5,
+                  Colors.red,
+                  "email harus diisi",
+                );
+              }
+            },
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                const Color.fromRGBO(248, 198, 48, 1),
+              ),
+              shadowColor: MaterialStateProperty.all(Colors.black),
+              elevation: MaterialStateProperty.all(10),
+              side: MaterialStateProperty.all(BorderSide.none),
+            ),
+            child: const Text(
+              'Reset',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+          ),
+        ],
+        actionPadding: const EdgeInsets.only(top: 20.0),
+      ),
+    );
+  }
+
+  void showOtpInput(BuildContext context) {
+    Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertInput(
+        height: 250,
+        header: Column(
+          children: [
+            const Text(
+              'Kode OTP',
+              style: TextStyle(
+                fontFamily: 'crimson',
+                fontSize: 30,
+              ),
+            ),
+            Text(
+              'Masukkan Kode OTP yang telah dikirim pada email ${_email.text}',
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+
+                  forgetPassword(context);
+                },
+                child: const Text(
+                  'ubah email',
+                  style: TextStyle(
+                    color: Color.fromRGBO(248, 198, 48, 1),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        headerPadding: const EdgeInsets.only(top: 8.0),
+        contents: [
+          otpField(EdgeInsets.zero, _otp1, _focusNode1),
+          otpField(const EdgeInsets.only(left: 10.0), _otp2, _focusNode2),
+          otpField(const EdgeInsets.only(left: 10.0), _otp3, _focusNode3),
+          otpField(const EdgeInsets.only(left: 10.0), _otp4, _focusNode4),
+        ],
+        contentAligment: 'horizontal',
+        contentPadding: const EdgeInsets.only(top: 8.0),
+        actionAligment: 'horizontal',
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              _focusNode1.unfocus();
+              _focusNode2.unfocus();
+              _focusNode3.unfocus();
+              _focusNode4.unfocus();
+
+              if (_kodeOtp ==
+                  "${_otp1.text}${_otp2.text}${_otp3.text}${_otp4.text}") {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) => PopScope(
+                    canPop: false,
+                    child: AlertDialog(
+                      backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+                      insetPadding: EdgeInsets.all(
+                          MediaQuery.of(context).size.width * 0.3),
+                      content: const LoadingIndicator(
+                        indicatorType: Indicator.ballSpinFadeLoader,
+                        colors: [Colors.white],
+                      ),
+                    ),
+                  ),
+                );
+                Provider.of<User>(context, listen: false)
+                    .resetPassword(_email.text, _kodeOtp)
+                    .then((response) {
+                  Navigator.pop(context);
+
+                  if (response['status'] == 'success') {
+                    Navigator.pop(context);
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertInput(
+                        height: 225,
+                        header: const Text(
+                          'Password Baru',
+                          style: TextStyle(
+                            fontFamily: 'crimson',
+                            fontSize: 30,
+                          ),
+                        ),
+                        headerPadding: const EdgeInsets.only(top: 8.0),
+                        contents: [
+                          Text(
+                            'Berikut adalah password baru untuk ${_email.text}',
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Password: ',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  response['password'],
+                                  style: const TextStyle(
+                                    color: Color.fromRGBO(248, 198, 48, 1),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        contentAligment: 'vertical',
+                        contentPadding: const EdgeInsets.only(top: 20.0),
+                        actionAligment: 'horizontal',
+                        actions: [
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                const Color.fromRGBO(248, 198, 48, 1),
+                              ),
+                              shadowColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              elevation: MaterialStateProperty.all(10),
+                              side: MaterialStateProperty.all(BorderSide.none),
+                            ),
+                            child: const Text(
+                              'Tutup',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                          )
+                        ],
+                        actionPadding: const EdgeInsets.only(top: 20.0),
+                      ),
+                    );
+                  } else {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.5,
+                      Colors.red,
+                      response['message'],
+                    );
+                  }
+                }).catchError((error) {
+                  Navigator.pop(context);
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.5,
+                    Colors.red,
+                    "Gagal terhubung server",
+                  );
+                });
+              } else {
+                snackbarMessenger(
+                  context,
+                  MediaQuery.of(context).size.width * 0.5,
+                  Colors.red,
+                  "Kode OTP salah",
+                );
+              }
+            },
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                const Color.fromRGBO(248, 198, 48, 1),
+              ),
+              shadowColor: MaterialStateProperty.all(Colors.black),
+              elevation: MaterialStateProperty.all(10),
+              side: MaterialStateProperty.all(BorderSide.none),
+            ),
+            child: const Text(
+              'Kirim',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+          )
+        ],
+        actionPadding: const EdgeInsets.only(top: 20.0),
+      ),
+    );
+  }
+
+  Container otpField(EdgeInsetsGeometry margin,
+      TextEditingController controller, FocusNode focusNode) {
+    return Container(
+      margin: margin,
+      width: 40.0,
+      child: TextField(
+        onTap: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        },
+        controller: controller,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        textInputAction: TextInputAction.next,
+        focusNode: focusNode,
+      ),
+    );
+  }
+
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.85,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
       ),
     );
   }
