@@ -5,13 +5,14 @@ class Input extends StatelessWidget {
     super.key,
     required this.textController,
     required this.label,
+    this.focusNode,
     this.prefixIcon,
     this.suffixIcon,
     this.isPassword = false,
   });
   final TextEditingController textController;
   final bool isPassword;
-  final dynamic prefixIcon, suffixIcon;
+  final dynamic prefixIcon, suffixIcon, focusNode;
   final String label;
 
   @override
@@ -20,6 +21,10 @@ class Input extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20.0),
       width: MediaQuery.of(context).size.width * 0.8,
       child: TextField(
+        onTap: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        },
+        focusNode: focusNode,
         controller: textController,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(left: 10),
