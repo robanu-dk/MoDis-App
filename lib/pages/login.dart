@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -8,6 +7,7 @@ import 'package:modis/components/card_implement.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/logo.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:modis/pages/beranda.dart';
 import 'package:modis/pages/regist.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
@@ -293,6 +293,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * 0.6,
                       child: OutlinedButton(
                         onPressed: () {
+                          loadingIndicator(context);
                           Provider.of<User>(context, listen: false)
                               .login(
                             _username.text,
@@ -300,13 +301,39 @@ class _LoginPageState extends State<LoginPage> {
                             _rememberMe,
                           )
                               .then(
-                            (value) {
-                              print(value);
+                            (response) {
+                              Navigator.pop(context);
+                              if (response['status'] == 'success') {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const Beranda(),
+                                  ),
+                                );
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.5,
+                                  const Color.fromARGB(255, 0, 120, 18),
+                                  'berhasil login',
+                                );
+                              } else {
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.4,
+                                  Colors.red,
+                                  response['message'],
+                                );
+                              }
                             },
                           ).catchError(
                             (error) {
-                              // message : unable to connect server
-                              print(error);
+                              Navigator.pop(context);
+                              snackbarMessenger(
+                                context,
+                                MediaQuery.of(context).size.width * 0.5,
+                                Colors.red,
+                                'Gagal terhubung server',
+                              );
                             },
                           );
                         },
@@ -369,6 +396,24 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void loadingIndicator(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+          insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.3),
+          content: const LoadingIndicator(
+            indicatorType: Indicator.ballSpinFadeLoader,
+            colors: [Colors.white],
+          ),
+        ),
+      ),
+    );
+  }
+
   void forgetPassword(BuildContext context) {
     _email.text = '';
     showDialog(
@@ -399,22 +444,7 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () {
               _resetNode.unfocus();
               if (_email.text != '') {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) => PopScope(
-                    canPop: false,
-                    child: AlertDialog(
-                      backgroundColor: const Color.fromARGB(154, 0, 0, 0),
-                      insetPadding: EdgeInsets.all(
-                          MediaQuery.of(context).size.width * 0.3),
-                      content: const LoadingIndicator(
-                        indicatorType: Indicator.ballSpinFadeLoader,
-                        colors: [Colors.white],
-                      ),
-                    ),
-                  ),
-                );
+                loadingIndicator(context);
                 Provider.of<User>(context, listen: false)
                     .forgetPassword(_email.text)
                     .then((response) {
@@ -536,22 +566,7 @@ class _LoginPageState extends State<LoginPage> {
 
               if (_kodeOtp ==
                   "${_otp1.text}${_otp2.text}${_otp3.text}${_otp4.text}") {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) => PopScope(
-                    canPop: false,
-                    child: AlertDialog(
-                      backgroundColor: const Color.fromARGB(154, 0, 0, 0),
-                      insetPadding: EdgeInsets.all(
-                          MediaQuery.of(context).size.width * 0.3),
-                      content: const LoadingIndicator(
-                        indicatorType: Indicator.ballSpinFadeLoader,
-                        colors: [Colors.white],
-                      ),
-                    ),
-                  ),
-                );
+                loadingIndicator(context);
                 Provider.of<User>(context, listen: false)
                     .resetPassword(_email.text, _kodeOtp)
                     .then((response) {
