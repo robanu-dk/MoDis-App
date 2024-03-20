@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -11,6 +12,7 @@ import 'package:modis/pages/beranda.dart';
 import 'package:modis/pages/regist.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -166,6 +168,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  saveLocalData(data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userData = {
+      'userFullName': data['name'],
+      'userName': data['username'],
+      'userToken': data['token'],
+      'userProfileImage': data['profile_image'] ?? '',
+      'userRole': data['role'].toString(),
+    };
+
+    prefs.setString('userData', jsonEncode(userData));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -298,7 +313,6 @@ class _LoginPageState extends State<LoginPage> {
                               .login(
                             _username.text,
                             _password.text,
-                            _rememberMe,
                           )
                               .then(
                             (response) {
@@ -316,6 +330,9 @@ class _LoginPageState extends State<LoginPage> {
                                   const Color.fromARGB(255, 0, 120, 18),
                                   'berhasil login',
                                 );
+                                if (_rememberMe) {
+                                  saveLocalData(response['data']);
+                                }
                               } else {
                                 snackbarMessenger(
                                   context,

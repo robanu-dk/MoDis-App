@@ -4,8 +4,23 @@ import 'package:http/http.dart' as http;
 
 class User with ChangeNotifier {
   final String apiDomain = 'http://10.0.2.2:8080/API/Modis/public/api/user';
+  String userFullName = '',
+      userName = '',
+      userToken = '',
+      userProfileImage = '';
+  int userRole = 0;
 
-  Future<dynamic> login(String email, String password, bool remember) async {
+  setUserData(String? localData) {
+    Map<String, dynamic> data =
+        jsonDecode(localData.toString()) as Map<String, dynamic>;
+    userFullName = data['userFullName'];
+    userName = data['userName'];
+    userToken = data['userToken'];
+    userProfileImage = data['userProfileImage'];
+    userRole = int.parse(data['userRole']);
+  }
+
+  Future<dynamic> login(String email, String password) async {
     try {
       Uri url = Uri.parse('$apiDomain/login');
 
@@ -19,11 +34,16 @@ class User with ChangeNotifier {
           },
         ),
       );
-
       var response = jsonDecode(post.body);
-      if (response['status'] == 'success') {}
+      if (response['status'] == 'success') {
+        userFullName = response['data']['name'];
+        userName = response['data']['username'];
+        userToken = response['data']['token'];
+        userProfileImage = response['data']['profile_image'] ?? '';
+        userRole = response['data']['role'];
+      }
 
-      return jsonDecode(post.body);
+      return response;
     } catch (error) {
       throw error.toString();
     }

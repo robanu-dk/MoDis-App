@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:modis/pages/beranda.dart';
 import 'package:modis/pages/login.dart';
+import 'package:modis/providers/user.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,15 +15,18 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool logged = false;
+
   @override
   void initState() {
     super.initState();
+    checkLocalData();
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           pageBuilder: (context, anitamtion, secondaryAnimation) =>
-              const LoginPage(),
+              logged ? const Beranda() : const LoginPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(
             opacity: animation,
@@ -28,6 +35,19 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
     });
+  }
+
+  void checkLocalData() async {
+    SharedPreferences data = await SharedPreferences.getInstance();
+    if (data.containsKey('userData')) {
+      Provider.of<User>(context, listen: false).setUserData(
+        data.getString('userData'),
+      );
+
+      setState(() {
+        logged = true;
+      });
+    }
   }
 
   @override
