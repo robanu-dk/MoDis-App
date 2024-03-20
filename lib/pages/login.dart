@@ -329,6 +329,8 @@ class _LoginPageState extends State<LoginPage> {
                                   MediaQuery.of(context).size.width * 0.5,
                                   const Color.fromARGB(255, 0, 120, 18),
                                   'berhasil login',
+                                  bottomPadding:
+                                      MediaQuery.of(context).size.height * 0.75,
                                 );
                                 if (_rememberMe) {
                                   saveLocalData(response['data']);
@@ -727,13 +729,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
-      Color backgroundColor, String message) {
+      Color backgroundColor, String message,
+      {double bottomPadding = 0}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.85,
+          bottom: bottomPadding == 0
+              ? MediaQuery.of(context).size.height * 0.85
+              : bottomPadding,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
