@@ -63,6 +63,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
       ),
     ];
 
+    if (Provider.of<User>(context).getUserRole() == 0) {
+      superMenu.removeAt(1);
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
