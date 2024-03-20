@@ -7,8 +7,13 @@ class User with ChangeNotifier {
   String userFullName = '',
       userName = '',
       userToken = '',
-      userProfileImage = '';
+      userProfileImage = '',
+      userGuide = '';
   int userRole = 0;
+
+  getUserRole() {
+    return userRole;
+  }
 
   setUserData(String? localData) {
     Map<String, dynamic> data =
@@ -18,6 +23,7 @@ class User with ChangeNotifier {
     userToken = data['userToken'];
     userProfileImage = data['userProfileImage'];
     userRole = int.parse(data['userRole']);
+    userGuide = data['userGuide'];
   }
 
   Future<dynamic> login(String email, String password) async {
@@ -40,6 +46,7 @@ class User with ChangeNotifier {
         userName = response['data']['username'];
         userToken = response['data']['token'];
         userProfileImage = response['data']['profile_image'] ?? '';
+        userGuide = response['data']['guide'] ?? '';
         userRole = response['data']['role'];
       }
 

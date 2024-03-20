@@ -176,6 +176,7 @@ class _LoginPageState extends State<LoginPage> {
       'userToken': data['token'],
       'userProfileImage': data['profile_image'] ?? '',
       'userRole': data['role'].toString(),
+      'userGuide': data['guide'] ?? '',
     };
 
     prefs.setString('userData', jsonEncode(userData));
