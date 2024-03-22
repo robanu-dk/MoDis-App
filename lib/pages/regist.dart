@@ -24,11 +24,16 @@ class _RegistPageState extends State<RegistPage> {
       _start = true,
       _showInternetModal = false;
   late Timer _timerInternet;
-  final TextEditingController _fullName = TextEditingController();
-  final TextEditingController _username = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _passwordConfirm = TextEditingController();
+  final TextEditingController _fullName = TextEditingController(),
+      _username = TextEditingController(),
+      _email = TextEditingController(),
+      _password = TextEditingController(),
+      _passwordConfirm = TextEditingController();
+  final FocusNode _fFullName = FocusNode(),
+      _fUsername = FocusNode(),
+      _fEmail = FocusNode(),
+      _fPassword = FocusNode(),
+      _fPasswordConfirm = FocusNode();
   dynamic _peran, _jenisKelamin;
 
   @override
@@ -190,6 +195,7 @@ class _RegistPageState extends State<RegistPage> {
                     Input(
                       label: 'Nama Lengkap',
                       textController: _fullName,
+                      focusNode: _fFullName,
                       prefixIcon: const Icon(
                         Icons.person,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -198,6 +204,7 @@ class _RegistPageState extends State<RegistPage> {
                     Input(
                       label: 'Nama Pengguna',
                       textController: _username,
+                      focusNode: _fUsername,
                       prefixIcon: const Icon(
                         Icons.person,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -206,6 +213,7 @@ class _RegistPageState extends State<RegistPage> {
                     Input(
                       label: 'Email',
                       textController: _email,
+                      focusNode: _fEmail,
                       prefixIcon: const Icon(
                         Icons.email,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -324,6 +332,7 @@ class _RegistPageState extends State<RegistPage> {
                     Input(
                       label: 'Kata Sandi',
                       textController: _password,
+                      focusNode: _fPassword,
                       prefixIcon: const Icon(
                         Icons.lock,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -349,6 +358,7 @@ class _RegistPageState extends State<RegistPage> {
                     Input(
                       label: 'Konfirmasi Kata Sandi',
                       textController: _passwordConfirm,
+                      focusNode: _fPasswordConfirm,
                       prefixIcon: const Icon(
                         Icons.lock,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -376,6 +386,11 @@ class _RegistPageState extends State<RegistPage> {
                       width: MediaQuery.of(context).size.width * 0.6,
                       child: OutlinedButton(
                         onPressed: () {
+                          _fFullName.unfocus();
+                          _fUsername.unfocus();
+                          _fEmail.unfocus();
+                          _fPassword.unfocus();
+                          _fPasswordConfirm.unfocus();
                           showDialog(
                             barrierDismissible: false,
                             context: context,

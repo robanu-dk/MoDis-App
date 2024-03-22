@@ -38,7 +38,9 @@ class _LoginPageState extends State<LoginPage> {
       _focusNode2 = FocusNode(),
       _focusNode3 = FocusNode(),
       _focusNode4 = FocusNode(),
-      _resetNode = FocusNode();
+      _resetNode = FocusNode(),
+      _fUsername = FocusNode(),
+      _fPassword = FocusNode();
   late String _kodeOtp;
 
   @override
@@ -232,6 +234,7 @@ class _LoginPageState extends State<LoginPage> {
                     Input(
                       label: 'Nama Pengguna/ Email',
                       textController: _username,
+                      focusNode: _fUsername,
                       prefixIcon: const Icon(
                         Icons.person,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -240,6 +243,7 @@ class _LoginPageState extends State<LoginPage> {
                     Input(
                       label: 'Kata Sandi',
                       textController: _password,
+                      focusNode: _fPassword,
                       prefixIcon: const Icon(
                         Icons.lock,
                         color: Color.fromRGBO(120, 120, 120, 1),
@@ -310,6 +314,8 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * 0.6,
                       child: OutlinedButton(
                         onPressed: () {
+                          _fUsername.unfocus();
+                          _fPassword.unfocus();
                           loadingIndicator(context);
                           Provider.of<User>(context, listen: false)
                               .login(
