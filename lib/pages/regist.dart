@@ -166,6 +166,7 @@ class _RegistPageState extends State<RegistPage> {
                 child: Logo(
                   fontSize: 50,
                   imageSize: 130,
+                  mainAxisAlignment: MainAxisAlignment.center,
                 ),
               ),
               Padding(

@@ -5,15 +5,16 @@ class Logo extends StatelessWidget {
     super.key,
     required this.fontSize,
     required this.imageSize,
+    required this.mainAxisAlignment,
   });
 
-  final double imageSize;
-  final double fontSize;
+  final double imageSize, fontSize;
+  final MainAxisAlignment mainAxisAlignment;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(

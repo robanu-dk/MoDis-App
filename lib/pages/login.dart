@@ -208,6 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Logo(
                   fontSize: 50,
                   imageSize: 130,
+                  mainAxisAlignment: MainAxisAlignment.center,
                 ),
               ),
               Padding(
