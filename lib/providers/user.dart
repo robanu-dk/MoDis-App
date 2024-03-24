@@ -8,6 +8,7 @@ class User with ChangeNotifier {
       userName = '',
       userToken = '',
       userProfileImage = '',
+      userEmail = '',
       userGuide = '';
   int userRole = 0;
 
@@ -15,11 +16,16 @@ class User with ChangeNotifier {
     return userRole;
   }
 
+  getUserProfileImage() {
+    return userProfileImage;
+  }
+
   setUserData(String? localData) {
     Map<String, dynamic> data =
         jsonDecode(localData.toString()) as Map<String, dynamic>;
     userFullName = data['userFullName'];
     userName = data['userName'];
+    userEmail = data['userEmail'];
     userToken = data['userToken'];
     userProfileImage = data['userProfileImage'];
     userRole = int.parse(data['userRole']);
@@ -44,6 +50,7 @@ class User with ChangeNotifier {
       if (response['status'] == 'success') {
         userFullName = response['data']['name'];
         userName = response['data']['username'];
+        userEmail = response['data']['email'];
         userToken = response['data']['token'];
         userProfileImage = response['data']['profile_image'] ?? '';
         userGuide = response['data']['guide'] ?? '';
@@ -153,5 +160,50 @@ class User with ChangeNotifier {
     } catch (error) {
       throw error.toString();
     }
+  }
+
+  Future<dynamic> updateData() async {
+    try {
+      userProfileImage =
+          '$userProfileImage?timestamp=${DateTime.fromMillisecondsSinceEpoch}';
+
+      notifyListeners();
+
+      return 'perbarui';
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> changePassword(String password) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/change-password');
+
+      var post = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $userToken',
+          },
+          body: jsonEncode({
+            'email': userEmail,
+            'password': password,
+          }));
+
+      var response = jsonDecode(post.body);
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  void resetData() {
+    userFullName = '';
+    userName = '';
+    userEmail = '';
+    userToken = '';
+    userProfileImage = '';
+    userGuide = '';
+    userRole = 0;
+    notifyListeners();
   }
 }
