@@ -175,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
     var userData = {
       'userFullName': data['name'],
       'userName': data['username'],
+      'userEmail': data['email'],
       'userToken': data['token'],
       'userProfileImage': data['profile_image'] ?? '',
       'userRole': data['role'].toString(),
