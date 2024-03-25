@@ -23,6 +23,7 @@ class AlertInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         height: height,
