@@ -179,6 +179,7 @@ class _LoginPageState extends State<LoginPage> {
       'userToken': data['token'],
       'userProfileImage': data['profile_image'] ?? '',
       'userRole': data['role'].toString(),
+      'userGender': data['jenis_kelamin'].toString(),
       'userGuide': data['guide'] ?? '',
     };
 
