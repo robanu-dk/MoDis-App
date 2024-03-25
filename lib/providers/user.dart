@@ -10,7 +10,7 @@ class User with ChangeNotifier {
       userProfileImage = '',
       userEmail = '',
       userGuide = '';
-  int userRole = 0;
+  int userRole = 0, userGender = 0;
 
   getUserRole() {
     return userRole;
@@ -29,6 +29,7 @@ class User with ChangeNotifier {
     userToken = data['userToken'];
     userProfileImage = data['userProfileImage'];
     userRole = int.parse(data['userRole']);
+    userGender = int.parse(data['userGender']);
     userGuide = data['userGuide'];
   }
 
@@ -54,6 +55,7 @@ class User with ChangeNotifier {
         userToken = response['data']['token'];
         userProfileImage = response['data']['profile_image'] ?? '';
         userGuide = response['data']['guide'] ?? '';
+        userGender = response['data']['jenis_kelamin'];
         userRole = response['data']['role'];
       }
 
@@ -162,14 +164,55 @@ class User with ChangeNotifier {
     }
   }
 
-  Future<dynamic> updateData() async {
+  Future<dynamic> updateData(
+    dynamic profileImage,
+    String name,
+    String username,
+    String email,
+    int gender,
+    bool upImage,
+  ) async {
     try {
-      userProfileImage =
-          '$userProfileImage?timestamp=${DateTime.fromMillisecondsSinceEpoch}';
+      Uri url = Uri.parse('$apiDomain/update');
+      var request = http.MultipartRequest('POST', url);
 
-      notifyListeners();
+      request.headers['authorization'] = 'Bearer $userToken';
 
-      return 'perbarui';
+      if (upImage) {
+        if (profileImage == 'delete') {
+          request.fields['reset_profile_image'] = '1';
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'profile_image',
+              profileImage.path,
+            ),
+          );
+        }
+      }
+
+      request.fields['name'] = name;
+      request.fields['username'] = username;
+      request.fields['old_email'] = userEmail;
+      request.fields['new_email'] = email;
+      request.fields['jenis_kelamin'] = gender.toString();
+
+      var post = await request.send();
+      var response = await http.Response.fromStream(post);
+
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        userFullName = data['data']['name'];
+        userName = data['data']['username'];
+        userEmail = data['data']['email'];
+        userProfileImage = data["data"]["profile_image"] != null
+            ? '${data["data"]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'
+            : '';
+        userGender = int.parse(data['data']['jenis_kelamin']);
+        notifyListeners();
+      }
+
+      return data;
     } catch (error) {
       throw error.toString();
     }
@@ -192,6 +235,7 @@ class User with ChangeNotifier {
       var response = jsonDecode(post.body);
       return response;
     } catch (error) {
+      print(error.toString());
       throw error.toString();
     }
   }
