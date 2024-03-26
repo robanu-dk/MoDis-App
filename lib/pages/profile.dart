@@ -163,29 +163,49 @@ class _ProfileState extends State<Profile> {
                       child: Consumer<User>(
                         builder: (context, user, child) => Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user.userFullName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                overflow: TextOverflow.clip,
-                              ),
-                              maxLines: 2,
-                            ),
-                            accountInformation(
-                              'Nama Pengguna:',
-                              user.userName,
-                            ),
-                            accountInformation(
-                              'Email:',
-                              user.userEmail,
-                            ),
-                            accountInformation(
-                              'Pendamping:',
-                              user.userGuide,
-                            ),
-                          ],
+                          children: user.getUserRole() == 0
+                              ? [
+                                  Text(
+                                    user.userFullName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      overflow: TextOverflow.clip,
+                                    ),
+                                    maxLines: 2,
+                                  ),
+                                  accountInformation(
+                                    'Nama Pengguna:',
+                                    user.userName,
+                                  ),
+                                  accountInformation(
+                                    'Email:',
+                                    user.userEmail,
+                                  ),
+                                  accountInformation(
+                                    'Pendamping:',
+                                    user.userGuide,
+                                  ),
+                                ]
+                              : [
+                                  Text(
+                                    user.userFullName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      overflow: TextOverflow.clip,
+                                    ),
+                                    maxLines: 2,
+                                  ),
+                                  accountInformation(
+                                    'Nama Pengguna:',
+                                    user.userName,
+                                  ),
+                                  accountInformation(
+                                    'Email:',
+                                    user.userEmail,
+                                  ),
+                                ],
                         ),
                       ),
                     ),
