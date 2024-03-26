@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -54,6 +55,24 @@ class _ProfileState extends State<Profile> {
     setState(() {
       _jenisKelamin = Provider.of<User>(context, listen: false).userGender;
     });
+  }
+
+  void saveToLocal(data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('userData')) {
+      var userData = {
+        'userFullName': data['name'],
+        'userName': data['username'],
+        'userEmail': data['email'],
+        'userToken': data['token'],
+        'userProfileImage': data['profile_image'] ?? '',
+        'userRole': data['role'].toString(),
+        'userGender': data['jenis_kelamin'].toString(),
+        'userGuide': data['guide'] ?? '',
+      };
+
+      prefs.setString('userData', jsonEncode(userData));
+    }
   }
 
   @override
@@ -445,6 +464,7 @@ class _ProfileState extends State<Profile> {
                               Navigator.pop(context);
                               Navigator.pop(context);
                               if (response['status'] == 'success') {
+                                saveToLocal(response['data']);
                                 snackbarMessenger(
                                   context,
                                   MediaQuery.of(context).size.width * 0.4,
