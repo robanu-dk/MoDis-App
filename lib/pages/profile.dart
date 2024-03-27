@@ -506,7 +506,7 @@ class _ProfileState extends State<Profile> {
                                 context,
                                 MediaQuery.of(context).size.width * 0.4,
                                 Colors.red,
-                                '$error Gagal terhubung server',
+                                'Gagal terhubung server',
                               );
                             });
                           },
