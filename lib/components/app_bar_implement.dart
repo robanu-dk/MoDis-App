@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 
 class ModisAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const ModisAppBar({super.key, required this.action, required this.title});
+  const ModisAppBar({
+    super.key,
+    required this.action,
+    required this.title,
+    this.header,
+    this.paddingHeader = 1.5,
+  });
 
   final Widget title, action;
+  final Widget? header;
+  final double paddingHeader;
 
   @override
   State<ModisAppBar> createState() => _ModisAppBarState();
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight * 1.5);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight * paddingHeader);
 }
 
 class _ModisAppBarState extends State<ModisAppBar> {
@@ -41,12 +49,13 @@ class _ModisAppBarState extends State<ModisAppBar> {
         ),
         Container(
           width: MediaQuery.of(context).size.width,
-          height: 20,
+          height: 200,
           margin: const EdgeInsets.only(top: 90.0),
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
             color: Colors.white,
           ),
+          child: widget.header,
         )
       ],
     );
