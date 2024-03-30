@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modis/pages/splash_screen.dart';
+import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +17,11 @@ class MoDis extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => User(),
+        ),
+        ChangeNotifierProxyProvider<User, Child>(
+          create: (_) => Child(),
+          update: (_, user, listAccount) =>
+              listAccount!..updateUser(user.userEmail, user.userToken),
         )
       ],
       child: MaterialApp(
