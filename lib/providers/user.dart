@@ -31,6 +31,7 @@ class User with ChangeNotifier {
     userRole = int.parse(data['userRole']);
     userGender = int.parse(data['userGender']);
     userGuide = data['userGuide'];
+    notifyListeners();
   }
 
   Future<dynamic> login(String email, String password) async {
@@ -57,6 +58,7 @@ class User with ChangeNotifier {
         userGuide = response['data']['guide'] ?? '';
         userGender = response['data']['jenis_kelamin'];
         userRole = response['data']['role'];
+        notifyListeners();
       }
 
       return response;
@@ -235,7 +237,6 @@ class User with ChangeNotifier {
       var response = jsonDecode(post.body);
       return response;
     } catch (error) {
-      print(error.toString());
       throw error.toString();
     }
   }
