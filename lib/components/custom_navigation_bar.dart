@@ -5,6 +5,7 @@ import 'package:modis/pages/chat.dart';
 import 'package:modis/pages/list_account.dart';
 import 'package:modis/pages/profile.dart';
 import 'package:modis/pages/video.dart';
+import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +32,16 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icons.supervised_user_circle_rounded,
         label: 'List Akun',
         action: () {
+          Provider.of<Child>(context, listen: false)
+              .getListData()
+              .catchError((error) {
+            snackbarMessenger(
+              context,
+              MediaQuery.of(context).size.width * 0.4,
+              Colors.red,
+              'Gagal terhubung server',
+            );
+          });
           pushReplacement(context, const ListAccount());
         },
       ),
@@ -102,6 +113,25 @@ class CustomBottomNavigationBar extends StatelessWidget {
             child: child,
           );
         },
+      ),
+    );
+  }
+
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.75,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
       ),
     );
   }
