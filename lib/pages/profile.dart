@@ -248,7 +248,7 @@ class _ProfileState extends State<Profile> {
                     contents: [
                       Input(
                         textController: _password,
-                        label: 'Sandi Baru',
+                        label: 'Kata Sandi Baru',
                         focusNode: _fPassword,
                         isPassword: !_showPassword,
                         prefixIcon: const Icon(Icons.lock),
@@ -267,7 +267,7 @@ class _ProfileState extends State<Profile> {
                       ),
                       Input(
                         textController: _confirmPassword,
-                        label: 'Konfirmasi Sandi Baru',
+                        label: 'Konfirmasi Kata Sandi Baru',
                         focusNode: _fConfirmPassword,
                         isPassword: !_showConfirmPassword,
                         prefixIcon: const Icon(Icons.lock),
@@ -366,7 +366,7 @@ class _ProfileState extends State<Profile> {
                 color: Colors.black,
               ),
               Text(
-                ' Ubah Password',
+                ' Ubah Kata Sandi',
                 style: TextStyle(color: Colors.black),
               )
             ],
