@@ -3,6 +3,7 @@ import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/flex_row_information.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/components/tile_information_implement.dart';
@@ -202,9 +203,10 @@ class ListAvailableChild extends StatelessWidget {
       children: [
         Consumer<Child>(
           builder: (context, provider, child) => provider.search(
-                      data: provider.allAvailableChild,
-                      filter: _searchAvailableChild) !=
-                  null
+                          data: provider.allAvailableChild,
+                          filter: _searchAvailableChild) !=
+                      null &&
+                  provider.allAvailableChild.length != 0
               ? Column(
                   children: provider
                       .search(
@@ -275,19 +277,19 @@ class ListAvailableChild extends StatelessWidget {
                                     ),
                                     child: Column(
                                       children: [
-                                        InformationAccount(
+                                        FlexRowInformation(
                                           label: 'Nama Lengkap',
                                           value: element['name'],
                                         ),
-                                        InformationAccount(
+                                        FlexRowInformation(
                                           label: 'Nama Pengguna',
                                           value: element['username'],
                                         ),
-                                        InformationAccount(
+                                        FlexRowInformation(
                                           label: 'Email',
                                           value: element['email'],
                                         ),
-                                        InformationAccount(
+                                        FlexRowInformation(
                                           label: 'Jenis Kelamin',
                                           value: element['gender'] == 1
                                               ? 'Perempuan'
@@ -405,68 +407,12 @@ class ListAvailableChild extends StatelessWidget {
                       )
                       .toList(),
                 )
-              : const Text('data tidak ditemukan'),
+              : const Padding(
+                  padding: EdgeInsets.only(top: 20.0),
+                  child: Text('data tidak ditemukan'),
+                ),
         )
       ],
-    );
-  }
-}
-
-class InformationAccount extends StatelessWidget {
-  const InformationAccount({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  final String label, value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 8.0,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.35,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  child: Text(
-                    maxLines: 2,
-                    label,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
-                  child: const Text(
-                    ': ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.27,
-            child: Text(
-              value,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
