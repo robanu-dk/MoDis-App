@@ -27,8 +27,6 @@ class Child extends ChangeNotifier {
 
   Future<dynamic> getListData() async {
     try {
-      listChild = null;
-
       Uri url = Uri.parse('$apiDomain/all-user-based-guide');
 
       var get = await http.post(
@@ -141,6 +139,9 @@ class Child extends ChangeNotifier {
       var response = jsonDecode(post.body);
       if (response['status'] == 'success') {
         getListData();
+        allAvailableChild = allAvailableChild
+            .where((element) => element['email'] != userEmail)
+            .toList();
       }
 
       return response;
