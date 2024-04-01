@@ -38,7 +38,7 @@ class _EditProfileState extends State<EditProfile> {
         'userToken': data['token'],
         'userProfileImage': data['profile_image'] ?? '',
         'userRole': data['role'].toString(),
-        'userGender': data['jenis_kelamin'].toString(),
+        'userGender': data['gender'].toString(),
         'userGuide': data['guide'] ?? '',
       };
 

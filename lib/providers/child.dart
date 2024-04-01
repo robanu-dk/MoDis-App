@@ -104,7 +104,7 @@ class Child extends ChangeNotifier {
             'user_email': userEmail,
             'name': name,
             'username': username,
-            'jenis_kelamin': gender,
+            'gender': gender,
             'password': password,
           }));
 

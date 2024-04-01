@@ -263,6 +263,7 @@ class ListAvailableChild extends StatelessWidget {
                                           : Image.network(
                                               'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                               filterQuality: FilterQuality.high,
+                                              fit: BoxFit.cover,
                                             ),
                                     ),
                                   ),
@@ -288,7 +289,7 @@ class ListAvailableChild extends StatelessWidget {
                                         ),
                                         InformationAccount(
                                           label: 'Jenis Kelamin',
-                                          value: element['jenis_kelamin'] == 1
+                                          value: element['gender'] == 1
                                               ? 'Perempuan'
                                               : 'Laki-Laki',
                                         ),
@@ -376,12 +377,18 @@ class ListAvailableChild extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(20.0)),
-                                child: element['profile_image'] == null
-                                    ? Image.asset(
-                                        'images/default_profile_image.jpg')
-                                    : Image.network(
-                                        'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
-                                      ),
+                                child: SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: element['profile_image'] == null
+                                      ? Image.asset(
+                                          'images/default_profile_image.jpg')
+                                      : Image.network(
+                                          'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                          filterQuality: FilterQuality.high,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 10.0),

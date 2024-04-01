@@ -56,7 +56,7 @@ class User with ChangeNotifier {
         userToken = response['data']['token'];
         userProfileImage = response['data']['profile_image'] ?? '';
         userGuide = response['data']['guide'] ?? '';
-        userGender = response['data']['jenis_kelamin'];
+        userGender = response['data']['gender'];
         userRole = response['data']['role'];
         notifyListeners();
       }
@@ -116,7 +116,7 @@ class User with ChangeNotifier {
           'username': username,
           'email': email,
           'role': peran,
-          'jenis_kelamin': gender,
+          'gender': gender,
           'password': password,
         }),
       );
@@ -197,7 +197,7 @@ class User with ChangeNotifier {
       request.fields['username'] = username;
       request.fields['old_email'] = userEmail;
       request.fields['new_email'] = email;
-      request.fields['jenis_kelamin'] = gender.toString();
+      request.fields['gender'] = gender.toString();
 
       var post = await request.send();
       var response = await http.Response.fromStream(post);
@@ -210,7 +210,7 @@ class User with ChangeNotifier {
         userProfileImage = data["data"]["profile_image"] != null
             ? '${data["data"]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'
             : '';
-        userGender = int.parse(data['data']['jenis_kelamin']);
+        userGender = int.parse(data['data']['gender']);
         notifyListeners();
       }
 
