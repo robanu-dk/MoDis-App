@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
@@ -157,6 +159,43 @@ class ListAvailableChild extends StatelessWidget {
 
   final String _searchAvailableChild;
 
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.7,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
+  void loadingIndicator(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+          insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.3),
+          content: const LoadingIndicator(
+            indicatorType: Indicator.ballSpinFadeLoader,
+            colors: [Colors.white],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -175,7 +214,163 @@ class ListAvailableChild extends StatelessWidget {
                         (element) => TileButton(
                           paddingLeft: 15.0,
                           paddingRight: 15.0,
-                          onPressed: () {},
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertInput(
+                                height: 440,
+                                header: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Informasi Akun',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Ionicons.md_close),
+                                    )
+                                  ],
+                                ),
+                                headerPadding: EdgeInsets.zero,
+                                contents: [
+                                  Container(
+                                    height: 150,
+                                    width: 150,
+                                    decoration: const BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black,
+                                          offset: Offset(0, 2),
+                                          blurRadius: 1.0,
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(20.0),
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      child: element['profile_image'] == null ||
+                                              element['profile_image'] == ''
+                                          ? Image.asset(
+                                              'images/default_profile_image.jpg')
+                                          : Image.network(
+                                              'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                              filterQuality: FilterQuality.high,
+                                            ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 20.0,
+                                      left: 4.0,
+                                      right: 4.0,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        InformationAccount(
+                                          label: 'Nama Lengkap',
+                                          value: element['name'],
+                                        ),
+                                        InformationAccount(
+                                          label: 'Nama Pengguna',
+                                          value: element['username'],
+                                        ),
+                                        InformationAccount(
+                                          label: 'Email',
+                                          value: element['email'],
+                                        ),
+                                        InformationAccount(
+                                          label: 'Jenis Kelamin',
+                                          value: element['jenis_kelamin'] == 1
+                                              ? 'Perempuan'
+                                              : 'Laki-Laki',
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                                contentAligment: 'vertical',
+                                contentPadding:
+                                    const EdgeInsets.only(top: 10.0),
+                                actionAligment: 'horizontal',
+                                actions: [
+                                  FilledButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    style: const ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStatePropertyAll(Colors.red),
+                                    ),
+                                    child: const Text(
+                                      'Batal',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () {
+                                      loadingIndicator(context);
+                                      Provider.of<Child>(context, listen: false)
+                                          .addChildAccount(element['email'])
+                                          .then((response) {
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        if (response['status'] == 'success') {
+                                          Navigator.pop(context);
+                                          snackbarMessenger(
+                                            context,
+                                            MediaQuery.of(context).size.width *
+                                                0.4,
+                                            const Color.fromARGB(
+                                                255, 0, 120, 18),
+                                            'berhasil memilih akun',
+                                          );
+                                        } else {
+                                          snackbarMessenger(
+                                            context,
+                                            MediaQuery.of(context).size.width *
+                                                0.4,
+                                            Colors.red,
+                                            response['message'],
+                                          );
+                                        }
+                                      }).catchError((error) {
+                                        snackbarMessenger(
+                                          context,
+                                          MediaQuery.of(context).size.width *
+                                              0.4,
+                                          Colors.red,
+                                          'Gagal terhubung server',
+                                        );
+                                      });
+                                    },
+                                    style: const ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                        Color.fromRGBO(248, 198, 48, 1),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Simpan',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                                actionPadding: const EdgeInsets.only(top: 20.0),
+                              ),
+                            );
+                          },
                           height: 55,
                           child: Row(
                             children: [
@@ -186,7 +381,7 @@ class ListAvailableChild extends StatelessWidget {
                                     ? Image.asset(
                                         'images/default_profile_image.jpg')
                                     : Image.network(
-                                        'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}',
+                                        'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                       ),
                               ),
                               Padding(
@@ -205,6 +400,54 @@ class ListAvailableChild extends StatelessWidget {
               : const Text('data tidak ditemukan'),
         )
       ],
+    );
+  }
+}
+
+class InformationAccount extends StatelessWidget {
+  const InformationAccount({
+    super.key,
+    required this.label,
+    required this.value,
+  });
+
+  final String label, value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 8.0,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Text(
+                  ': ',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 150,
+            child: Text(value),
+          ),
+        ],
+      ),
     );
   }
 }

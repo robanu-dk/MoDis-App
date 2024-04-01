@@ -119,4 +119,33 @@ class Child extends ChangeNotifier {
       throw error.toString();
     }
   }
+
+  Future<dynamic> addChildAccount(String userEmail) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/choose-user');
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(
+          {
+            'user_email': userEmail,
+            'guide_email': email,
+          },
+        ),
+      );
+
+      var response = jsonDecode(post.body);
+      if (response['status'] == 'success') {
+        getListData();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
 }
