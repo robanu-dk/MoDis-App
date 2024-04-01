@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AlertInput extends StatelessWidget {
   const AlertInput({
     super.key,
-    required this.height,
+    this.height,
     required this.header,
     required this.headerPadding,
     required this.contents,
@@ -17,7 +17,7 @@ class AlertInput extends StatelessWidget {
   final Widget header;
   final List<Widget> contents, actions;
   final String actionAligment, contentAligment;
-  final double height;
+  final double? height;
   final EdgeInsetsGeometry headerPadding, contentPadding, actionPadding;
 
   @override

@@ -166,7 +166,7 @@ class ListAvailableChild extends StatelessWidget {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.7,
+          bottom: MediaQuery.of(context).size.height * 0.6,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
@@ -218,7 +218,6 @@ class ListAvailableChild extends StatelessWidget {
                             showDialog(
                               context: context,
                               builder: (context) => AlertInput(
-                                height: 440,
                                 header: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -423,28 +422,39 @@ class InformationAccount extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: MediaQuery.of(context).size.width * 0.35,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: Text(
+                    maxLines: 2,
+                    label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const Text(
-                  ': ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
+                  child: const Text(
+                    ': ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           SizedBox(
-            width: 150,
-            child: Text(value),
+            width: MediaQuery.of(context).size.width * 0.27,
+            child: Text(
+              value,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -757,7 +767,7 @@ class _FormCreateAccountState extends State<FormCreateAccount> {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.7,
+          bottom: MediaQuery.of(context).size.height * 0.6,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
