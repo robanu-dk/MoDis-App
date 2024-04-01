@@ -231,7 +231,7 @@ class _ProfileState extends State<Profile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Ubah Password',
+                          'Ubah Kata Sandi',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
