@@ -4,6 +4,7 @@ import 'package:modis/components/custom_navigation_bar.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/components/tile_information_implement.dart';
+import 'package:modis/pages/add_child_account.dart';
 import 'package:modis/providers/child.dart';
 import 'package:provider/provider.dart';
 
@@ -50,9 +51,7 @@ class _ListAccountState extends State<ListAccount> {
               ),
               SearchModis(
                 focusNode: _fSearchChildBasedAccount,
-                onChanged: (value) {
-                  Provider.of<Child>(context, listen: false)
-                      .getListChild(filter: value);
+                onSubmitted: (value) {
                   setState(() {
                     _searchChildBasedAccount = value;
                   });
@@ -63,15 +62,38 @@ class _ListAccountState extends State<ListAccount> {
         ),
       ),
       body: Consumer<Child>(
-        builder: (context, provider, child) =>
-            provider.getListChild(filter: _searchChildBasedAccount) != null
-                ? accountButton(provider: provider)
-                : const Center(
-                    child: Text('Tidak ada data'),
-                  ),
+        builder: (context, provider, child) => provider.search(
+                    data: provider.listChild,
+                    filter: _searchChildBasedAccount) !=
+                null
+            ? accountButton(provider: provider)
+            : const Center(
+                child: Text('Tidak ada data'),
+              ),
       ),
       floatingActionButton: IconButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              transitionDuration:
+                  const Duration(milliseconds: 300), // Durasi animasi
+              pageBuilder: (BuildContext context, Animation<double> animation,
+                  Animation<double> secondaryAnimation) {
+                return const AddChildAccount();
+              },
+              transitionsBuilder: (BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                  Widget child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        },
         style: const ButtonStyle(
           fixedSize: MaterialStatePropertyAll(
             Size.fromRadius(kRadialReactionRadius * 1.5),
@@ -93,11 +115,17 @@ class _ListAccountState extends State<ListAccount> {
   accountButton({required Child provider}) {
     return ListView(
       children: provider
-          .getListChild(filter: _searchChildBasedAccount)
+          .search(data: provider.listChild, filter: _searchChildBasedAccount)
           .map<Widget>(
             (element) => TileButton(
               onPressed: () {
                 _fSearchChildBasedAccount.unfocus();
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    child: Text('wkwk'),
+                  ),
+                );
               },
               height: 55,
               child: Row(
@@ -122,6 +150,56 @@ class _ListAccountState extends State<ListAccount> {
             ),
           )
           .toList(),
+    );
+  }
+}
+
+class TabButton extends StatelessWidget {
+  const TabButton({
+    super.key,
+    required this.listAccount,
+    required this.onPressed,
+    required this.label,
+  });
+
+  final bool listAccount;
+  final VoidCallback onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.3,
+      height: 50.0,
+      child: listAccount
+          ? FilledButton(
+              onPressed: onPressed,
+              style: const ButtonStyle(
+                padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 10.0)),
+                backgroundColor: MaterialStatePropertyAll(
+                  Color.fromRGBO(248, 198, 48, 1),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : OutlinedButton(
+              onPressed: onPressed,
+              style: const ButtonStyle(
+                padding: MaterialStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 10.0),
+                ),
+              ),
+              child: Text(
+                label,
+              ),
+            ),
     );
   }
 }
