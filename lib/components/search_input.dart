@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 class SearchModis extends StatelessWidget {
-  const SearchModis({super.key, required this.onChanged, this.focusNode});
-  final ValueChanged onChanged;
+  const SearchModis({super.key, required this.onSubmitted, this.focusNode});
+  final ValueChanged onSubmitted;
   final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      onChanged: onChanged,
+      onSubmitted: onSubmitted,
       focusNode: focusNode,
+      textInputAction: TextInputAction.search,
       decoration: const InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(

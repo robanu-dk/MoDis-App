@@ -6,16 +6,23 @@ class TileButton extends StatelessWidget {
     required this.onPressed,
     required this.height,
     required this.child,
+    this.paddingTop = 8.0,
+    this.paddingLeft = 10.0,
+    this.paddingRight = 10.0,
   });
 
   final VoidCallback onPressed;
-  final double height;
+  final double height, paddingTop, paddingLeft, paddingRight;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0, left: 10.0, right: 10.0),
+      padding: EdgeInsets.only(
+        top: paddingTop,
+        left: paddingLeft,
+        right: paddingRight,
+      ),
       child: OutlinedButton(
         style: const ButtonStyle(
           padding: MaterialStatePropertyAll(EdgeInsets.zero),

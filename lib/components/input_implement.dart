@@ -9,11 +9,13 @@ class Input extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.isPassword = false,
+    this.border = InputBorder.none,
   });
   final TextEditingController textController;
   final bool isPassword;
   final dynamic prefixIcon, suffixIcon, focusNode;
   final String label;
+  final InputBorder border;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class Input extends StatelessWidget {
           contentPadding: const EdgeInsets.only(left: 10),
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
-          border: InputBorder.none,
+          border: border,
           filled: true,
           fillColor: Colors.white,
           labelText: label,
