@@ -23,6 +23,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icons.dataset_outlined,
         label: 'Beranda',
         action: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
           pushReplacement(context, const Beranda());
         },
       ),
@@ -32,9 +33,20 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icons.supervised_user_circle_rounded,
         label: 'List Akun',
         action: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+          pushReplacement(context, const ListAccount());
           Provider.of<Child>(context, listen: false)
               .getListData()
-              .catchError((error) {
+              .then((response) {
+            if (response['status'] == 'error') {
+              snackbarMessenger(
+                context,
+                MediaQuery.of(context).size.width * 0.4,
+                Colors.red,
+                'Gagal terhubung server',
+              );
+            }
+          }).catchError((error) {
             snackbarMessenger(
               context,
               MediaQuery.of(context).size.width * 0.4,
@@ -42,7 +54,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
               'Gagal terhubung server',
             );
           });
-          pushReplacement(context, const ListAccount());
         },
       ),
       BottomNavigationItem(
@@ -51,6 +62,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icons.play_circle_outline,
         label: 'Video',
         action: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
           pushReplacement(context, const Video());
         },
       ),
@@ -60,6 +72,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Ionicons.ios_chatbubbles,
         label: 'Chat',
         action: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
           pushReplacement(context, const Chat());
         },
       ),
@@ -69,6 +82,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         icon: Icons.account_circle,
         label: 'Profil',
         action: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
           pushReplacement(context, const Profile());
         },
       ),
@@ -97,11 +111,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
     );
   }
 
-  pushReplacement(BuildContext context, destination) {
+  pushReplacement(BuildContext context, destination) async {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 200), // Durasi animasi
+        transitionDuration: const Duration(milliseconds: 250), // Durasi animasi
         pageBuilder: (BuildContext context, Animation<double> animation,
             Animation<double> secondaryAnimation) {
           return destination;
@@ -124,7 +138,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.75,
+          bottom: MediaQuery.of(context).size.height * 0.65,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
