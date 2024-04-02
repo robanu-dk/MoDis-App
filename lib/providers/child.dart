@@ -149,4 +149,34 @@ class Child extends ChangeNotifier {
       throw error.toString();
     }
   }
+
+  Future<dynamic> removeChildFromListAccountBasedGuide(String userEmail) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/remove-user');
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(
+          {
+            'guide_email': email,
+            'user_email': userEmail,
+          },
+        ),
+      );
+
+      var response = jsonDecode(post.body);
+      if (response['status'] == 'success') {
+        listChild = response['data'];
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
 }

@@ -5,6 +5,8 @@ import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/components/tile_information_implement.dart';
 import 'package:modis/pages/add_child_account.dart';
+import 'package:modis/pages/child_account_information.dart';
+import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +21,29 @@ class _ListAccountState extends State<ListAccount> {
   String _searchChildBasedAccount = '';
   final FocusNode _fSearchChildBasedAccount = FocusNode();
 
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.6,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: ModisAppBar(
         title: const Logo(
           fontSize: 26,
@@ -63,9 +85,10 @@ class _ListAccountState extends State<ListAccount> {
       ),
       body: Consumer<Child>(
         builder: (context, provider, child) => provider.search(
-                    data: provider.listChild,
-                    filter: _searchChildBasedAccount) !=
-                null
+                        data: provider.listChild,
+                        filter: _searchChildBasedAccount) !=
+                    null &&
+                provider.listChild.length != 0
             ? accountButton(provider: provider)
             : const Center(
                 child: Text('Tidak ada data'),
@@ -73,6 +96,7 @@ class _ListAccountState extends State<ListAccount> {
       ),
       floatingActionButton: IconButton(
         onPressed: () {
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
           Navigator.push(
             context,
             PageRouteBuilder(
@@ -119,13 +143,53 @@ class _ListAccountState extends State<ListAccount> {
           .map<Widget>(
             (element) => TileButton(
               onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 _fSearchChildBasedAccount.unfocus();
-                showDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    child: Text('wkwk'),
-                  ),
-                );
+                Provider.of<Activity>(context, listen: false)
+                    .getListTodayActivityBasedGuide(
+                  element['email'],
+                )
+                    .then((response) {
+                  if (response['status'] == 'success') {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        transitionDuration:
+                            const Duration(milliseconds: 300), // Durasi animasi
+                        pageBuilder: (BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation) {
+                          return ChildAccountInformation(
+                            data: element,
+                          );
+                        },
+                        transitionsBuilder: (BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                            Widget child) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+                  } else {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.4,
+                      Colors.red,
+                      'Gagal terhubung ke server',
+                    );
+                  }
+                }).catchError((error) {
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.4,
+                    Colors.red,
+                    'Gagal terhubung ke server',
+                  );
+                });
               },
               height: 55,
               child: Row(
@@ -135,7 +199,7 @@ class _ListAccountState extends State<ListAccount> {
                     child: element['profile_image'] == null
                         ? Image.asset('images/default_profile_image.jpg')
                         : Image.network(
-                            'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}',
+                            'http://10.0.2.2:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                           ),
                   ),
                   Padding(
@@ -192,12 +256,20 @@ class TabButton extends StatelessWidget {
           : OutlinedButton(
               onPressed: onPressed,
               style: const ButtonStyle(
+                side: MaterialStatePropertyAll(
+                  BorderSide(
+                    color: Color.fromARGB(255, 81, 81, 81),
+                  ),
+                ),
                 padding: MaterialStatePropertyAll(
                   EdgeInsets.symmetric(horizontal: 10.0),
                 ),
               ),
               child: Text(
                 label,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 81, 81, 81),
+                ),
               ),
             ),
     );

@@ -5,9 +5,13 @@ class FlexRowInformation extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
+    this.widthLabel,
+    this.widthNameLabel,
+    this.widthValue,
   });
 
   final String label, value;
+  final double? widthLabel, widthNameLabel, widthValue;
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +23,13 @@ class FlexRowInformation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width * 0.35,
+            width: widthLabel ?? MediaQuery.of(context).size.width * 0.35,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width:
+                      widthNameLabel ?? MediaQuery.of(context).size.width * 0.3,
                   child: Text(
                     maxLines: 2,
                     label,
@@ -46,7 +51,7 @@ class FlexRowInformation extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.width * 0.27,
+            width: widthValue ?? MediaQuery.of(context).size.width * 0.27,
             child: Text(
               value,
               maxLines: 3,
