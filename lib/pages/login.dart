@@ -459,6 +459,7 @@ class _LoginPageState extends State<LoginPage> {
         headerPadding: const EdgeInsets.only(top: 8.0),
         contents: [
           Input(
+            border: const OutlineInputBorder(),
             textController: _email,
             label: "Email",
             focusNode: _resetNode,

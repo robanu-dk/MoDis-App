@@ -97,6 +97,7 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: ModisAppBar(
         action: IconButton(
           onPressed: () {},
@@ -187,6 +188,7 @@ class _EditProfileState extends State<EditProfile> {
                             showDialog(
                               context: context,
                               builder: (context) => Dialog(
+                                backgroundColor: Colors.white,
                                 alignment: Alignment.bottomCenter,
                                 child: SizedBox(
                                   height: 100,

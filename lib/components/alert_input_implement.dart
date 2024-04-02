@@ -23,6 +23,8 @@ class AlertInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
       scrollable: true,
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,

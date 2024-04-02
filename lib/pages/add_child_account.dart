@@ -32,6 +32,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: ModisAppBar(
         paddingHeader: _listAccount ? 3.3 : 2.5,
         action: IconButton(

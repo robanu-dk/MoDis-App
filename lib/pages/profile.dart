@@ -72,6 +72,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               color: Colors.white,
+              surfaceTintColor: Colors.white,
               child: Container(
                 padding: const EdgeInsets.all(10.0),
                 width: MediaQuery.of(context).size.width,
@@ -86,6 +87,7 @@ class _ProfileState extends State<Profile> {
                           color: Color.fromRGBO(0, 0, 0, 0.25),
                           offset: Offset(0.5, 0.5),
                           spreadRadius: BorderSide.strokeAlignOutside,
+                          blurRadius: 0.3,
                         )
                       ], borderRadius: BorderRadius.all(Radius.circular(15.0))),
                       child: ClipRRect(
@@ -247,6 +249,7 @@ class _ProfileState extends State<Profile> {
                     headerPadding: const EdgeInsets.only(left: 8.0),
                     contents: [
                       Input(
+                        border: const OutlineInputBorder(),
                         textController: _password,
                         label: 'Kata Sandi Baru',
                         focusNode: _fPassword,
@@ -266,6 +269,7 @@ class _ProfileState extends State<Profile> {
                         ),
                       ),
                       Input(
+                        border: const OutlineInputBorder(),
                         textController: _confirmPassword,
                         label: 'Konfirmasi Kata Sandi Baru',
                         focusNode: _fConfirmPassword,
