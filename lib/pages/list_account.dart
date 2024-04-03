@@ -8,6 +8,7 @@ import 'package:modis/pages/add_child_account.dart';
 import 'package:modis/pages/child_account_information.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
+import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
 
 class ListAccount extends StatefulWidget {
@@ -151,29 +152,51 @@ class _ListAccountState extends State<ListAccount> {
                 )
                     .then((response) {
                   if (response['status'] == 'success') {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration:
-                            const Duration(milliseconds: 300), // Durasi animasi
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation) {
-                          return ChildAccountInformation(
-                            data: element,
-                          );
-                        },
-                        transitionsBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation,
-                            Widget child) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
-                        },
-                      ),
-                    );
+                    Provider.of<Weight>(context, listen: false)
+                        .getUserWeightBasedGuide(
+                      element['email'],
+                    )
+                        .then((response) {
+                      if (response['status'] == 'success') {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(
+                                milliseconds: 300), // Durasi animasi
+                            pageBuilder: (BuildContext context,
+                                Animation<double> animation,
+                                Animation<double> secondaryAnimation) {
+                              return ChildAccountInformation(
+                                data: element,
+                              );
+                            },
+                            transitionsBuilder: (BuildContext context,
+                                Animation<double> animation,
+                                Animation<double> secondaryAnimation,
+                                Widget child) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.4,
+                          Colors.red,
+                          'Gagal terhubung ke server',
+                        );
+                      }
+                    }).catchError((error) {
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.4,
+                        Colors.red,
+                        'Gagal terhubung ke server',
+                      );
+                    });
                   } else {
                     snackbarMessenger(
                       context,
