@@ -56,7 +56,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
               ),
             ),
             const Text(
-              'Ubah Data',
+              'Tambah Akun',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.white,
@@ -366,7 +366,7 @@ class ListAvailableChild extends StatelessWidget {
                                       ),
                                     ),
                                     child: const Text(
-                                      'Simpan',
+                                      'Tambah',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
