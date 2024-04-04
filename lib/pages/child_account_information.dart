@@ -5,6 +5,7 @@ import 'package:modis/components/flex_row_information.dart';
 import 'package:modis/pages/weight_tracker.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
+import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
 
 class ChildAccountInformation extends StatelessWidget {
@@ -15,13 +16,13 @@ class ChildAccountInformation extends StatelessWidget {
   final dynamic data;
 
   void snackbarMessenger(BuildContext context, double leftPadding,
-      Color backgroundColor, String message) {
+      Color backgroundColor, String message, double bottom) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.6,
+          bottom: bottom,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
@@ -145,6 +146,16 @@ class ChildAccountInformation extends StatelessWidget {
                     label: 'Jenis Kelamin',
                     value: data['gender'] == 1 ? 'Perempuan' : 'Laki-Laki',
                   ),
+                  Consumer<Weight>(
+                    builder: (context, weight, child) => FlexRowInformation(
+                      widthValue: MediaQuery.of(context).size.width * 0.5,
+                      label: 'Berat Badan',
+                      value: weight.listWeightBasedGuide == null ||
+                              weight.listWeightBasedGuide == 0
+                          ? '-'
+                          : '${weight.listWeightBasedGuide[0]["weight"]} kg',
+                    ),
+                  ),
                   Consumer<Activity>(
                     builder: (context, activity, child) => activity
                                     .listTodayActivity !=
@@ -219,6 +230,9 @@ class ChildAccountInformation extends StatelessWidget {
                   padding: MaterialStatePropertyAll(EdgeInsets.all(3.0)),
                 ),
                 onPressed: () {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  var dataWeight = Provider.of<Weight>(context, listen: false)
+                      .listWeightBasedGuide;
                   Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -227,7 +241,10 @@ class ChildAccountInformation extends StatelessWidget {
                       pageBuilder: (BuildContext context,
                           Animation<double> animation,
                           Animation<double> secondaryAnimation) {
-                        return const WeightTracker();
+                        return WeightTracker(
+                          data: dataWeight,
+                          isGuide: true,
+                        );
                       },
                       transitionsBuilder: (BuildContext context,
                           Animation<double> animation,
@@ -310,6 +327,8 @@ class ChildAccountInformation extends StatelessWidget {
                                         MediaQuery.of(context).size.width * 0.5,
                                         const Color.fromARGB(255, 0, 120, 18),
                                         'berhasil menghapus pengguna',
+                                        MediaQuery.of(context).size.height *
+                                            0.6,
                                       );
                                     } else {
                                       snackbarMessenger(
@@ -317,6 +336,8 @@ class ChildAccountInformation extends StatelessWidget {
                                         MediaQuery.of(context).size.width * 0.4,
                                         Colors.red,
                                         response['message'],
+                                        MediaQuery.of(context).size.height *
+                                            0.7,
                                       );
                                     }
                                   }).catchError((error) {
@@ -325,6 +346,7 @@ class ChildAccountInformation extends StatelessWidget {
                                       MediaQuery.of(context).size.width * 0.4,
                                       Colors.red,
                                       'Gagal terhubung ke server',
+                                      MediaQuery.of(context).size.height * 0.7,
                                     );
                                   });
                                 },
