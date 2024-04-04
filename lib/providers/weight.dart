@@ -16,6 +16,22 @@ class Weight extends ChangeNotifier {
     notifyListeners();
   }
 
+  dynamic filter(dynamic data, String? startDate, String? endDate) {
+    if (startDate != null && startDate != '') {
+      if (endDate != null && endDate != '') {
+        return data;
+      } else {
+        return data;
+      }
+    }
+
+    if (endDate != null && endDate != '') {
+      return data;
+    }
+
+    return data;
+  }
+
   Future<dynamic> getUserWeightBasedGuide(String userEmail) async {
     listWeightBasedGuide = null;
 
