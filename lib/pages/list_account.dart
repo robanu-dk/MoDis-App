@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
+import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/components/tile_information_implement.dart';
@@ -95,7 +96,7 @@ class _ListAccountState extends State<ListAccount> {
                 child: Text('Tidak ada data'),
               ),
       ),
-      floatingActionButton: IconButton(
+      floatingActionButton: FloatingActionButtonModis(
         onPressed: () {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           Navigator.push(
@@ -119,19 +120,6 @@ class _ListAccountState extends State<ListAccount> {
             ),
           );
         },
-        style: const ButtonStyle(
-          fixedSize: MaterialStatePropertyAll(
-            Size.fromRadius(kRadialReactionRadius * 1.5),
-          ),
-          backgroundColor: MaterialStatePropertyAll(
-            Color.fromRGBO(1, 98, 104, 1.0),
-          ),
-        ),
-        icon: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 45.0,
-        ),
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
     );
