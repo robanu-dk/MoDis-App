@@ -36,7 +36,12 @@ class TileButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: Container(
-          padding: const EdgeInsets.only(left: 12.0, top: 8.0, bottom: 8.0),
+          padding: const EdgeInsets.only(
+            left: 12.0,
+            top: 8.0,
+            bottom: 8.0,
+            right: 12.0,
+          ),
           height: height,
           child: child,
         ),
