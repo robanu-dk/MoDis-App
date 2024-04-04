@@ -60,7 +60,7 @@ class _ProfileState extends State<Profile> {
         children: [
           Container(
             margin: const EdgeInsets.only(
-                left: 10.0, right: 10.0, top: 6.0, bottom: 6.0),
+                left: 10.0, right: 10.0, top: 8.0, bottom: 6.0),
             child: Card(
               shape: const RoundedRectangleBorder(
                 side: BorderSide(
