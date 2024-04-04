@@ -224,7 +224,7 @@ class User with ChangeNotifier {
     try {
       Uri url = Uri.parse('$apiDomain/change-password');
 
-      var post = await http.post(url,
+      var post = await http.put(url,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $userToken',
@@ -241,14 +241,39 @@ class User with ChangeNotifier {
     }
   }
 
-  void resetData() {
-    userFullName = '';
-    userName = '';
-    userEmail = '';
-    userToken = '';
-    userProfileImage = '';
-    userGuide = '';
-    userRole = 0;
-    notifyListeners();
+  Future<dynamic> resetData() async {
+    try {
+      Uri url = Uri.parse('$apiDomain/logout');
+
+      var logout = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $userToken',
+        },
+        body: jsonEncode(
+          {
+            'email': userEmail,
+          },
+        ),
+      );
+
+      var response = jsonDecode(logout.body);
+
+      if (response['status'] == 'success') {
+        userFullName = '';
+        userName = '';
+        userEmail = '';
+        userToken = '';
+        userProfileImage = '';
+        userGuide = '';
+        userRole = 0;
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
   }
 }

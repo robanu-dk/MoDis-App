@@ -382,29 +382,54 @@ class _ProfileState extends State<Profile> {
                 pref.clear();
               }
 
-              Provider.of<User>(context, listen: false).resetData();
-
-              Navigator.pushReplacement(
-                context,
-                PageRouteBuilder(
-                  transitionDuration:
-                      const Duration(milliseconds: 500), // Durasi animasi
-                  pageBuilder: (BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation) {
-                    return const LoginPage();
-                  },
-                  transitionsBuilder: (BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                      Widget child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
-                ),
-              );
+              Provider.of<User>(context, listen: false)
+                  .resetData()
+                  .then((response) {
+                loadingIndicator(context);
+                if (response['status'] == 'success') {
+                  Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      transitionDuration:
+                          const Duration(milliseconds: 500), // Durasi animasi
+                      pageBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation) {
+                        return const LoginPage();
+                      },
+                      transitionsBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                          Widget child) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.4,
+                    const Color.fromARGB(255, 0, 120, 18),
+                    'berhasil keluar',
+                  );
+                } else {
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.4,
+                    Colors.red,
+                    response['message'],
+                  );
+                }
+              }).catchError((error) {
+                snackbarMessenger(
+                  context,
+                  MediaQuery.of(context).size.width * 0.4,
+                  Colors.red,
+                  'Gagal terhubung server',
+                );
+              });
             },
             childrens: const [
               Icon(
