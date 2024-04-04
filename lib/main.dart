@@ -3,6 +3,7 @@ import 'package:modis/pages/splash_screen.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
+import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -28,6 +29,11 @@ class MoDis extends StatelessWidget {
           create: (_) => Activity(),
           update: (_, user, event) =>
               event!..updateEmailToken(user.userEmail, user.userToken),
+        ),
+        ChangeNotifierProxyProvider<User, Weight>(
+          create: (_) => Weight(),
+          update: (context, user, weight) =>
+              weight!..updateEmailToken(user.userEmail, user.userToken),
         ),
       ],
       child: MaterialApp(
