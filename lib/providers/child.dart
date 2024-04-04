@@ -154,7 +154,7 @@ class Child extends ChangeNotifier {
     try {
       Uri url = Uri.parse('$apiDomain/remove-user');
 
-      var post = await http.post(
+      var post = await http.delete(
         url,
         headers: {
           'Content-Type': 'application/json',
