@@ -243,35 +243,51 @@ class User with ChangeNotifier {
 
   Future<dynamic> resetData() async {
     try {
-      Uri url = Uri.parse('$apiDomain/logout');
+      if (userToken != '' && userEmail != '') {
+        Uri url = Uri.parse('$apiDomain/logout');
 
-      var logout = await http.delete(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'authorization': 'Bearer $userToken',
-        },
-        body: jsonEncode(
-          {
-            'email': userEmail,
+        var logout = await http.delete(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer $userToken',
           },
-        ),
-      );
+          body: jsonEncode(
+            {
+              'email': userEmail,
+            },
+          ),
+        );
 
-      var response = jsonDecode(logout.body);
+        var response = jsonDecode(logout.body);
 
-      if (response['status'] == 'success') {
-        userFullName = '';
-        userName = '';
-        userEmail = '';
-        userToken = '';
-        userProfileImage = '';
-        userGuide = '';
-        userRole = 0;
-        notifyListeners();
+        if (response['status'] == 'success') {
+          userFullName = '';
+          userName = '';
+          userEmail = '';
+          userToken = '';
+          userProfileImage = '';
+          userGuide = '';
+          userRole = 0;
+          notifyListeners();
+        }
+
+        return response;
       }
 
-      return response;
+      userFullName = '';
+      userName = '';
+      userEmail = '';
+      userToken = '';
+      userProfileImage = '';
+      userGuide = '';
+      userRole = 0;
+      notifyListeners();
+
+      return {
+        'status': 'success',
+        'message': 'berhasil keluar',
+      };
     } catch (error) {
       throw error.toString();
     }
