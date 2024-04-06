@@ -151,7 +151,7 @@ class ChildAccountInformation extends StatelessWidget {
                       widthValue: MediaQuery.of(context).size.width * 0.5,
                       label: 'Berat Badan',
                       value: weight.listWeightBasedGuide == null ||
-                              weight.listWeightBasedGuide == 0
+                              weight.listWeightBasedGuide.length == 0
                           ? '-'
                           : '${weight.listWeightBasedGuide[0]["weight"]} kg',
                     ),
