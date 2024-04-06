@@ -5,7 +5,6 @@ import 'package:modis/pages/chat.dart';
 import 'package:modis/pages/list_account.dart';
 import 'package:modis/pages/profile.dart';
 import 'package:modis/pages/video.dart';
-import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 
@@ -35,25 +34,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
         action: () {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
           pushReplacement(context, const ListAccount());
-          Provider.of<Child>(context, listen: false)
-              .getListData()
-              .then((response) {
-            if (response['status'] == 'error') {
-              snackbarMessenger(
-                context,
-                MediaQuery.of(context).size.width * 0.4,
-                Colors.red,
-                'Gagal terhubung server',
-              );
-            }
-          }).catchError((error) {
-            snackbarMessenger(
-              context,
-              MediaQuery.of(context).size.width * 0.4,
-              Colors.red,
-              'Gagal terhubung server',
-            );
-          });
         },
       ),
       BottomNavigationItem(

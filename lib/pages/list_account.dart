@@ -43,6 +43,28 @@ class _ListAccountState extends State<ListAccount> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    Provider.of<Child>(context, listen: false).getListData().then((response) {
+      if (response['status'] == 'error') {
+        snackbarMessenger(
+          context,
+          MediaQuery.of(context).size.width * 0.4,
+          Colors.red,
+          'Gagal terhubung server',
+        );
+      }
+    }).catchError((error) {
+      snackbarMessenger(
+        context,
+        MediaQuery.of(context).size.width * 0.4,
+        Colors.red,
+        'Gagal terhubung server',
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
