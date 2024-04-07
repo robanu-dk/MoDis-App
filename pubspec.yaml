@@ -37,6 +37,7 @@ dependencies:
   shared_preferences: ^2.2.2
   icons_flutter: ^0.0.4
   image_picker: ^1.0.7
+  fl_chart: ^0.67.0
 
 
 
