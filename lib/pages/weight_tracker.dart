@@ -21,6 +21,28 @@ class WeightTracker extends StatefulWidget {
 }
 
 class _WeightTrackerState extends State<WeightTracker> {
+  int? filter;
+
+  final Map<String, String> month = {
+    '01': 'Januari',
+    '02': 'Februari',
+    '03': 'Maret',
+    '04': 'April',
+    '05': 'Mei',
+    '06': 'Juni',
+    '07': 'Juli',
+    '08': 'Agustus',
+    '09': 'September',
+    '10': 'Oktober',
+    '11': 'November',
+    '12': 'Desember',
+  };
+
+  String dateToString(datetime) {
+    dynamic date = datetime.toString().split(' ')[0].split('-');
+    return '${date[2]} ${month[date[1]]} ${date[0]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,18 +89,94 @@ class _WeightTrackerState extends State<WeightTracker> {
             margin: const EdgeInsets.only(right: 8.0),
             alignment: Alignment.topRight,
             child: OutlinedButton(
-              onPressed: () {},
-              child: const SizedBox(
-                width: 60.0,
+              onPressed: () {
+                showMenu(
+                  context: context,
+                  color: Colors.white,
+                  position: RelativeRect.fromDirectional(
+                    textDirection: TextDirection.ltr,
+                    start: 1.0,
+                    top: 145,
+                    end: 0,
+                    bottom: 0,
+                  ),
+                  items: [
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = null;
+                        });
+                      },
+                      child: const Text('Reset Filter'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 23;
+                        });
+                      },
+                      child: const Text('2 Tahun Terakhir'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 11;
+                        });
+                      },
+                      child: const Text('1 Tahun Terakhir'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 5;
+                        });
+                      },
+                      child: const Text('6 Bulan Terakhir'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 2;
+                        });
+                      },
+                      child: const Text('3 Bulan Terakhir'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 1;
+                        });
+                      },
+                      child: const Text('2 Bulan Terakhir'),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        setState(() {
+                          filter = 0;
+                        });
+                      },
+                      child: const Text('1 Bulan Terakhir'),
+                    ),
+                  ],
+                );
+              },
+              child: SizedBox(
+                width: filter == null ? 60.0 : 125.0,
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.filter_list_outlined,
                       color: Colors.black,
                     ),
                     Text(
-                      'Filter',
-                      style: TextStyle(
+                      filter != null
+                          ? (filter! < 11
+                              ? '$filter bulan terakhir'
+                              : (filter! == 11
+                                  ? '1 tahun terakhir'
+                                  : '2 tahun terakhir'))
+                          : 'Filter',
+                      style: const TextStyle(
                         color: Colors.black,
                       ),
                     ),
@@ -110,11 +208,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                 child: Row(
                   children: [
                     Container(
-                        padding: const EdgeInsets.only(left: 5.0),
-                        child: const RotatedBox(
-                          quarterTurns: 3,
-                          child: Text('Berat Badan (kg)'),
-                        )),
+                      padding: const EdgeInsets.only(left: 4.0),
+                      child: const RotatedBox(
+                        quarterTurns: 3,
+                        child: Text('Berat Badan (kg)'),
+                      ),
+                    ),
                     Column(
                       children: [
                         Container(
@@ -127,20 +226,45 @@ class _WeightTrackerState extends State<WeightTracker> {
                                 lineTouchData: LineTouchData(
                                   enabled: true,
                                   touchTooltipData: LineTouchTooltipData(
+                                    maxContentWidth: 150,
+                                    fitInsideHorizontally: true,
                                     tooltipBorder:
                                         const BorderSide(color: Colors.black),
                                     getTooltipColor: (touchedSpot) =>
                                         Colors.white,
+                                    getTooltipItems: (touchedSpots) {
+                                      return touchedSpots
+                                          .map((LineBarSpot touchedSpot) {
+                                        final textStyle = TextStyle(
+                                          color: touchedSpot
+                                                  .bar.gradient?.colors.first ??
+                                              touchedSpot.bar.color ??
+                                              Colors.blueGrey,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        );
+
+                                        String date =
+                                            '${weight.filter(weight.listWeightBasedGuide, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
+                                        date = dateToString(date);
+                                        String label = '${touchedSpot.y} kg';
+
+                                        return LineTooltipItem(
+                                          '$date\n$label',
+                                          textStyle,
+                                        );
+                                      }).toList();
+                                    },
                                   ),
                                 ),
                                 lineBarsData: [
                                   LineChartBarData(
                                     spots: weight
-                                        .filter(widget.data, '', '')
+                                        .filter(widget.data, filter)
                                         .map<FlSpot>(
                                       (element) {
                                         var index = weight
-                                            .filter(widget.data, '', '')
+                                            .filter(widget.data, filter)
                                             .reversed
                                             .toList()
                                             .indexOf(element);
@@ -161,12 +285,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                 minX: 0,
                                 maxX: double.parse(
                                   weight
-                                      .filter(widget.data, '', '')
+                                      .filter(widget.data, filter)
                                       .length
                                       .toString(),
                                 ),
                                 minY: 0,
-                                maxY: 100,
+                                maxY: 120,
                                 titlesData: FlTitlesData(
                                   show: true,
                                   rightTitles: const AxisTitles(
@@ -185,13 +309,11 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       reservedSize: 75,
                                       getTitlesWidget: (value, titleMeta) {
                                         dynamic data = weight
-                                            .filter(widget.data, '', '')
+                                            .filter(widget.data, filter)
                                             .reversed
                                             .toList();
-                                        int distance =
-                                            (data.length / 5).round();
-                                        if (value % distance == 0 &&
-                                            value < data.length) {
+                                        if (value < data.length &&
+                                            value % 1 == 0) {
                                           String date =
                                               data[value.round()]['date'];
                                           date = date
@@ -200,15 +322,18 @@ class _WeightTrackerState extends State<WeightTracker> {
                                               .join('-');
                                           return Padding(
                                             padding: const EdgeInsets.only(
-                                                top: 16.0),
+                                                top: 16.0, right: 35.0),
                                             child: Transform.rotate(
-                                              angle: 45,
+                                              alignment: Alignment.center,
+                                              angle: -0.45,
                                               child: Text(
                                                 date,
+                                                textAlign: TextAlign.start,
                                               ),
                                             ),
                                           );
                                         }
+
                                         return const Text('');
                                       },
                                     ),
@@ -234,26 +359,8 @@ class _WeightTrackerState extends State<WeightTracker> {
             padding: const EdgeInsets.only(bottom: 80.0),
             child: Consumer<Weight>(
               builder: (context, weight, child) => Column(
-                children: weight.filter(widget.data, '', '').map<Widget>(
+                children: weight.filter(widget.data, filter).map<Widget>(
                   (element) {
-                    Map<String, String> month = {
-                      '01': 'Januari',
-                      '02': 'Februari',
-                      '03': 'Maret',
-                      '04': 'April',
-                      '05': 'Mei',
-                      '06': 'Juni',
-                      '07': 'Juli',
-                      '08': 'Agustus',
-                      '09': 'September',
-                      '10': 'Oktober',
-                      '11': 'November',
-                      '12': 'Desember',
-                    };
-
-                    List<String> date =
-                        element['date'].split('-').reversed.toList();
-
                     return TileButton(
                       onPressed: () {},
                       height: 60,
@@ -261,7 +368,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${date[0]} ${month[date[1]]} ${date[2]}',
+                            dateToString(element["date"]),
                             style: const TextStyle(color: Colors.black),
                           ),
                           Text(
