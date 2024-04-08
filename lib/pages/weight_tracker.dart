@@ -1,6 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_flutter/icons_flutter.dart';
+import 'package:loading_indicator/loading_indicator.dart';
+import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/tile_information_implement.dart';
 import 'package:modis/providers/weight.dart';
@@ -9,11 +13,11 @@ import 'package:provider/provider.dart';
 class WeightTracker extends StatefulWidget {
   const WeightTracker({
     super.key,
-    required this.data,
+    this.userEmail,
     required this.isGuide,
   });
 
-  final dynamic data;
+  final String? userEmail;
   final bool isGuide;
 
   @override
@@ -41,6 +45,43 @@ class _WeightTrackerState extends State<WeightTracker> {
   String dateToString(datetime) {
     dynamic date = datetime.toString().split(' ')[0].split('-');
     return '${date[2]} ${month[date[1]]} ${date[0]}';
+  }
+
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.6,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
+  void loadingIndicator(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+          insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.3),
+          content: const LoadingIndicator(
+            indicatorType: Indicator.ballSpinFadeLoader,
+            colors: [Colors.white],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -171,7 +212,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                     Text(
                       filter != null
                           ? (filter! < 11
-                              ? '$filter bulan terakhir'
+                              ? '${filter! + 1} bulan terakhir'
                               : (filter! == 11
                                   ? '1 tahun terakhir'
                                   : '2 tahun terakhir'))
@@ -245,7 +286,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                         );
 
                                         String date =
-                                            '${weight.filter(weight.listWeightBasedGuide, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
+                                            '${weight.filter(weight.listWeightUser, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
                                         date = dateToString(date);
                                         String label = '${touchedSpot.y} kg';
 
@@ -260,11 +301,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                 lineBarsData: [
                                   LineChartBarData(
                                     spots: weight
-                                        .filter(widget.data, filter)
+                                        .filter(weight.listWeightUser, filter)
                                         .map<FlSpot>(
                                       (element) {
                                         var index = weight
-                                            .filter(widget.data, filter)
+                                            .filter(
+                                                weight.listWeightUser, filter)
                                             .reversed
                                             .toList()
                                             .indexOf(element);
@@ -285,7 +327,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                 minX: 0,
                                 maxX: double.parse(
                                   weight
-                                      .filter(widget.data, filter)
+                                      .filter(weight.listWeightUser, filter)
                                       .length
                                       .toString(),
                                 ),
@@ -309,7 +351,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       reservedSize: 75,
                                       getTitlesWidget: (value, titleMeta) {
                                         dynamic data = weight
-                                            .filter(widget.data, filter)
+                                            .filter(
+                                                weight.listWeightUser, filter)
                                             .reversed
                                             .toList();
                                         if (value < data.length &&
@@ -359,10 +402,145 @@ class _WeightTrackerState extends State<WeightTracker> {
             padding: const EdgeInsets.only(bottom: 80.0),
             child: Consumer<Weight>(
               builder: (context, weight, child) => Column(
-                children: weight.filter(widget.data, filter).map<Widget>(
+                children:
+                    weight.filter(weight.listWeightUser, filter).map<Widget>(
                   (element) {
                     return TileButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                            surfaceTintColor: Colors.white,
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
+                              height: 120,
+                              child: Row(
+                                children: [
+                                  CircleButtonModis(
+                                    icon: Icons.edit,
+                                    label: 'Ubah',
+                                    colors: const [
+                                      Color.fromARGB(255, 162, 111, 0),
+                                      Color.fromARGB(255, 255, 202, 87),
+                                    ],
+                                    margin: const EdgeInsets.only(
+                                      top: 8.0,
+                                      bottom: 8.0,
+                                      left: 20.0,
+                                    ),
+                                    onPressed: () {},
+                                  ),
+                                  CircleButtonModis(
+                                    icon: Icons.delete,
+                                    label: 'Hapus',
+                                    colors: const [
+                                      Color.fromARGB(255, 136, 9, 0),
+                                      Color.fromARGB(255, 255, 123, 114),
+                                    ],
+                                    margin: const EdgeInsets.only(
+                                      top: 8.0,
+                                      bottom: 8.0,
+                                      left: 20.0,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            AlertDialog.adaptive(
+                                          backgroundColor: Colors.white,
+                                          surfaceTintColor: Colors.white,
+                                          title: const Text('Peringatan!!!'),
+                                          contentPadding: const EdgeInsets.only(
+                                              left: 25.0,
+                                              top: 10.0,
+                                              bottom: 10.0,
+                                              right: 20.0),
+                                          actionsPadding: const EdgeInsets.only(
+                                            bottom: 20.0,
+                                            top: 10.0,
+                                          ),
+                                          content: const Text(
+                                            'Apakah yakin menghapus data berat badan?',
+                                          ),
+                                          actionsAlignment:
+                                              MainAxisAlignment.center,
+                                          actions: [
+                                            FilledButton(
+                                                style: const ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStatePropertyAll(
+                                                    Color.fromRGBO(
+                                                        248, 198, 48, 1),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Batal')),
+                                            FilledButton(
+                                                style: const ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStatePropertyAll(
+                                                    Colors.red,
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  loadingIndicator(context);
+                                                  Provider.of<Weight>(context,
+                                                          listen: false)
+                                                      .deleteWeight(
+                                                    weightId: element['id']
+                                                        .toString(),
+                                                    email: widget.userEmail,
+                                                    isGuide: true,
+                                                  )
+                                                      .then(
+                                                    (response) {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+                                                      snackbarMessenger(
+                                                        context,
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        response['status'] ==
+                                                                'success'
+                                                            ? const Color
+                                                                .fromARGB(
+                                                                255, 0, 120, 18)
+                                                            : Colors.red,
+                                                        response['message'],
+                                                      );
+                                                    },
+                                                  ).catchError((error) {
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                    snackbarMessenger(
+                                                      context,
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.5,
+                                                      Colors.red,
+                                                      'Gagal terhubung ke server',
+                                                    );
+                                                  });
+                                                },
+                                                child: const Text('Hapus')),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                       height: 60,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -387,7 +565,39 @@ class _WeightTrackerState extends State<WeightTracker> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButtonModis(onPressed: () {}),
+      floatingActionButton: FloatingActionButtonModis(onPressed: () {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        showDialog(
+          context: context,
+          builder: (context) => AlertInput(
+            height: 275,
+            header: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tambah Data Berat Badan',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Ionicons.md_close),
+                )
+              ],
+            ),
+            headerPadding: const EdgeInsets.only(left: 8.0),
+            contents: [],
+            contentAligment: 'vertical',
+            contentPadding: EdgeInsets.all(8),
+            actionAligment: 'horizontal',
+            actions: [],
+            actionPadding: EdgeInsets.all(8),
+          ),
+        );
+      }),
     );
   }
 }
