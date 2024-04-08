@@ -150,10 +150,10 @@ class ChildAccountInformation extends StatelessWidget {
                     builder: (context, weight, child) => FlexRowInformation(
                       widthValue: MediaQuery.of(context).size.width * 0.5,
                       label: 'Berat Badan',
-                      value: weight.listWeightBasedGuide == null ||
-                              weight.listWeightBasedGuide.length == 0
+                      value: weight.listWeightUser == null ||
+                              weight.listWeightUser.length == 0
                           ? '-'
-                          : '${weight.listWeightBasedGuide[0]["weight"]} kg',
+                          : '${weight.listWeightUser[0]["weight"]} kg',
                     ),
                   ),
                   Consumer<Activity>(
@@ -231,8 +231,6 @@ class ChildAccountInformation extends StatelessWidget {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  var dataWeight = Provider.of<Weight>(context, listen: false)
-                      .listWeightBasedGuide;
                   Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -242,7 +240,7 @@ class ChildAccountInformation extends StatelessWidget {
                           Animation<double> animation,
                           Animation<double> secondaryAnimation) {
                         return WeightTracker(
-                          data: dataWeight,
+                          userEmail: data['email'],
                           isGuide: true,
                         );
                       },

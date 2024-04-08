@@ -163,9 +163,7 @@ class _ListAccountState extends State<ListAccount> {
                     .then((response) {
                   if (response['status'] == 'success') {
                     Provider.of<Weight>(context, listen: false)
-                        .getUserWeightBasedGuide(
-                      element['email'],
-                    )
+                        .getUserWeight(element['email'], true)
                         .then((response) {
                       if (response['status'] == 'success') {
                         Navigator.push(
