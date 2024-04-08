@@ -243,51 +243,34 @@ class User with ChangeNotifier {
 
   Future<dynamic> resetData() async {
     try {
-      if (userToken != '' && userEmail != '') {
-        Uri url = Uri.parse('$apiDomain/logout');
+      Uri url = Uri.parse('$apiDomain/logout');
 
-        var logout = await http.delete(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-            'authorization': 'Bearer $userToken',
+      var logout = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(
+          {
+            'email': userEmail,
           },
-          body: jsonEncode(
-            {
-              'email': userEmail,
-            },
-          ),
-        );
+        ),
+      );
 
-        var response = jsonDecode(logout.body);
+      var response = jsonDecode(logout.body);
 
-        if (response['status'] == 'success') {
-          userFullName = '';
-          userName = '';
-          userEmail = '';
-          userToken = '';
-          userProfileImage = '';
-          userGuide = '';
-          userRole = 0;
-          notifyListeners();
-        }
-
-        return response;
+      if (response['status'] == 'success') {
+        userFullName = '';
+        userName = '';
+        userEmail = '';
+        userToken = '';
+        userProfileImage = '';
+        userGuide = '';
+        userRole = 0;
+        notifyListeners();
       }
 
-      userFullName = '';
-      userName = '';
-      userEmail = '';
-      userToken = '';
-      userProfileImage = '';
-      userGuide = '';
-      userRole = 0;
-      notifyListeners();
-
-      return {
-        'status': 'success',
-        'message': 'berhasil keluar',
-      };
+      return response;
     } catch (error) {
       throw error.toString();
     }
