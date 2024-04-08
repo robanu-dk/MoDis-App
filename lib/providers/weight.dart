@@ -82,11 +82,11 @@ class Weight extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> deleteWeight(
-    String weightId,
+  Future<dynamic> deleteWeight({
+    required String weightId,
     String? email,
-    bool isGuide,
-  ) async {
+    required bool isGuide,
+  }) async {
     try {
       Uri url = Uri.parse('$apiDomain/delete');
 
