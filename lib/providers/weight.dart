@@ -8,7 +8,7 @@ class Weight extends ChangeNotifier {
       token = '',
       apiDomain = 'http://10.0.2.2:8080/API/Modis/public/api/weight';
 
-  dynamic listWeightBasedGuide;
+  dynamic listWeightUser;
 
   updateEmailToken(String userEmail, String userToken) {
     email = userEmail;
@@ -38,11 +38,25 @@ class Weight extends ChangeNotifier {
     return data;
   }
 
-  Future<dynamic> getUserWeightBasedGuide(String userEmail) async {
-    listWeightBasedGuide = null;
+  Future<dynamic> getUserWeight(String userEmail, bool isGuide) async {
+    listWeightUser = null;
 
     try {
-      Uri url = Uri.parse('$apiDomain/weight-based-guide');
+      Uri url = Uri.parse(isGuide
+          ? '$apiDomain/weight-based-guide'
+          : '$apiDomain/weight-based-user');
+
+      Map<String, dynamic> body;
+      if (isGuide) {
+        body = {
+          'guide_email': email,
+          'user_email': userEmail,
+        };
+      } else {
+        body = {
+          'email': email,
+        };
+      }
 
       var post = await http.post(
         url,
@@ -51,19 +65,61 @@ class Weight extends ChangeNotifier {
           'authorization': 'Bearer $token',
         },
         body: jsonEncode(
-          {
-            'guide_email': email,
-            'user_email': userEmail,
-          },
+          body,
         ),
       );
 
       var response = jsonDecode(post.body);
 
       if (response['status'] == 'success') {
-        listWeightBasedGuide = response['data'];
+        listWeightUser = response['data'];
       }
       notifyListeners();
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> deleteWeight(
+    String weightId,
+    String? email,
+    bool isGuide,
+  ) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/delete');
+
+      Map<String, String> body = {};
+      if (isGuide) {
+        body = {
+          'guide_email': this.email,
+          'user_email': email!,
+          'weight_id': weightId,
+        };
+      } else {
+        body = {
+          'email': this.email,
+          'weight_id': weightId,
+        };
+      }
+
+      var delete = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      var response = jsonDecode(delete.body);
+      if (response['status'] == 'success') {
+        listWeightUser = listWeightUser
+            .where((element) => element['id'].toString() != weightId)
+            .toList();
+        notifyListeners();
+      }
 
       return response;
     } catch (error) {
