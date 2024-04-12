@@ -10,12 +10,14 @@ class Input extends StatelessWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.border = InputBorder.none,
+    this.keyboardType = TextInputType.emailAddress,
   });
   final TextEditingController textController;
   final bool isPassword;
   final dynamic prefixIcon, suffixIcon, focusNode;
   final String label;
   final InputBorder border;
+  final TextInputType keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class Input extends StatelessWidget {
             color: Color.fromRGBO(120, 120, 120, 1),
           ),
         ),
-        keyboardType: TextInputType.emailAddress,
+        keyboardType: keyboardType,
         textInputAction: TextInputAction.next,
         obscureText: isPassword,
       ),
