@@ -6,6 +6,7 @@ import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
+import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/tile_information_implement.dart';
 import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,10 @@ class WeightTracker extends StatefulWidget {
 
 class _WeightTrackerState extends State<WeightTracker> {
   int? filter;
+  final TextEditingController addBB = TextEditingController(),
+      addDateToString = TextEditingController();
+  final FocusNode fAddBB = FocusNode();
+  late DateTime addDate;
 
   final Map<String, String> month = {
     '01': 'Januari',
@@ -79,6 +84,50 @@ class _WeightTrackerState extends State<WeightTracker> {
             indicatorType: Indicator.ballSpinFadeLoader,
             colors: [Colors.white],
           ),
+        ),
+      ),
+    );
+  }
+
+  Dialog showCalendarPicker(
+    BuildContext context,
+    DateTime initialDate,
+    Function(DateTime) onChanged,
+  ) {
+    return Dialog(
+      surfaceTintColor: Colors.white,
+      child: Container(
+        padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 20.0),
+                  child: Text(
+                    'Pilih Tanggal',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Ionicons.md_close),
+                )
+              ],
+            ),
+            CalendarDatePicker(
+              initialDate: initialDate,
+              firstDate: DateTime(1990, 1, 1),
+              lastDate: DateTime.now(),
+              onDateChanged: onChanged,
+            ),
+          ],
         ),
       ),
     );
@@ -480,42 +529,24 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                 },
                                                 child: const Text('Batal')),
                                             FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Colors.red,
-                                                  ),
+                                              style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                  Colors.red,
                                                 ),
-                                                onPressed: () {
-                                                  loadingIndicator(context);
-                                                  Provider.of<Weight>(context,
-                                                          listen: false)
-                                                      .deleteWeight(
-                                                    weightId: element['id']
-                                                        .toString(),
-                                                    email: widget.userEmail,
-                                                    isGuide: true,
-                                                  )
-                                                      .then(
-                                                    (response) {
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-                                                      snackbarMessenger(
-                                                        context,
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.5,
-                                                        response['status'] ==
-                                                                'success'
-                                                            ? const Color
-                                                                .fromARGB(
-                                                                255, 0, 120, 18)
-                                                            : Colors.red,
-                                                        response['message'],
-                                                      );
-                                                    },
-                                                  ).catchError((error) {
+                                              ),
+                                              onPressed: () {
+                                                loadingIndicator(context);
+                                                Provider.of<Weight>(context,
+                                                        listen: false)
+                                                    .deleteWeight(
+                                                  weightId:
+                                                      element['id'].toString(),
+                                                  email: widget.userEmail,
+                                                  isGuide: true,
+                                                )
+                                                    .then(
+                                                  (response) {
                                                     Navigator.pop(context);
                                                     Navigator.pop(context);
                                                     snackbarMessenger(
@@ -524,12 +555,31 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                               .size
                                                               .width *
                                                           0.5,
-                                                      Colors.red,
-                                                      'Gagal terhubung ke server',
+                                                      response['status'] ==
+                                                              'success'
+                                                          ? const Color
+                                                              .fromARGB(
+                                                              255, 0, 120, 18)
+                                                          : Colors.red,
+                                                      response['message'],
                                                     );
-                                                  });
-                                                },
-                                                child: const Text('Hapus')),
+                                                  },
+                                                ).catchError((error) {
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                  snackbarMessenger(
+                                                    context,
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.5,
+                                                    Colors.red,
+                                                    'Gagal terhubung ke server',
+                                                  );
+                                                });
+                                              },
+                                              child: const Text('Hapus'),
+                                            ),
                                           ],
                                         ),
                                       );
@@ -567,10 +617,14 @@ class _WeightTrackerState extends State<WeightTracker> {
       ),
       floatingActionButton: FloatingActionButtonModis(onPressed: () {
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        addBB.text = '';
+        setState(() {
+          addDate = DateTime.now();
+        });
+        addDateToString.text = dateToString(addDate);
         showDialog(
           context: context,
           builder: (context) => AlertInput(
-            height: 275,
             header: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -589,12 +643,162 @@ class _WeightTrackerState extends State<WeightTracker> {
               ],
             ),
             headerPadding: const EdgeInsets.only(left: 8.0),
-            contents: [],
+            contents: [
+              Input(
+                keyboardType: TextInputType.number,
+                border: const OutlineInputBorder(),
+                textController: addBB,
+                label: 'Berat Badan',
+                suffixIcon: const SizedBox(
+                  width: 10,
+                  child: Center(
+                    child: Text(
+                      'Kg',
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.53,
+                      child: TextField(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => StatefulBuilder(
+                              builder: (context, setState) =>
+                                  showCalendarPicker(context, addDate, (date) {
+                                Navigator.pop(context);
+                                setState(() {
+                                  addDate = date;
+                                });
+                                addDateToString.text = dateToString(addDate);
+                              }),
+                            ),
+                          );
+                        },
+                        readOnly: true,
+                        controller: addDateToString,
+                        decoration: const InputDecoration(
+                          label: Text('Tanggal'),
+                          labelStyle: TextStyle(
+                            color: Color.fromRGBO(120, 120, 120, 1),
+                          ),
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      iconSize: 30,
+                      style: const ButtonStyle(
+                          padding: MaterialStatePropertyAll(EdgeInsets.zero)),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => StatefulBuilder(
+                            builder: (context, setState) =>
+                                showCalendarPicker(context, addDate, (date) {
+                              Navigator.pop(context);
+                              setState(() {
+                                addDate = date;
+                              });
+                              addDateToString.text = dateToString(addDate);
+                            }),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.calendar_month_outlined,
+                        size: 30,
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
             contentAligment: 'vertical',
-            contentPadding: EdgeInsets.all(8),
+            contentPadding: const EdgeInsets.all(8),
             actionAligment: 'horizontal',
-            actions: [],
-            actionPadding: EdgeInsets.all(8),
+            actions: [
+              FilledButton(
+                style: const ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                    Color.fromRGBO(248, 198, 48, 1),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Batal',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              FilledButton(
+                style: const ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                    Color.fromRGBO(1, 98, 104, 1.0),
+                  ),
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  if (addBB.text != '') {
+                    loadingIndicator(context);
+                    Provider.of<Weight>(context, listen: false)
+                        .addWeight(
+                      widget.userEmail!,
+                      addBB.text,
+                      addDate.toString().split(' ')[0],
+                      widget.isGuide,
+                    )
+                        .then((response) {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      if (response['status'] == 'success') {
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.5,
+                          const Color.fromARGB(255, 0, 120, 18),
+                          'berhasil menambahkan berat badan',
+                        );
+                      } else {
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.5,
+                          Colors.red,
+                          response['message'],
+                        );
+                      }
+                    }).catchError((error) {
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.5,
+                        Colors.red,
+                        'Gagal terhubung ke server',
+                      );
+                    });
+                  } else {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.5,
+                      Colors.red,
+                      'terdapat data yang kosong',
+                    );
+                  }
+                },
+                child: const Text(
+                  'Tambah',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+            actionPadding:
+                const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
           ),
         );
       }),

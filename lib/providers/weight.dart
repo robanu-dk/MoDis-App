@@ -82,6 +82,49 @@ class Weight extends ChangeNotifier {
     }
   }
 
+  Future<dynamic> addWeight(
+      String userEmail, String weight, String date, bool isGuide) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/store');
+
+      Map<String, String> body;
+      if (isGuide) {
+        body = {
+          'guide_email': email,
+          'user_email': userEmail,
+          'weight': weight,
+          'date': date,
+        };
+      } else {
+        body = {
+          'email': email,
+          'weight': weight,
+          'date': date,
+        };
+      }
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      var response = jsonDecode(post.body);
+
+      if (response['status'] == 'success') {
+        listWeightUser = response['data'];
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
   Future<dynamic> deleteWeight({
     required String weightId,
     String? email,
