@@ -83,7 +83,7 @@ class Weight extends ChangeNotifier {
   }
 
   Future<dynamic> addWeight(
-      String userEmail, String weight, String date, bool isGuide) async {
+      String? userEmail, String weight, String date, bool isGuide) async {
     try {
       Uri url = Uri.parse('$apiDomain/store');
 
@@ -91,7 +91,7 @@ class Weight extends ChangeNotifier {
       if (isGuide) {
         body = {
           'guide_email': email,
-          'user_email': userEmail,
+          'user_email': userEmail!,
           'weight': weight,
           'date': date,
         };
@@ -113,6 +113,52 @@ class Weight extends ChangeNotifier {
       );
 
       var response = jsonDecode(post.body);
+
+      if (response['status'] == 'success') {
+        listWeightUser = response['data'];
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> updateWeight(String weightId, String? userEmail,
+      String weight, String date, bool isGuide) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/update');
+
+      Map<String, String> body = {};
+
+      if (isGuide) {
+        body = {
+          'guide_email': email,
+          'user_email': userEmail!,
+          'weight_id': weightId,
+          'weight': weight,
+          'date': date,
+        };
+      } else {
+        body = {
+          'email': email,
+          'weight_id': weightId,
+          'weight': weight,
+          'date': date,
+        };
+      }
+
+      var update = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      var response = jsonDecode(update.body);
 
       if (response['status'] == 'success') {
         listWeightUser = response['data'];

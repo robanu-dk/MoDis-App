@@ -28,9 +28,11 @@ class WeightTracker extends StatefulWidget {
 class _WeightTrackerState extends State<WeightTracker> {
   int? filter;
   final TextEditingController addBB = TextEditingController(),
-      addDateToString = TextEditingController();
-  final FocusNode fAddBB = FocusNode();
-  late DateTime addDate;
+      addDateToString = TextEditingController(),
+      updateBB = TextEditingController(),
+      updateDateToString = TextEditingController();
+  final FocusNode fAddBB = FocusNode(), fUpdateBB = FocusNode();
+  late DateTime addDate, updateDate;
 
   final Map<String, String> month = {
     '01': 'Januari',
@@ -96,38 +98,40 @@ class _WeightTrackerState extends State<WeightTracker> {
   ) {
     return Dialog(
       surfaceTintColor: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    'Pilih Tanggal',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: Text(
+                      'Pilih Tanggal',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Ionicons.md_close),
-                )
-              ],
-            ),
-            CalendarDatePicker(
-              initialDate: initialDate,
-              firstDate: DateTime(1990, 1, 1),
-              lastDate: DateTime.now(),
-              onDateChanged: onChanged,
-            ),
-          ],
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Ionicons.md_close),
+                  )
+                ],
+              ),
+              CalendarDatePicker(
+                initialDate: initialDate,
+                firstDate: DateTime(1990, 1, 1),
+                lastDate: DateTime.now(),
+                onDateChanged: onChanged,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -478,7 +482,276 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       bottom: 8.0,
                                       left: 20.0,
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      updateBB.text =
+                                          element['weight'].toString();
+                                      List<String> date =
+                                          element['date'].toString().split('-');
+                                      setState(() {
+                                        updateDate = DateTime(
+                                          int.parse(date[0]),
+                                          int.parse(date[1]),
+                                          int.parse(date[2]),
+                                        );
+                                      });
+                                      updateDateToString.text =
+                                          dateToString(updateDate);
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertInput(
+                                          header: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                'Perbarui Data Berat Badan',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                icon: const Icon(
+                                                    Ionicons.md_close),
+                                              )
+                                            ],
+                                          ),
+                                          headerPadding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          contents: [
+                                            Input(
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              border:
+                                                  const OutlineInputBorder(),
+                                              textController: updateBB,
+                                              focusNode: fUpdateBB,
+                                              label: 'Berat Badan',
+                                              suffixIcon: const SizedBox(
+                                                width: 10,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Kg',
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 12.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.53,
+                                                    child: TextField(
+                                                      onTap: () {
+                                                        fUpdateBB.unfocus();
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) =>
+                                                              StatefulBuilder(
+                                                            builder: (context,
+                                                                    setState) =>
+                                                                showCalendarPicker(
+                                                                    context,
+                                                                    updateDate,
+                                                                    (date) {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              setState(() {
+                                                                updateDate =
+                                                                    date;
+                                                              });
+                                                              updateDateToString
+                                                                      .text =
+                                                                  dateToString(
+                                                                      updateDate);
+                                                            }),
+                                                          ),
+                                                        );
+                                                      },
+                                                      readOnly: true,
+                                                      controller:
+                                                          updateDateToString,
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        label: Text('Tanggal'),
+                                                        labelStyle: TextStyle(
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                        border:
+                                                            OutlineInputBorder(),
+                                                        contentPadding:
+                                                            EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        8.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    iconSize: 30,
+                                                    style: const ButtonStyle(
+                                                        padding:
+                                                            MaterialStatePropertyAll(
+                                                                EdgeInsets
+                                                                    .zero)),
+                                                    onPressed: () {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) =>
+                                                            StatefulBuilder(
+                                                          builder: (context,
+                                                                  setState) =>
+                                                              showCalendarPicker(
+                                                                  context,
+                                                                  updateDate,
+                                                                  (date) {
+                                                            Navigator.pop(
+                                                                context);
+                                                            setState(() {
+                                                              updateDate = date;
+                                                            });
+                                                            updateDateToString
+                                                                    .text =
+                                                                dateToString(
+                                                                    updateDate);
+                                                          }),
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons
+                                                          .calendar_month_outlined,
+                                                      size: 30,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                          contentAligment: 'vertical',
+                                          contentPadding:
+                                              const EdgeInsets.all(8),
+                                          actionAligment: 'horizontal',
+                                          actions: [
+                                            FilledButton(
+                                              style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                  Color.fromRGBO(
+                                                      248, 198, 48, 1),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text(
+                                                'Batal',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                            FilledButton(
+                                              style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                  Color.fromRGBO(
+                                                      1, 98, 104, 1.0),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .removeCurrentSnackBar();
+                                                if (updateBB.text != '') {
+                                                  loadingIndicator(context);
+                                                  Provider.of<Weight>(context,
+                                                          listen: false)
+                                                      .updateWeight(
+                                                    element['id'].toString(),
+                                                    widget.userEmail,
+                                                    updateBB.text,
+                                                    updateDate
+                                                        .toString()
+                                                        .split(' ')[0],
+                                                    widget.isGuide,
+                                                  )
+                                                      .then((response) {
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                    if (response['status'] ==
+                                                        'success') {
+                                                      snackbarMessenger(
+                                                        context,
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        const Color.fromARGB(
+                                                            255, 0, 120, 18),
+                                                        'berhasil memperbarui berat badan',
+                                                      );
+                                                    } else {
+                                                      snackbarMessenger(
+                                                        context,
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        Colors.red,
+                                                        response['message'],
+                                                      );
+                                                    }
+                                                  }).catchError((error) {
+                                                    snackbarMessenger(
+                                                      context,
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.5,
+                                                      Colors.red,
+                                                      'Gagal terhubung ke server',
+                                                    );
+                                                  });
+                                                } else {
+                                                  snackbarMessenger(
+                                                    context,
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.5,
+                                                    Colors.red,
+                                                    'terdapat data yang kosong',
+                                                  );
+                                                }
+                                              },
+                                              child: const Text(
+                                                'Perbarui',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          actionPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 8.0,
+                                                  vertical: 12.0),
+                                        ),
+                                      );
+                                    },
                                   ),
                                   CircleButtonModis(
                                     icon: Icons.delete,
@@ -648,6 +921,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                 keyboardType: TextInputType.number,
                 border: const OutlineInputBorder(),
                 textController: addBB,
+                focusNode: fAddBB,
                 label: 'Berat Badan',
                 suffixIcon: const SizedBox(
                   width: 10,
@@ -667,6 +941,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                       width: MediaQuery.of(context).size.width * 0.53,
                       child: TextField(
                         onTap: () {
+                          fAddBB.unfocus();
                           showDialog(
                             context: context,
                             builder: (context) => StatefulBuilder(
@@ -751,7 +1026,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                     loadingIndicator(context);
                     Provider.of<Weight>(context, listen: false)
                         .addWeight(
-                      widget.userEmail!,
+                      widget.userEmail,
                       addBB.text,
                       addDate.toString().split(' ')[0],
                       widget.isGuide,
