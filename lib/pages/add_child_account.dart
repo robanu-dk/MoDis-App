@@ -6,8 +6,8 @@ import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/flex_row_information.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
+import 'package:modis/components/tab_button.dart';
 import 'package:modis/components/tile_information_implement.dart';
-import 'package:modis/pages/list_account.dart';
 import 'package:modis/providers/child.dart';
 import 'package:provider/provider.dart';
 

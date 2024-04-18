@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+
+class TabButton extends StatelessWidget {
+  const TabButton({
+    super.key,
+    required this.listAccount,
+    required this.onPressed,
+    required this.label,
+  });
+
+  final bool listAccount;
+  final VoidCallback onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.3,
+      height: 50.0,
+      child: listAccount
+          ? FilledButton(
+              onPressed: onPressed,
+              style: const ButtonStyle(
+                padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 10.0)),
+                backgroundColor: MaterialStatePropertyAll(
+                  Color.fromRGBO(248, 198, 48, 1),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : OutlinedButton(
+              onPressed: onPressed,
+              style: const ButtonStyle(
+                side: MaterialStatePropertyAll(
+                  BorderSide(
+                    color: Color.fromARGB(255, 81, 81, 81),
+                  ),
+                ),
+                padding: MaterialStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 10.0),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 81, 81, 81),
+                ),
+              ),
+            ),
+    );
+  }
+}
