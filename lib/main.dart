@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:modis/pages/splash_screen.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
+import 'package:modis/providers/motivation.dart';
 import 'package:modis/providers/user.dart';
 import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +35,11 @@ class MoDis extends StatelessWidget {
           create: (_) => Weight(),
           update: (context, user, weight) =>
               weight!..updateEmailToken(user.userEmail, user.userToken),
+        ),
+        ChangeNotifierProxyProvider<User, MotivationVideo>(
+          create: (_) => MotivationVideo(),
+          update: (context, user, motivation) =>
+              motivation!..updateEmailToken(user.userEmail, user.userToken),
         ),
       ],
       child: MaterialApp(
