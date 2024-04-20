@@ -622,6 +622,7 @@ class _VideoState extends State<Video> {
             child: FilledButton(
               onPressed: () {
                 setState(() {
+                  start = 0;
                   categoryId = '';
                 });
                 if (_allVideo) {
@@ -667,6 +668,7 @@ class _VideoState extends State<Video> {
                     child: FilledButton(
                       onPressed: () {
                         setState(() {
+                          start = 0;
                           categoryId = element['id'];
                         });
                         if (_allVideo) {
