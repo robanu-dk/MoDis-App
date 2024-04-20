@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
+import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/components/tab_button.dart';
+import 'package:modis/pages/create_video.dart';
 import 'package:modis/pages/edit_video.dart';
 import 'package:modis/pages/play_video.dart';
 import 'package:modis/providers/motivation.dart';
@@ -169,8 +173,11 @@ class _VideoState extends State<Video> {
                             });
                             searchController.text = '';
                             fSearchController.unfocus();
-                            _scrollSingleController.jumpTo(0.0);
+                            _scrollController.jumpTo(0.0);
                             getAllVideo();
+                            Timer(const Duration(milliseconds: 20), () {
+                              _scrollSingleController.jumpTo(0.0);
+                            });
                           },
                           label: 'Semua Video',
                         ),
@@ -185,8 +192,11 @@ class _VideoState extends State<Video> {
                             });
                             searchController.text = '';
                             fSearchController.unfocus();
-                            _scrollSingleController.jumpTo(0.0);
+                            _scrollController.jumpTo(0.0);
                             getVideoBasedGuide();
+                            Timer(const Duration(milliseconds: 20), () {
+                              _scrollSingleController.jumpTo(0.0);
+                            });
                           },
                           label: 'Video Saya',
                         ),
@@ -261,26 +271,78 @@ class _VideoState extends State<Video> {
                           : const Text(''),
                       listVideo(motivation),
                       motivation.lengthResponseData >= 10
-                          ? Text('loading...')
-                          : Text(''),
+                          ? loadingContent(0.0)
+                          : const Text(''),
                     ]
                   : [
                       motivation.videoCategories != null &&
                               motivation.videoCategories.length != 0
                           ? videoCategory(motivation)
                           : const Text(''),
-                      Text('Proses'),
+                      loadingContent(16.0),
                     ]
               : [
                   videoCategory(motivation),
                   motivation.listVideo.length != 0
                       ? listVideo(motivation)
-                      : Text('tidak ada video'),
+                      : const Padding(
+                          padding: EdgeInsets.only(top: 28.0),
+                          child: Center(
+                            child: Text('Tidak Ada Video'),
+                          ),
+                        ),
                 ],
         ),
       ),
       backgroundColor: Colors.white,
+      floatingActionButton: _allVideo
+          ? null
+          : FloatingActionButtonModis(
+              onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    transitionDuration:
+                        const Duration(milliseconds: 300), // Durasi animasi
+                    pageBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation) {
+                      return const CreateVideo();
+                    },
+                    transitionsBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                        Widget child) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 2),
+    );
+  }
+
+  Padding loadingContent(double topPadding) {
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 30,
+            height: 30,
+            child: LoadingIndicator(
+              indicatorType: Indicator.ballSpinFadeLoader,
+            ),
+          ),
+          Text(' Loading'),
+        ],
+      ),
     );
   }
 
