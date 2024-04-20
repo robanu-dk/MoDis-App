@@ -135,8 +135,32 @@ class MotivationVideo extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> deleteVideo() async {
-    try {} catch (error) {
+  Future<dynamic> deleteVideo(String videoId, int limit, int start,
+      dynamic categoryId, String search) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/delete-video');
+
+      var deleteVideo = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(
+          {
+            'email': email,
+            'video_id': videoId,
+          },
+        ),
+      );
+
+      var response = jsonDecode(deleteVideo.body);
+      if (response['status'] == 'success') {
+        getVideoBasedGuide(limit, start, categoryId ?? '', search);
+      }
+
+      return response;
+    } catch (error) {
       throw error.toString();
     }
   }

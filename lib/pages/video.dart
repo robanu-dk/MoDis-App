@@ -60,20 +60,12 @@ class _VideoState extends State<Video> {
         .getAllVideo(limit, start, categoryId, keyword)
         .then((response) {
       if (response['status'] == 'error') {
-        snackbarMessenger(
-          context,
-          MediaQuery.of(context).size.width * 0.4,
-          Colors.red,
-          'Gagal terhubung ke server',
-        );
+        snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
+            Colors.red, 'Gagal terhubung ke server', null);
       }
     }).catchError((error) {
-      snackbarMessenger(
-        context,
-        MediaQuery.of(context).size.width * 0.4,
-        Colors.red,
-        'Gagal terhubung ke server',
-      );
+      snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
+          Colors.red, 'Gagal terhubung ke server', null);
     });
   }
 
@@ -82,20 +74,12 @@ class _VideoState extends State<Video> {
         .getVideoBasedGuide(limit, start, categoryId, keyword)
         .then((response) {
       if (response['status'] == 'error') {
-        snackbarMessenger(
-          context,
-          MediaQuery.of(context).size.width * 0.4,
-          Colors.red,
-          'Gagal terhubung ke server',
-        );
+        snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
+            Colors.red, 'Gagal terhubung ke server', null);
       }
     }).catchError((error) {
-      snackbarMessenger(
-        context,
-        MediaQuery.of(context).size.width * 0.4,
-        Colors.red,
-        'Gagal terhubung ke server',
-      );
+      snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
+          Colors.red, 'Gagal terhubung ke server', null);
     });
   }
 
@@ -118,13 +102,13 @@ class _VideoState extends State<Video> {
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
-      Color backgroundColor, String message) {
+      Color backgroundColor, String message, double? bottomPadding) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.75,
+          bottom: bottomPadding ?? MediaQuery.of(context).size.height * 0.75,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
@@ -461,16 +445,17 @@ class _VideoState extends State<Video> {
                                           MainAxisAlignment.center,
                                       actions: [
                                         FilledButton(
-                                            style: const ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStatePropertyAll(
-                                                Color.fromRGBO(248, 198, 48, 1),
-                                              ),
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                              Color.fromRGBO(248, 198, 48, 1),
                                             ),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('Batal')),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text('Batal'),
+                                        ),
                                         FilledButton(
                                           style: const ButtonStyle(
                                             backgroundColor:
@@ -483,11 +468,22 @@ class _VideoState extends State<Video> {
                                             Provider.of<MotivationVideo>(
                                                     context,
                                                     listen: false)
-                                                .deleteVideo()
+                                                .deleteVideo(
+                                                    element['id'].toString(),
+                                                    10,
+                                                    0,
+                                                    categoryId,
+                                                    keyword)
                                                 .then(
                                               (response) {
                                                 Navigator.pop(context);
                                                 Navigator.pop(context);
+                                                if (response['status'] ==
+                                                    'success') {
+                                                  setState(() {
+                                                    start = 0;
+                                                  });
+                                                }
                                                 snackbarMessenger(
                                                   context,
                                                   MediaQuery.of(context)
@@ -500,11 +496,13 @@ class _VideoState extends State<Video> {
                                                           255, 0, 120, 18)
                                                       : Colors.red,
                                                   response['message'],
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.6,
                                                 );
                                               },
                                             ).catchError((error) {
-                                              Navigator.pop(context);
-                                              Navigator.pop(context);
                                               snackbarMessenger(
                                                 context,
                                                 MediaQuery.of(context)
@@ -512,7 +510,11 @@ class _VideoState extends State<Video> {
                                                         .width *
                                                     0.5,
                                                 Colors.red,
-                                                'Gagal terhubung ke server',
+                                                'Gagal terhubung ke server $error',
+                                                MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.6,
                                               );
                                             });
                                           },
