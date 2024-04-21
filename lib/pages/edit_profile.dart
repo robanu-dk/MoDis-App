@@ -170,7 +170,7 @@ class _EditProfileState extends State<EditProfile> {
                                   builder: (context, user, child) =>
                                       user.userProfileImage != ''
                                           ? Image.network(
-                                              'http://10.0.2.2:8080/API/Modis/public/${user.userProfileImage}',
+                                              'http://192.168.42.60:8080/API/Modis/public/${user.userProfileImage}',
                                               fit: BoxFit.cover,
                                               filterQuality: FilterQuality.high,
                                             )
