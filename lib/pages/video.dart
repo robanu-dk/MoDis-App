@@ -349,7 +349,7 @@ class _VideoState extends State<Video> {
                         pageBuilder: (BuildContext context,
                             Animation<double> animation,
                             Animation<double> secondaryAnimation) {
-                          return const VideoPlayer();
+                          return const VideoPlayerPage();
                         },
                         transitionsBuilder: (BuildContext context,
                             Animation<double> animation,
@@ -567,7 +567,7 @@ class _VideoState extends State<Video> {
                           Radius.circular(10.0),
                         ),
                         child: Image.network(
-                          'http://10.0.2.2:8080/API/Modis/public/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                          'http://192.168.42.60:8080/API/Modis/public/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                           fit: BoxFit.cover,
                         ),
                       ),

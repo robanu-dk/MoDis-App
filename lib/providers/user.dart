@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class User with ChangeNotifier {
-  final String apiDomain = 'http://10.0.2.2:8080/API/Modis/public/api/user';
+  final String apiDomain =
+      'http://192.168.42.60:8080/API/Modis/public/api/user';
   String userFullName = '',
       userName = '',
       userToken = '',

@@ -255,7 +255,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                 );
               },
               child: SizedBox(
-                width: filter == null ? 60.0 : 125.0,
+                width: filter == null ? 60.0 : 130.0,
                 child: Row(
                   children: [
                     const Icon(
@@ -504,10 +504,13 @@ class _WeightTrackerState extends State<WeightTracker> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              const Text(
-                                                'Perbarui Data Berat Badan',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
+                                              const SizedBox(
+                                                width: 160,
+                                                child: Text(
+                                                  'Perbarui Data Berat Badan',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
                                               ),
                                               IconButton(
@@ -552,7 +555,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                         MediaQuery.of(context)
                                                                 .size
                                                                 .width *
-                                                            0.53,
+                                                            0.45,
                                                     child: TextField(
                                                       onTap: () {
                                                         fUpdateBB.unfocus();
@@ -901,10 +904,13 @@ class _WeightTrackerState extends State<WeightTracker> {
             header: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Tambah Data Berat Badan',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                const SizedBox(
+                  width: 160,
+                  child: Text(
+                    'Tambah Data Berat Badan',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -938,7 +944,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.53,
+                      width: MediaQuery.of(context).size.width * 0.45,
                       child: TextField(
                         onTap: () {
                           fAddBB.unfocus();
@@ -989,7 +995,6 @@ class _WeightTrackerState extends State<WeightTracker> {
                       },
                       icon: const Icon(
                         Icons.calendar_month_outlined,
-                        size: 30,
                       ),
                     )
                   ],

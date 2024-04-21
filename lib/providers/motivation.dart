@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class MotivationVideo extends ChangeNotifier {
-  String apiDomain = 'http://10.0.2.2:8080/API/Modis/public/api/video';
+  String apiDomain = 'http://192.168.42.60:8080/API/Modis/public/api/video';
   String apiVideoCategories =
-      'http://10.0.2.2:8080/API/Modis/public/api/video-categories';
+      'http://192.168.42.60:8080/API/Modis/public/api/video-categories';
   String token = '', email = '';
   dynamic listVideo, videoCategories;
   int lengthResponseData = 0;

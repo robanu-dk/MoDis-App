@@ -23,13 +23,13 @@ class FlexRowInformation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: widthLabel ?? MediaQuery.of(context).size.width * 0.35,
+            width: widthLabel ?? MediaQuery.of(context).size.width * 0.33,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width:
-                      widthNameLabel ?? MediaQuery.of(context).size.width * 0.3,
+                  width: widthNameLabel ??
+                      MediaQuery.of(context).size.width * 0.28,
                   child: Text(
                     maxLines: 2,
                     label,
