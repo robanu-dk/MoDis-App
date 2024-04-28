@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +18,16 @@ class MotivationVideo extends ChangeNotifier {
     this.email = email;
     this.token = token;
     notifyListeners();
+  }
+
+  Future<dynamic> getCategories() async {
+    try {
+      var getCategories = await http.get(Uri.parse('$apiVideoCategories/get'));
+      videoCategories = jsonDecode(getCategories.body)['data'];
+      notifyListeners();
+    } catch (error) {
+      throw error.toString();
+    }
   }
 
   Future<dynamic> getAllVideo(
@@ -123,14 +134,89 @@ class MotivationVideo extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> uploadVideo() async {
-    try {} catch (error) {
+  Future<dynamic> uploadVideo({
+    required String title,
+    required int category,
+    required String description,
+    required File thumbnail,
+    required File video,
+  }) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/upload-video');
+
+      var upload = http.MultipartRequest('POST', url);
+      upload.headers['authorization'] = 'Bearer $token';
+      upload.fields['email'] = email;
+      upload.fields['title'] = title;
+      upload.fields['category'] = category.toString();
+      upload.fields['description'] = description;
+      upload.files.add(
+        await http.MultipartFile.fromPath('thumbnail', thumbnail.path),
+      );
+      upload.files.add(
+        await http.MultipartFile.fromPath('video', video.path),
+      );
+
+      var post = await upload.send();
+      var response = await http.Response.fromStream(post);
+
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['status'] == 'success') {
+        listVideo = responseBody['data'];
+        notifyListeners();
+      }
+
+      return responseBody;
+    } catch (error) {
       throw error.toString();
     }
   }
 
-  Future<dynamic> updateVideo() async {
-    try {} catch (error) {
+  Future<dynamic> updateVideo({
+    required String videoId,
+    required String title,
+    required int category,
+    required String description,
+    required bool updateThumbnail,
+    required bool updateVideo,
+    File? thumbnail,
+    File? video,
+  }) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/update-video');
+
+      var request = http.MultipartRequest('POST', url);
+      request.headers['authorization'] = 'Bearer $token';
+
+      request.fields['video_id'] = videoId;
+      request.fields['email'] = email;
+      request.fields['title'] = title;
+      request.fields['category'] = category.toString();
+      request.fields['description'] = description;
+
+      if (updateThumbnail) {
+        request.files.add(
+          await http.MultipartFile.fromPath('thumbnail', thumbnail!.path),
+        );
+      }
+
+      if (updateVideo) {
+        request.files.add(
+          await http.MultipartFile.fromPath('video', video!.path),
+        );
+      }
+
+      var update = await request.send();
+      var response = await http.Response.fromStream(update);
+
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['status'] == 'success') {
+        listVideo = responseBody['data'];
+        notifyListeners();
+      }
+
+      return responseBody;
+    } catch (error) {
       throw error.toString();
     }
   }

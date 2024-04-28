@@ -349,7 +349,7 @@ class _VideoState extends State<Video> {
                         pageBuilder: (BuildContext context,
                             Animation<double> animation,
                             Animation<double> secondaryAnimation) {
-                          return const VideoPlayerPage();
+                          return VideoPlayerPage(dataVideo: element);
                         },
                         transitionsBuilder: (BuildContext context,
                             Animation<double> animation,
@@ -394,7 +394,9 @@ class _VideoState extends State<Video> {
                                           Animation<double> animation,
                                           Animation<double>
                                               secondaryAnimation) {
-                                        return const EditVideo();
+                                        return EditVideo(
+                                          videoOldData: element,
+                                        );
                                       },
                                       transitionsBuilder: (BuildContext context,
                                           Animation<double> animation,
