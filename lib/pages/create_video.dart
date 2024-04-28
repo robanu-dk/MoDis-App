@@ -43,7 +43,7 @@ class _CreateVideoState extends State<CreateVideo> {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.72,
+          bottom: MediaQuery.of(context).size.height * 0.67,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
