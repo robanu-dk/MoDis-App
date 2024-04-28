@@ -11,6 +11,8 @@ class Input extends StatelessWidget {
     this.isPassword = false,
     this.border = InputBorder.none,
     this.keyboardType = TextInputType.emailAddress,
+    this.textInputAction = TextInputAction.next,
+    this.maxLines = 1,
   });
   final TextEditingController textController;
   final bool isPassword;
@@ -18,6 +20,8 @@ class Input extends StatelessWidget {
   final String label;
   final InputBorder border;
   final TextInputType keyboardType;
+  final TextInputAction textInputAction;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +46,9 @@ class Input extends StatelessWidget {
             color: Color.fromRGBO(120, 120, 120, 1),
           ),
         ),
+        maxLines: maxLines,
         keyboardType: keyboardType,
-        textInputAction: TextInputAction.next,
+        textInputAction: textInputAction,
         obscureText: isPassword,
       ),
     );

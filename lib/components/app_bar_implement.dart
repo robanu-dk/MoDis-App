@@ -7,11 +7,13 @@ class ModisAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.title,
     this.header,
     this.paddingHeader = 1.5,
+    this.noFreeSpace = false,
   });
 
   final Widget title, action;
   final Widget? header;
   final double paddingHeader;
+  final bool noFreeSpace;
 
   @override
   State<ModisAppBar> createState() => _ModisAppBarState();
@@ -23,41 +25,64 @@ class ModisAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _ModisAppBarState extends State<ModisAppBar> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.only(
-              top: 25.0, bottom: 30.0, left: 15.0, right: 15.0),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Color.fromRGBO(1, 92, 104, 1),
-                Color.fromRGBO(1, 135, 76, 1),
+    return widget.noFreeSpace
+        ? Container(
+            padding: const EdgeInsets.only(
+                top: 25.0, bottom: 10.0, left: 15.0, right: 15.0),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color.fromRGBO(1, 92, 104, 1),
+                  Color.fromRGBO(1, 135, 76, 1),
+                ],
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                widget.title,
+                widget.action,
               ],
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          )
+        : Stack(
             children: [
-              widget.title,
-              widget.action,
+              Container(
+                padding: const EdgeInsets.only(
+                    top: 25.0, bottom: 30.0, left: 15.0, right: 15.0),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color.fromRGBO(1, 92, 104, 1),
+                      Color.fromRGBO(1, 135, 76, 1),
+                    ],
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    widget.title,
+                    widget.action,
+                  ],
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 200,
+                margin: const EdgeInsets.only(top: 90.0),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
+                  color: Colors.white,
+                ),
+                child: widget.header,
+              )
             ],
-          ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: 200,
-          margin: const EdgeInsets.only(top: 90.0),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
-            color: Colors.white,
-          ),
-          child: widget.header,
-        )
-      ],
-    );
+          );
   }
 }
