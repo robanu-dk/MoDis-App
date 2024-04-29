@@ -228,10 +228,12 @@ class _CreateVideoState extends State<CreateVideo> {
                 _pickerImage
                     .pickImage(source: ImageSource.gallery)
                     .then((value) {
-                  setState(() {
-                    thumbnail = File(value!.path);
-                    showPreviewThumbnail = true;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      thumbnail = File(value.path);
+                      showPreviewThumbnail = true;
+                    });
+                  }
                 });
               },
               style: const ButtonStyle(
@@ -291,11 +293,13 @@ class _CreateVideoState extends State<CreateVideo> {
             child: OutlinedButton(
               onPressed: () {
                 _pickVideo.pickVideo(source: ImageSource.gallery).then((value) {
-                  setState(() {
-                    showPreviewVideo = true;
-                    video = File(value!.path);
-                    loadVideo();
-                  });
+                  if (value != null) {
+                    setState(() {
+                      showPreviewVideo = true;
+                      video = File(value.path);
+                      loadVideo();
+                    });
+                  }
                 });
               },
               style: const ButtonStyle(

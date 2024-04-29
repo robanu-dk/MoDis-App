@@ -237,10 +237,12 @@ class _EditVideoState extends State<EditVideo> {
                 _pickerImage
                     .pickImage(source: ImageSource.gallery)
                     .then((value) {
-                  setState(() {
-                    thumbnail = File(value!.path);
-                    updateThumbnail = true;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      thumbnail = File(value.path);
+                      updateThumbnail = true;
+                    });
+                  }
                 });
               },
               style: const ButtonStyle(
@@ -300,11 +302,13 @@ class _EditVideoState extends State<EditVideo> {
             child: OutlinedButton(
               onPressed: () {
                 _pickVideo.pickVideo(source: ImageSource.gallery).then((value) {
-                  setState(() {
-                    updateVideo = true;
-                    video = File(value!.path);
-                    loadVideo();
-                  });
+                  if (value != null) {
+                    setState(() {
+                      updateVideo = true;
+                      video = File(value.path);
+                      loadVideo();
+                    });
+                  }
                 });
               },
               style: const ButtonStyle(
