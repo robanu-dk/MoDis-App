@@ -8,12 +8,14 @@ class ModisAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.header,
     this.paddingHeader = 1.5,
     this.noFreeSpace = false,
+    this.colorFreeSpace = Colors.white,
   });
 
   final Widget title, action;
   final Widget? header;
   final double paddingHeader;
   final bool noFreeSpace;
+  final Color colorFreeSpace;
 
   @override
   State<ModisAppBar> createState() => _ModisAppBarState();
@@ -76,9 +78,10 @@ class _ModisAppBarState extends State<ModisAppBar> {
                 width: MediaQuery.of(context).size.width,
                 height: 200,
                 margin: const EdgeInsets.only(top: 90.0),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(17)),
+                  color: widget.colorFreeSpace,
                 ),
                 child: widget.header,
               )
