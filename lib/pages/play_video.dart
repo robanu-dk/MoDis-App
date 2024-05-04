@@ -120,7 +120,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   children: [
                     SizedBox(
                       width: MediaQuery.of(context).size.width,
-                      height: 235,
+                      height: MediaQuery.of(context).size.width * 9 / 16,
                       child: Chewie(controller: chewieController!),
                     ),
                     Container(
