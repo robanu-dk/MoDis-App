@@ -293,7 +293,7 @@ class _EditVideoState extends State<EditVideo> {
                 updateThumbnail
                     ? Image.file(thumbnail!)
                     : Image.network(
-                        'http://192.168.42.60:8080/API/Modis/public/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
+                        'https://modis.techcreator.my.id/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
               ],
             ),
           ),

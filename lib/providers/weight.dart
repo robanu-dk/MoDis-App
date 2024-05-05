@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class Weight extends ChangeNotifier {
   String email = '',
       token = '',
-      apiDomain = 'http://192.168.42.60:8080/API/Modis/public/api/weight';
+      apiDomain = 'https://modis.techcreator.my.id/api/weight';
 
   dynamic listWeightUser;
 

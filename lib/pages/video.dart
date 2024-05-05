@@ -569,7 +569,7 @@ class _VideoState extends State<Video> {
                           Radius.circular(10.0),
                         ),
                         child: Image.network(
-                          'http://192.168.42.60:8080/API/Modis/public/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                          'https://modis.techcreator.my.id/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                           fit: BoxFit.cover,
                         ),
                       ),

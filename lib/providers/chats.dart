@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 
 class Chats extends ChangeNotifier {
   String email = '', token = '';
-  String apiDomain = 'http://192.168.42.60:8080/API/Modis/public/api/chats';
-  dynamic listMessage;
+  String apiDomain = 'https://modis.techcreator.my.id/api/chats';
+  List<dynamic> listMessage = [];
 
   updateEmailToken(email, token) {
     this.email = email;
@@ -27,14 +27,18 @@ class Chats extends ChangeNotifier {
         body: jsonEncode(
           {
             'email': email,
+            'offset': listMessage.length,
           },
         ),
       );
 
       var response = jsonDecode(allMessage.body);
       if (response['status'] == 'success') {
-        listMessage = response['data'];
-        notifyListeners();
+        if (response['data'].length != 0) {
+          listMessage =
+              [...listMessage.reversed, ...response['data']].reversed.toList();
+          notifyListeners();
+        }
       }
 
       return response;
@@ -62,10 +66,6 @@ class Chats extends ChangeNotifier {
       );
 
       var response = jsonDecode(post.body);
-      if (response['status'] == 'success') {
-        listMessage = response['data'];
-        notifyListeners();
-      }
 
       return response;
     } catch (error) {

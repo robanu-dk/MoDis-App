@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class Activity extends ChangeNotifier {
   String email = '',
       token = '',
-      apiDomain = 'http://192.168.42.60:8080/API/Modis/public/api/event';
+      apiDomain = 'https://modis.techcreator.my.id/api/event';
   dynamic listTodayActivity;
 
   updateEmailToken(String userEmail, String userToken) {

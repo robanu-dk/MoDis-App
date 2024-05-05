@@ -544,180 +544,184 @@ class _LoginPageState extends State<LoginPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertInput(
-        height: 250,
-        header: Column(
-          children: [
-            const Text(
-              'Kode OTP',
-              style: TextStyle(
-                fontFamily: 'crimson',
-                fontSize: 30,
+      builder: (context) => LayoutBuilder(builder: (context, constraint) {
+        return AlertInput(
+          height: constraint.maxHeight * 0.38,
+          header: Column(
+            children: [
+              const Text(
+                'Kode OTP',
+                style: TextStyle(
+                  fontFamily: 'crimson',
+                  fontSize: 30,
+                ),
               ),
-            ),
-            Text(
-              'Masukkan Kode OTP yang telah dikirim pada email ${_email.text}',
-            ),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
+              Text(
+                'Masukkan Kode OTP yang telah dikirim pada email ${_email.text}',
+              ),
+              Container(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
 
-                  forgetPassword(context);
-                },
-                child: const Text(
-                  'ubah email',
-                  style: TextStyle(
-                    color: Color.fromRGBO(248, 198, 48, 1),
+                    forgetPassword(context);
+                  },
+                  child: const Text(
+                    'ubah email',
+                    style: TextStyle(
+                      color: Color.fromRGBO(248, 198, 48, 1),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+          ),
+          headerPadding: const EdgeInsets.only(top: 8.0),
+          contents: [
+            otpField(EdgeInsets.zero, _otp1, _focusNode1),
+            otpField(const EdgeInsets.only(left: 10.0), _otp2, _focusNode2),
+            otpField(const EdgeInsets.only(left: 10.0), _otp3, _focusNode3),
+            otpField(const EdgeInsets.only(left: 10.0), _otp4, _focusNode4),
           ],
-        ),
-        headerPadding: const EdgeInsets.only(top: 8.0),
-        contents: [
-          otpField(EdgeInsets.zero, _otp1, _focusNode1),
-          otpField(const EdgeInsets.only(left: 10.0), _otp2, _focusNode2),
-          otpField(const EdgeInsets.only(left: 10.0), _otp3, _focusNode3),
-          otpField(const EdgeInsets.only(left: 10.0), _otp4, _focusNode4),
-        ],
-        contentAligment: 'horizontal',
-        contentPadding: const EdgeInsets.only(top: 8.0),
-        actionAligment: 'horizontal',
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              _focusNode1.unfocus();
-              _focusNode2.unfocus();
-              _focusNode3.unfocus();
-              _focusNode4.unfocus();
+          contentAligment: 'horizontal',
+          contentPadding: const EdgeInsets.only(top: 8.0),
+          actionAligment: 'horizontal',
+          actions: [
+            OutlinedButton(
+              onPressed: () {
+                _focusNode1.unfocus();
+                _focusNode2.unfocus();
+                _focusNode3.unfocus();
+                _focusNode4.unfocus();
 
-              if (_kodeOtp ==
-                  "${_otp1.text}${_otp2.text}${_otp3.text}${_otp4.text}") {
-                loadingIndicator(context);
-                Provider.of<User>(context, listen: false)
-                    .resetPassword(_email.text, _kodeOtp)
-                    .then((response) {
-                  Navigator.pop(context);
-
-                  if (response['status'] == 'success') {
+                if (_kodeOtp ==
+                    "${_otp1.text}${_otp2.text}${_otp3.text}${_otp4.text}") {
+                  loadingIndicator(context);
+                  Provider.of<User>(context, listen: false)
+                      .resetPassword(_email.text, _kodeOtp)
+                      .then((response) {
                     Navigator.pop(context);
 
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertInput(
-                        height: 225,
-                        header: const Text(
-                          'Password Baru',
-                          style: TextStyle(
-                            fontFamily: 'crimson',
-                            fontSize: 30,
+                    if (response['status'] == 'success') {
+                      Navigator.pop(context);
+
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertInput(
+                          height: 225,
+                          header: const Text(
+                            'Password Baru',
+                            style: TextStyle(
+                              fontFamily: 'crimson',
+                              fontSize: 30,
+                            ),
                           ),
+                          headerPadding: const EdgeInsets.only(top: 8.0),
+                          contents: [
+                            Text(
+                              'Berikut adalah password baru untuk ${_email.text}',
+                            ),
+                            Container(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              width: MediaQuery.of(context).size.width,
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Password: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    response['password'],
+                                    style: const TextStyle(
+                                      color: Color.fromRGBO(248, 198, 48, 1),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          contentAligment: 'vertical',
+                          contentPadding: const EdgeInsets.only(top: 20.0),
+                          actionAligment: 'horizontal',
+                          actions: [
+                            OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromRGBO(248, 198, 48, 1),
+                                ),
+                                shadowColor:
+                                    MaterialStateProperty.all(Colors.black),
+                                elevation: MaterialStateProperty.all(10),
+                                side:
+                                    MaterialStateProperty.all(BorderSide.none),
+                              ),
+                              child: const Text(
+                                'Tutup',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            )
+                          ],
+                          actionPadding: const EdgeInsets.only(top: 20.0),
                         ),
-                        headerPadding: const EdgeInsets.only(top: 8.0),
-                        contents: [
-                          Text(
-                            'Berikut adalah password baru untuk ${_email.text}',
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              children: [
-                                const Text(
-                                  'Password: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  response['password'],
-                                  style: const TextStyle(
-                                    color: Color.fromRGBO(248, 198, 48, 1),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        contentAligment: 'vertical',
-                        contentPadding: const EdgeInsets.only(top: 20.0),
-                        actionAligment: 'horizontal',
-                        actions: [
-                          OutlinedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                const Color.fromRGBO(248, 198, 48, 1),
-                              ),
-                              shadowColor:
-                                  MaterialStateProperty.all(Colors.black),
-                              elevation: MaterialStateProperty.all(10),
-                              side: MaterialStateProperty.all(BorderSide.none),
-                            ),
-                            child: const Text(
-                              'Tutup',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          )
-                        ],
-                        actionPadding: const EdgeInsets.only(top: 20.0),
-                      ),
-                    );
-                  } else {
+                      );
+                    } else {
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.5,
+                        Colors.red,
+                        response['message'],
+                      );
+                    }
+                  }).catchError((error) {
+                    Navigator.pop(context);
                     snackbarMessenger(
                       context,
                       MediaQuery.of(context).size.width * 0.5,
                       Colors.red,
-                      response['message'],
+                      "Gagal terhubung server",
                     );
-                  }
-                }).catchError((error) {
-                  Navigator.pop(context);
+                  });
+                } else {
                   snackbarMessenger(
                     context,
                     MediaQuery.of(context).size.width * 0.5,
                     Colors.red,
-                    "Gagal terhubung server",
+                    "Kode OTP salah",
                   );
-                });
-              } else {
-                snackbarMessenger(
-                  context,
-                  MediaQuery.of(context).size.width * 0.5,
-                  Colors.red,
-                  "Kode OTP salah",
-                );
-              }
-            },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(
-                const Color.fromRGBO(248, 198, 48, 1),
+                }
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(
+                  const Color.fromRGBO(248, 198, 48, 1),
+                ),
+                shadowColor: MaterialStateProperty.all(Colors.black),
+                elevation: MaterialStateProperty.all(10),
+                side: MaterialStateProperty.all(BorderSide.none),
               ),
-              shadowColor: MaterialStateProperty.all(Colors.black),
-              elevation: MaterialStateProperty.all(10),
-              side: MaterialStateProperty.all(BorderSide.none),
-            ),
-            child: const Text(
-              'Kirim',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
+              child: const Text(
+                'Kirim',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
               ),
-            ),
-          )
-        ],
-        actionPadding: const EdgeInsets.only(top: 20.0),
-      ),
+            )
+          ],
+          actionPadding: const EdgeInsets.only(top: 20.0),
+        );
+      }),
     );
   }
 

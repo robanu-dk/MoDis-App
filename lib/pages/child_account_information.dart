@@ -116,7 +116,7 @@ class ChildAccountInformation extends StatelessWidget {
                             fit: BoxFit.cover,
                           )
                         : Image.network(
-                            'http://192.168.42.60:8080/API/Modis/public/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                            'https://modis.techcreator.my.id/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                             filterQuality: FilterQuality.high,
                             fit: BoxFit.cover,
                           ),

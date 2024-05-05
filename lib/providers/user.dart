@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class User with ChangeNotifier {
-  final String apiDomain =
-      'http://192.168.42.60:8080/API/Modis/public/api/user';
+  final String apiDomain = 'https://modis.techcreator.my.id/api/user';
   String userFullName = '',
       userName = '',
       userToken = '',
@@ -57,8 +56,8 @@ class User with ChangeNotifier {
         userToken = response['data']['token'];
         userProfileImage = response['data']['profile_image'] ?? '';
         userGuide = response['data']['guide'] ?? '';
-        userGender = response['data']['gender'];
-        userRole = response['data']['role'];
+        userGender = int.parse(response['data']['gender'].toString());
+        userRole = int.parse((response['data']['role'].toString()));
         notifyListeners();
       }
 

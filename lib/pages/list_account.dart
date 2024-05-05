@@ -230,7 +230,7 @@ class _ListAccountState extends State<ListAccount> {
                     child: element['profile_image'] == null
                         ? Image.asset('images/default_profile_image.jpg')
                         : Image.network(
-                            'http://192.168.42.60:8080/API/Modis/public/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                            'https://modis.techcreator.my.id/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                           ),
                   ),
                   Padding(
