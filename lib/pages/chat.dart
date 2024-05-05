@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
@@ -17,12 +17,13 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  final ScrollController _scollChat = ScrollController();
+  final ScrollController _scrollChat = ScrollController();
   final TextEditingController _keyboard = TextEditingController();
   late SharedPreferences _pref;
   final FocusNode _keyboardFocus = FocusNode();
   final double height = 70;
   int scale = 1;
+  Timer? _polling;
   final Map<String, String> month = {
     '01': 'Januari',
     '02': 'Febuari',
@@ -37,23 +38,7 @@ class _ChatState extends State<Chat> {
     '11': 'November',
     '12': 'Desember',
   };
-
-  scrollPosition() async {
-    _pref = await SharedPreferences.getInstance();
-    if (_pref.containsKey('scrollChatPosition')) {
-      _scollChat.jumpTo(
-        double.parse(
-          _pref.getString('scrollChatPosition').toString(),
-        ),
-      );
-    } else {
-      _scollChat.jumpTo(0);
-    }
-    _pref.setString(
-      'scrollChatPosition',
-      _scollChat.position.maxScrollExtent.toString(),
-    );
-  }
+  bool _stillProgress = false;
 
   checkKeyboardMessage() async {
     _pref = await SharedPreferences.getInstance();
@@ -66,13 +51,30 @@ class _ChatState extends State<Chat> {
   void initState() {
     super.initState();
     try {
-      Provider.of<Chats>(context, listen: false).getAllMessage().then((value) {
-        scrollPosition();
-      });
       checkKeyboardMessage();
+      _polling = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        if (!_stillProgress) {
+          setState(() {
+            _stillProgress = true;
+          });
+          Provider.of<Chats>(context, listen: false)
+              .getAllMessage()
+              .then((value) {
+            setState(() {
+              _stillProgress = false;
+            });
+          });
+        }
+      });
     } catch (error) {
       print('error: $error');
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _polling?.cancel();
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
@@ -200,6 +202,7 @@ class _ChatState extends State<Chat> {
         colorFreeSpace: const Color.fromARGB(255, 240, 240, 240),
       ),
       body: CustomScrollView(
+        controller: _scrollChat,
         reverse: true,
         slivers: [
           SliverPersistentHeader(
@@ -214,235 +217,207 @@ class _ChatState extends State<Chat> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   String today = DateTime.now().toString().split(' ')[0];
-                  String dayChatCreated = chat.listMessage != null
-                      ? chat.listMessage[index]['created_at'].split(' ')[0]
-                      : '';
-                  String timeChatCreated = chat.listMessage != null
-                      ? chat.listMessage[index]['created_at'].split(' ')[1]
-                      : '';
-                  String timeChatCreatedInHoursMinutes = timeChatCreated != ''
-                      ? '${timeChatCreated.split(":")[0]}:${timeChatCreated.split(":")[1]}'
-                      : '';
-                  dynamic chatMessage = chat.listMessage != null
-                      ? [
-                          chat.listMessage.length == index + 1
-                              ? (chat.listMessage[index]['email'] != chat.email
-                                  ? showProfile(context, chat, index)
-                                  : Container())
-                              : (chat.listMessage[index]['email'] !=
-                                          chat.listMessage[index + 1]
-                                              ['email'] ||
-                                      chat.listMessage[index]['created_at']
-                                              .split(' ')[0] !=
-                                          chat.listMessage[index + 1]
-                                                  ['created_at']
-                                              .split(' ')[0]
-                                  ? showProfile(context, chat, index)
-                                  : Container(
-                                      padding: const EdgeInsets.only(left: 30),
-                                    )),
-                          Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  chat.listMessage[index]['email'] != chat.email
-                                      ? Colors.white
-                                      : const Color.fromRGBO(1, 98, 104, 1.0),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(8.0)),
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: chat.listMessage[index]['email'] !=
-                                      chat.email
-                                  ? [
-                                      chat.listMessage.length == index + 1
-                                          ? Text(
-                                              chat.listMessage[index]['name'],
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )
-                                          : (chat.listMessage[index]['email'] !=
-                                                      chat.listMessage[
-                                                          index + 1]['email'] ||
-                                                  chat.listMessage[index]
-                                                              ['created_at']
-                                                          .split(' ')[0] !=
-                                                      chat.listMessage[index +
-                                                              1]['created_at']
-                                                          .split(' ')[0]
-                                              ? Text(
-                                                  chat.listMessage[index]
-                                                      ['name'],
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                )
-                                              : Container()),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                                right: 4.0),
-                                            width: chat
-                                                                .listMessage[index]
-                                                                    ['message']
-                                                                .length *
-                                                            8.0 >
-                                                        200 ||
-                                                    chat.listMessage[index]['name'].length * 6.0 >
-                                                        200.0
-                                                ? 200.0
-                                                : (chat
-                                                            .listMessage[index]
-                                                                ['message']
-                                                            .length >
-                                                        chat
-                                                            .listMessage[index]
-                                                                ['name']
-                                                            .length
-                                                    ? chat
-                                                            .listMessage[index]
-                                                                ['message']
-                                                            .length *
-                                                        8.0
-                                                    : chat
-                                                            .listMessage[index]
-                                                                ['name']
-                                                            .length *
-                                                        6.0),
-                                            child: Text(chat.listMessage[index]
-                                                ['message']),
-                                          ),
-                                          Text(
-                                            timeChatCreatedInHoursMinutes,
-                                            style:
-                                                const TextStyle(fontSize: 10.0),
-                                          ),
-                                        ],
-                                      ),
-                                    ]
-                                  : [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                                right: 4.0),
-                                            width: chat
-                                                            .listMessage[index]
-                                                                ['message']
-                                                            .length *
-                                                        8.0 >
-                                                    200
-                                                ? 200.0
-                                                : chat
-                                                        .listMessage[index]
-                                                            ['message']
-                                                        .length *
-                                                    8.0,
-                                            child: Text(
-                                              chat.listMessage[index]
-                                                  ['message'],
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            timeChatCreatedInHoursMinutes,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                            ),
-                          )
-                        ]
-                      : [];
-                  return chat.listMessage != null
-                      ? Container(
-                          margin: const EdgeInsets.only(
-                              bottom: 8.0, left: 8.0, right: 8.0),
-                          child: Column(
-                            children: [
-                              index == chat.listMessage.length - 1
-                                  ? Container(
-                                      decoration: const BoxDecoration(
-                                          color: Color.fromRGBO(0, 0, 0, 0.7),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0))),
-                                      padding: const EdgeInsets.all(8.0),
-                                      margin:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: Text(
-                                        dayChatCreated == today
-                                            ? 'Hari ini'
-                                            : convertDateToString(
-                                                dayChatCreated),
+                  String dayChatCreated =
+                      chat.listMessage[index]['created_at'].split(' ')[0];
+                  String timeChatCreated =
+                      chat.listMessage[index]['created_at'].split(' ')[1];
+                  String timeChatCreatedInHoursMinutes =
+                      '${timeChatCreated.split(":")[0]}:${timeChatCreated.split(":")[1]}';
+                  dynamic chatMessage = [
+                    chat.listMessage.length == index + 1
+                        ? (chat.listMessage[index]['email'] != chat.email
+                            ? showProfile(context, chat, index)
+                            : Container())
+                        : ((chat.listMessage[index]['email'] !=
+                                        chat.listMessage[index + 1]['email'] ||
+                                    chat.listMessage[index]['created_at']
+                                            .split(' ')[0] !=
+                                        chat.listMessage[index + 1]
+                                                ['created_at']
+                                            .split(' ')[0]) &&
+                                chat.listMessage[index]['email'] != chat.email
+                            ? showProfile(context, chat, index)
+                            : Container(
+                                padding: EdgeInsets.only(
+                                    left: chat.listMessage[index]['email'] ==
+                                            chat.email
+                                        ? 4.0
+                                        : 30.0),
+                              )),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: chat.listMessage[index]['email'] != chat.email
+                            ? Colors.white
+                            : const Color.fromRGBO(1, 98, 104, 1.0),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                      padding: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: chat.listMessage[index]['email'] != chat.email
+                            ? [
+                                chat.listMessage.length == index + 1
+                                    ? Text(
+                                        chat.listMessage[index]['name'],
                                         style: const TextStyle(
-                                            color: Colors.white),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  : (chat.listMessage[index]['created_at']
-                                              .toString()
-                                              .split(' ')[0] !=
-                                          chat.listMessage[index + 1]
-                                                  ['created_at']
-                                              .toString()
-                                              .split(' ')[0]
-                                      ? Container(
-                                          decoration: const BoxDecoration(
-                                            color: Color.fromRGBO(0, 0, 0, 0.7),
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0),
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.all(8.0),
-                                          margin: const EdgeInsets.only(
-                                              bottom: 8.0),
-                                          child: Text(
-                                            dayChatCreated == today
-                                                ? 'Hari ini'
-                                                : convertDateToString(
-                                                    dayChatCreated),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )
+                                    : (chat.listMessage[index]['email'] !=
+                                                chat.listMessage[index + 1]
+                                                    ['email'] ||
+                                            chat.listMessage[index]
+                                                        ['created_at']
+                                                    .split(' ')[0] !=
+                                                chat.listMessage[index + 1]
+                                                        ['created_at']
+                                                    .split(' ')[0]
+                                        ? Text(
+                                            chat.listMessage[index]['name'],
                                             style: const TextStyle(
-                                                color: Colors.white),
-                                            textAlign: TextAlign.center,
-                                          ))
-                                      : Container()),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: chat.listMessage[index]
-                                            ['email'] ==
-                                        chat.email
-                                    ? MainAxisAlignment.end
-                                    : MainAxisAlignment.start,
-                                children: chat.listMessage[index]['email'] ==
-                                        chat.email
-                                    ? chatMessage.reversed.toList()
-                                    : chatMessage.toList(),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container();
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : Container()),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 4.0),
+                                      width: chat.listMessage[index]['message']
+                                                          .length *
+                                                      10.0 >
+                                                  200 ||
+                                              chat.listMessage[index]['name']
+                                                          .length *
+                                                      7.0 >
+                                                  200.0
+                                          ? 200.0
+                                          : (chat.listMessage[index]['message']
+                                                      .length >
+                                                  chat
+                                                      .listMessage[index]
+                                                          ['name']
+                                                      .length
+                                              ? chat
+                                                      .listMessage[index]
+                                                          ['message']
+                                                      .length *
+                                                  10.0
+                                              : chat.listMessage[index]['name']
+                                                      .length *
+                                                  7.0),
+                                      child: Text(
+                                          chat.listMessage[index]['message']),
+                                    ),
+                                    Text(
+                                      timeChatCreatedInHoursMinutes,
+                                      style: const TextStyle(fontSize: 10.0),
+                                    ),
+                                  ],
+                                ),
+                              ]
+                            : [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 4.0),
+                                      width: chat.listMessage[index]['message']
+                                                      .length *
+                                                  14.0 >
+                                              200
+                                          ? 200.0
+                                          : chat.listMessage[index]['message']
+                                                  .length *
+                                              14.0,
+                                      child: Text(
+                                        chat.listMessage[index]['message'],
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      timeChatCreatedInHoursMinutes,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                      ),
+                    )
+                  ];
+                  return Container(
+                    margin: const EdgeInsets.only(
+                        bottom: 8.0, left: 8.0, right: 8.0),
+                    child: Column(
+                      children: [
+                        index == chat.listMessage.length - 1
+                            ? Container(
+                                decoration: const BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.7),
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(10.0))),
+                                padding: const EdgeInsets.all(8.0),
+                                margin: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  dayChatCreated == today
+                                      ? 'Hari ini'
+                                      : convertDateToString(dayChatCreated),
+                                  style: const TextStyle(color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : (chat.listMessage[index]['created_at']
+                                        .toString()
+                                        .split(' ')[0] !=
+                                    chat.listMessage[index + 1]['created_at']
+                                        .toString()
+                                        .split(' ')[0]
+                                ? Container(
+                                    decoration: const BoxDecoration(
+                                      color: Color.fromRGBO(0, 0, 0, 0.7),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10.0),
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                    margin: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      dayChatCreated == today
+                                          ? 'Hari ini'
+                                          : convertDateToString(dayChatCreated),
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      textAlign: TextAlign.center,
+                                    ))
+                                : Container()),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment:
+                              chat.listMessage[index]['email'] == chat.email
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                          children:
+                              chat.listMessage[index]['email'] == chat.email
+                                  ? chatMessage.reversed.toList()
+                                  : chatMessage.toList(),
+                        ),
+                      ],
+                    ),
+                  );
                 },
-                childCount:
-                    chat.listMessage != null ? chat.listMessage.length : 1,
+                childCount: chat.listMessage.length,
               ),
             ),
           ),
@@ -481,7 +456,7 @@ class _ChatState extends State<Chat> {
                               Radius.circular(24),
                             ),
                             child: Image.network(
-                              'http://192.168.42.60:8080/API/Modis/public/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                              'https://modis.techcreator.my.id/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                               fit: BoxFit.cover,
                               width: constraint.maxWidth,
                               height: constraint.maxWidth,
@@ -509,7 +484,7 @@ class _ChatState extends State<Chat> {
                   Radius.circular(36),
                 ),
                 child: Image.network(
-                  'http://192.168.42.60:8080/API/Modis/public/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                  'https://modis.techcreator.my.id/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                   fit: BoxFit.cover,
                   width: 30,
                   height: 30,
