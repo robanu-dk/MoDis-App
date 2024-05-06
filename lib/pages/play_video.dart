@@ -75,6 +75,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   @override
+  void dispose() {
+    videoPlayerController.dispose();
+    chewieController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ModisAppBar(
@@ -136,12 +143,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         ),
                       ),
                     ),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.only(
-                          left: 8.0, right: 8.0, top: 10.0),
-                      child: Text(widget.dataVideo['description']),
-                    )
+                    widget.dataVideo['description'] != null
+                        ? Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: const EdgeInsets.only(
+                                left: 8.0, right: 8.0, top: 10.0),
+                            child: Text(widget.dataVideo['description']),
+                          )
+                        : Container(),
                   ],
                 )
               : Column(

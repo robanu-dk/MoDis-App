@@ -36,6 +36,16 @@ class _CreateVideoState extends State<CreateVideo> {
     }
   }
 
+  @override
+  void dispose() {
+    if (chewieController != null &&
+        chewieController!.videoPlayerController.value.isInitialized) {
+      videoPlayerController.dispose();
+      chewieController?.dispose();
+    }
+    super.dispose();
+  }
+
   void snackbarMessenger(BuildContext context, double leftPadding,
       Color backgroundColor, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -283,7 +293,12 @@ class _CreateVideoState extends State<CreateVideo> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Image.file(thumbnail!),
+                      Image.file(
+                        thumbnail!,
+                        height: MediaQuery.of(context).size.width,
+                        width: MediaQuery.of(context).size.width,
+                        fit: BoxFit.cover,
+                      ),
                     ],
                   ),
                 )
@@ -354,7 +369,8 @@ class _CreateVideoState extends State<CreateVideo> {
                                   .videoPlayerController.value.isInitialized
                           ? SizedBox(
                               width: MediaQuery.of(context).size.width,
-                              height: 235,
+                              height:
+                                  MediaQuery.of(context).size.width * 9 / 16,
                               child: Chewie(controller: chewieController!),
                             )
                           : const Row(

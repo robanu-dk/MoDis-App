@@ -421,7 +421,6 @@ class _VideoState extends State<Video> {
                                 margin: const EdgeInsets.only(
                                   top: 8.0,
                                   bottom: 8.0,
-                                  left: 20.0,
                                 ),
                                 onPressed: () {
                                   Navigator.pop(context);
@@ -589,7 +588,7 @@ class _VideoState extends State<Video> {
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                                fontSize: 14,
                               ),
                             ),
                           ),

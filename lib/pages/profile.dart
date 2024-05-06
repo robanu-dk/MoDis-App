@@ -98,7 +98,6 @@ class _ProfileState extends State<Profile> {
                               user.getUserProfileImage() != ''
                                   ? Image.network(
                                       'https://modis.techcreator.my.id/${user.getUserProfileImage()}',
-                                      alignment: Alignment.topCenter,
                                       fit: BoxFit.cover,
                                       filterQuality: FilterQuality.high,
                                     )

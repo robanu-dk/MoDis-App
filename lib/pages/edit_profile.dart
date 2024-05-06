@@ -194,6 +194,7 @@ class _EditProfileState extends State<EditProfile> {
                                   height: 100,
                                   width: MediaQuery.of(context).size.width,
                                   child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       CircleButtonModis(
                                         onPressed: () {
@@ -214,8 +215,7 @@ class _EditProfileState extends State<EditProfile> {
                                           Color.fromARGB(255, 180, 196, 255),
                                           Color.fromARGB(255, 0, 32, 147),
                                         ],
-                                        margin:
-                                            const EdgeInsets.only(left: 25.0),
+                                        margin: EdgeInsets.zero,
                                       ),
                                       CircleButtonModis(
                                         onPressed: () {
@@ -236,8 +236,7 @@ class _EditProfileState extends State<EditProfile> {
                                           Color.fromARGB(255, 200, 169, 255),
                                           Color.fromARGB(255, 82, 34, 165),
                                         ],
-                                        margin:
-                                            const EdgeInsets.only(left: 30.0),
+                                        margin: EdgeInsets.zero,
                                       ),
                                       CircleButtonModis(
                                         onPressed: () {
@@ -253,8 +252,7 @@ class _EditProfileState extends State<EditProfile> {
                                           Color.fromARGB(255, 250, 148, 146),
                                           Color.fromARGB(255, 183, 28, 28),
                                         ],
-                                        margin:
-                                            const EdgeInsets.only(left: 30.0),
+                                        margin: EdgeInsets.zero,
                                       ),
                                     ],
                                   ),

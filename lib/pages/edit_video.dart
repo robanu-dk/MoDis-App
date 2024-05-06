@@ -32,11 +32,21 @@ class _EditVideoState extends State<EditVideo> {
   void initState() {
     super.initState();
     title.text = widget.videoOldData['title'];
-    description.text = widget.videoOldData['description'];
+    description.text = widget.videoOldData['description'] ?? '';
     setState(() {
       category = int.parse(widget.videoOldData['id_video_category'].toString());
     });
     loadVideo();
+  }
+
+  @override
+  void dispose() {
+    if (chewieController != null &&
+        chewieController!.videoPlayerController.value.isInitialized) {
+      videoPlayerController.dispose();
+      chewieController?.dispose();
+    }
+    super.dispose();
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
