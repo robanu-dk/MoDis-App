@@ -596,6 +596,7 @@ class _VideoState extends State<Video> {
                             element['name'],
                             style: const TextStyle(
                               color: Colors.black,
+                              fontSize: 12,
                             ),
                           ),
                         ],
