@@ -14,11 +14,11 @@ import 'package:provider/provider.dart';
 class WeightTracker extends StatefulWidget {
   const WeightTracker({
     super.key,
-    this.userEmail,
+    required this.userEmail,
     required this.isGuide,
   });
 
-  final String? userEmail;
+  final String userEmail;
   final bool isGuide;
 
   @override
@@ -48,6 +48,15 @@ class _WeightTrackerState extends State<WeightTracker> {
     '11': 'November',
     '12': 'Desember',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isGuide) {
+      Provider.of<Weight>(context, listen: false)
+          .getUserWeight(widget.userEmail, false);
+    }
+  }
 
   String dateToString(datetime) {
     dynamic date = datetime.toString().split(' ')[0].split('-');
@@ -327,50 +336,58 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     getTooltipColor: (touchedSpot) =>
                                         Colors.white,
                                     getTooltipItems: (touchedSpots) {
-                                      return touchedSpots
-                                          .map((LineBarSpot touchedSpot) {
-                                        final textStyle = TextStyle(
-                                          color: touchedSpot
-                                                  .bar.gradient?.colors.first ??
-                                              touchedSpot.bar.color ??
-                                              Colors.blueGrey,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        );
+                                      return touchedSpots.isNotEmpty
+                                          ? touchedSpots
+                                              .map((LineBarSpot touchedSpot) {
+                                              final textStyle = TextStyle(
+                                                color: touchedSpot.bar.gradient
+                                                        ?.colors.first ??
+                                                    touchedSpot.bar.color ??
+                                                    Colors.blueGrey,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              );
 
-                                        String date =
-                                            '${weight.filter(weight.listWeightUser, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
-                                        date = dateToString(date);
-                                        String label = '${touchedSpot.y} kg';
+                                              String date =
+                                                  '${weight.filter(weight.listWeightUser, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
+                                              date = dateToString(date);
+                                              String label =
+                                                  '${touchedSpot.y} kg';
 
-                                        return LineTooltipItem(
-                                          '$date\n$label',
-                                          textStyle,
-                                        );
-                                      }).toList();
+                                              return LineTooltipItem(
+                                                '$date\n$label',
+                                                textStyle,
+                                              );
+                                            }).toList()
+                                          : [];
                                     },
                                   ),
                                 ),
                                 lineBarsData: [
                                   LineChartBarData(
-                                    spots: weight
-                                        .filter(weight.listWeightUser, filter)
-                                        .map<FlSpot>(
-                                      (element) {
-                                        var index = weight
+                                    spots: weight.filter(weight.listWeightUser,
+                                                filter) !=
+                                            null
+                                        ? weight
                                             .filter(
                                                 weight.listWeightUser, filter)
-                                            .reversed
-                                            .toList()
-                                            .indexOf(element);
-                                        return FlSpot(
-                                          double.parse(index.toString()),
-                                          double.parse(
-                                            element['weight'].toString(),
-                                          ),
-                                        );
-                                      },
-                                    ).toList(),
+                                            .map<FlSpot>(
+                                            (element) {
+                                              var index = weight
+                                                  .filter(weight.listWeightUser,
+                                                      filter)
+                                                  .reversed
+                                                  .toList()
+                                                  .indexOf(element);
+                                              return FlSpot(
+                                                double.parse(index.toString()),
+                                                double.parse(
+                                                  element['weight'].toString(),
+                                                ),
+                                              );
+                                            },
+                                          ).toList()
+                                        : [],
                                     isCurved: true,
                                     color: Colors.blue,
                                     barWidth: 4,
@@ -378,13 +395,18 @@ class _WeightTrackerState extends State<WeightTracker> {
                                   ),
                                 ],
                                 minX: 0,
-                                maxX: double.parse(
-                                  weight
-                                      .filter(weight.listWeightUser, filter)
-                                      .length
-                                      .toString(),
-                                ),
-                                minY: 0,
+                                maxX: weight.filter(
+                                            weight.listWeightUser, filter) !=
+                                        null
+                                    ? double.parse(
+                                        weight
+                                            .filter(
+                                                weight.listWeightUser, filter)
+                                            .length
+                                            .toString(),
+                                      )
+                                    : 0,
+                                minY: 1,
                                 maxY: 120,
                                 titlesData: FlTitlesData(
                                   show: true,
@@ -403,11 +425,16 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       showTitles: true,
                                       reservedSize: 75,
                                       getTitlesWidget: (value, titleMeta) {
-                                        dynamic data = weight
-                                            .filter(
-                                                weight.listWeightUser, filter)
-                                            .reversed
-                                            .toList();
+                                        dynamic data = weight.filter(
+                                                    weight.listWeightUser,
+                                                    filter) !=
+                                                null
+                                            ? weight
+                                                .filter(weight.listWeightUser,
+                                                    filter)
+                                                .reversed
+                                                .toList()
+                                            : [];
                                         if (value < data.length &&
                                             value % 1 == 0) {
                                           String date =
@@ -455,437 +482,477 @@ class _WeightTrackerState extends State<WeightTracker> {
             padding: const EdgeInsets.only(bottom: 80.0),
             child: Consumer<Weight>(
               builder: (context, weight, child) => Column(
-                children:
-                    weight.filter(weight.listWeightUser, filter).map<Widget>(
-                  (element) {
-                    return TileButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        showDialog(
-                          context: context,
-                          builder: (context) => Dialog(
-                            surfaceTintColor: Colors.white,
-                            alignment: Alignment.bottomCenter,
-                            child: SizedBox(
-                              height: 120,
-                              child: Row(
-                                children: [
-                                  CircleButtonModis(
-                                    icon: Icons.edit,
-                                    label: 'Ubah',
-                                    colors: const [
-                                      Color.fromARGB(255, 162, 111, 0),
-                                      Color.fromARGB(255, 255, 202, 87),
-                                    ],
-                                    margin: const EdgeInsets.only(
-                                      top: 8.0,
-                                      bottom: 8.0,
-                                      left: 20.0,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      updateBB.text =
-                                          element['weight'].toString();
-                                      List<String> date =
-                                          element['date'].toString().split('-');
-                                      setState(() {
-                                        updateDate = DateTime(
-                                          int.parse(date[0]),
-                                          int.parse(date[1]),
-                                          int.parse(date[2]),
-                                        );
-                                      });
-                                      updateDateToString.text =
-                                          dateToString(updateDate);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertInput(
-                                          header: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const SizedBox(
-                                                width: 160,
-                                                child: Text(
-                                                  'Perbarui Data Berat Badan',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                icon: const Icon(
-                                                    Ionicons.md_close),
-                                              )
-                                            ],
+                children: weight.filter(weight.listWeightUser, filter) != null
+                    ? weight.filter(weight.listWeightUser, filter).map<Widget>(
+                        (element) {
+                          return TileButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context)
+                                  .removeCurrentSnackBar();
+                              showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                  surfaceTintColor: Colors.white,
+                                  alignment: Alignment.bottomCenter,
+                                  child: SizedBox(
+                                    height: 120,
+                                    child: Row(
+                                      children: [
+                                        CircleButtonModis(
+                                          icon: Icons.edit,
+                                          label: 'Ubah',
+                                          colors: const [
+                                            Color.fromARGB(255, 162, 111, 0),
+                                            Color.fromARGB(255, 255, 202, 87),
+                                          ],
+                                          margin: const EdgeInsets.only(
+                                            top: 8.0,
+                                            bottom: 8.0,
+                                            left: 20.0,
                                           ),
-                                          headerPadding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          contents: [
-                                            Input(
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              border:
-                                                  const OutlineInputBorder(),
-                                              textController: updateBB,
-                                              focusNode: fUpdateBB,
-                                              label: 'Berat Badan',
-                                              suffixIcon: const SizedBox(
-                                                width: 10,
-                                                child: Center(
-                                                  child: Text(
-                                                    'Kg',
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 12.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  SizedBox(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.45,
-                                                    child: TextField(
-                                                      onTap: () {
-                                                        fUpdateBB.unfocus();
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context) =>
-                                                              StatefulBuilder(
-                                                            builder: (context,
-                                                                    setState) =>
-                                                                showCalendarPicker(
-                                                                    context,
-                                                                    updateDate,
-                                                                    (date) {
-                                                              Navigator.pop(
-                                                                  context);
-                                                              setState(() {
-                                                                updateDate =
-                                                                    date;
-                                                              });
-                                                              updateDateToString
-                                                                      .text =
-                                                                  dateToString(
-                                                                      updateDate);
-                                                            }),
-                                                          ),
-                                                        );
-                                                      },
-                                                      readOnly: true,
-                                                      controller:
-                                                          updateDateToString,
-                                                      decoration:
-                                                          const InputDecoration(
-                                                        label: Text('Tanggal'),
-                                                        labelStyle: TextStyle(
-                                                          color: Color.fromRGBO(
-                                                              120, 120, 120, 1),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            updateBB.text =
+                                                element['weight'].toString();
+                                            List<String> date = element['date']
+                                                .toString()
+                                                .split('-');
+                                            setState(() {
+                                              updateDate = DateTime(
+                                                int.parse(date[0]),
+                                                int.parse(date[1]),
+                                                int.parse(date[2]),
+                                              );
+                                            });
+                                            updateDateToString.text =
+                                                dateToString(updateDate);
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertInput(
+                                                header: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    const SizedBox(
+                                                      width: 160,
+                                                      child: Text(
+                                                        'Perbarui Data Berat Badan',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                         ),
-                                                        border:
-                                                            OutlineInputBorder(),
-                                                        contentPadding:
-                                                            EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        8.0),
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      icon: const Icon(
+                                                          Ionicons.md_close),
+                                                    )
+                                                  ],
+                                                ),
+                                                headerPadding:
+                                                    const EdgeInsets.only(
+                                                        left: 8.0),
+                                                contents: [
+                                                  Input(
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    border:
+                                                        const OutlineInputBorder(),
+                                                    textController: updateBB,
+                                                    focusNode: fUpdateBB,
+                                                    label: 'Berat Badan',
+                                                    suffixIcon: const SizedBox(
+                                                      width: 10,
+                                                      child: Center(
+                                                        child: Text(
+                                                          'Kg',
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                  IconButton(
-                                                    iconSize: 30,
-                                                    style: const ButtonStyle(
-                                                        padding:
-                                                            MaterialStatePropertyAll(
-                                                                EdgeInsets
-                                                                    .zero)),
-                                                    onPressed: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (context) =>
-                                                            StatefulBuilder(
-                                                          builder: (context,
-                                                                  setState) =>
-                                                              showCalendarPicker(
-                                                                  context,
-                                                                  updateDate,
-                                                                  (date) {
-                                                            Navigator.pop(
-                                                                context);
-                                                            setState(() {
-                                                              updateDate = date;
-                                                            });
-                                                            updateDateToString
-                                                                    .text =
-                                                                dateToString(
-                                                                    updateDate);
-                                                          }),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 12.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.45,
+                                                          child: TextField(
+                                                            onTap: () {
+                                                              fUpdateBB
+                                                                  .unfocus();
+                                                              showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (context) =>
+                                                                        StatefulBuilder(
+                                                                  builder: (context,
+                                                                          setState) =>
+                                                                      showCalendarPicker(
+                                                                          context,
+                                                                          updateDate,
+                                                                          (date) {
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                    setState(
+                                                                        () {
+                                                                      updateDate =
+                                                                          date;
+                                                                    });
+                                                                    updateDateToString
+                                                                            .text =
+                                                                        dateToString(
+                                                                            updateDate);
+                                                                  }),
+                                                                ),
+                                                              );
+                                                            },
+                                                            readOnly: true,
+                                                            controller:
+                                                                updateDateToString,
+                                                            decoration:
+                                                                const InputDecoration(
+                                                              label: Text(
+                                                                  'Tanggal'),
+                                                              labelStyle:
+                                                                  TextStyle(
+                                                                color: Color
+                                                                    .fromRGBO(
+                                                                        120,
+                                                                        120,
+                                                                        120,
+                                                                        1),
+                                                              ),
+                                                              border:
+                                                                  OutlineInputBorder(),
+                                                              contentPadding:
+                                                                  EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          8.0),
+                                                            ),
+                                                          ),
                                                         ),
-                                                      );
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons
-                                                          .calendar_month_outlined,
-                                                      size: 30,
+                                                        IconButton(
+                                                          iconSize: 30,
+                                                          style: const ButtonStyle(
+                                                              padding:
+                                                                  MaterialStatePropertyAll(
+                                                                      EdgeInsets
+                                                                          .zero)),
+                                                          onPressed: () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (context) =>
+                                                                  StatefulBuilder(
+                                                                builder: (context,
+                                                                        setState) =>
+                                                                    showCalendarPicker(
+                                                                        context,
+                                                                        updateDate,
+                                                                        (date) {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  setState(() {
+                                                                    updateDate =
+                                                                        date;
+                                                                  });
+                                                                  updateDateToString
+                                                                          .text =
+                                                                      dateToString(
+                                                                          updateDate);
+                                                                }),
+                                                              ),
+                                                            );
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons
+                                                                .calendar_month_outlined,
+                                                            size: 30,
+                                                          ),
+                                                        )
+                                                      ],
                                                     ),
                                                   )
                                                 ],
-                                              ),
-                                            )
-                                          ],
-                                          contentAligment: 'vertical',
-                                          contentPadding:
-                                              const EdgeInsets.all(8),
-                                          actionAligment: 'horizontal',
-                                          actions: [
-                                            FilledButton(
-                                              style: const ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStatePropertyAll(
-                                                  Color.fromRGBO(
-                                                      248, 198, 48, 1),
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text(
-                                                'Batal',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            FilledButton(
-                                              style: const ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStatePropertyAll(
-                                                  Color.fromRGBO(
-                                                      1, 98, 104, 1.0),
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                ScaffoldMessenger.of(context)
-                                                    .removeCurrentSnackBar();
-                                                if (updateBB.text != '') {
-                                                  loadingIndicator(context);
-                                                  Provider.of<Weight>(context,
-                                                          listen: false)
-                                                      .updateWeight(
-                                                    element['id'].toString(),
-                                                    widget.userEmail,
-                                                    updateBB.text,
-                                                    updateDate
-                                                        .toString()
-                                                        .split(' ')[0],
-                                                    widget.isGuide,
-                                                  )
-                                                      .then((response) {
-                                                    Navigator.pop(context);
-                                                    Navigator.pop(context);
-                                                    if (response['status'] ==
-                                                        'success') {
-                                                      snackbarMessenger(
-                                                        context,
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.5,
-                                                        const Color.fromARGB(
-                                                            255, 0, 120, 18),
-                                                        'berhasil memperbarui berat badan',
-                                                      );
-                                                    } else {
-                                                      snackbarMessenger(
-                                                        context,
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.5,
-                                                        Colors.red,
-                                                        response['message'],
-                                                      );
-                                                    }
-                                                  }).catchError((error) {
-                                                    snackbarMessenger(
-                                                      context,
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.5,
-                                                      Colors.red,
-                                                      'Gagal terhubung ke server',
-                                                    );
-                                                  });
-                                                } else {
-                                                  snackbarMessenger(
-                                                    context,
-                                                    MediaQuery.of(context)
-                                                            .size
-                                                            .width *
-                                                        0.5,
-                                                    Colors.red,
-                                                    'terdapat data yang kosong',
-                                                  );
-                                                }
-                                              },
-                                              child: const Text(
-                                                'Perbarui',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                          actionPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 8.0,
-                                                  vertical: 12.0),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  CircleButtonModis(
-                                    icon: Icons.delete,
-                                    label: 'Hapus',
-                                    colors: const [
-                                      Color.fromARGB(255, 136, 9, 0),
-                                      Color.fromARGB(255, 255, 123, 114),
-                                    ],
-                                    margin: const EdgeInsets.only(
-                                      top: 8.0,
-                                      bottom: 8.0,
-                                      left: 20.0,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) =>
-                                            AlertDialog.adaptive(
-                                          backgroundColor: Colors.white,
-                                          surfaceTintColor: Colors.white,
-                                          title: const Text('Peringatan!!!'),
-                                          contentPadding: const EdgeInsets.only(
-                                              left: 25.0,
-                                              top: 10.0,
-                                              bottom: 10.0,
-                                              right: 20.0),
-                                          actionsPadding: const EdgeInsets.only(
-                                            bottom: 20.0,
-                                            top: 10.0,
-                                          ),
-                                          content: const Text(
-                                            'Apakah yakin menghapus data berat badan?',
-                                          ),
-                                          actionsAlignment:
-                                              MainAxisAlignment.center,
-                                          actions: [
-                                            FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        248, 198, 48, 1),
+                                                contentAligment: 'vertical',
+                                                contentPadding:
+                                                    const EdgeInsets.all(8),
+                                                actionAligment: 'horizontal',
+                                                actions: [
+                                                  FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            248, 198, 48, 1),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      'Batal',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
                                                   ),
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text('Batal')),
-                                            FilledButton(
-                                              style: const ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStatePropertyAll(
-                                                  Colors.red,
-                                                ),
+                                                  FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            1, 98, 104, 1.0),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .removeCurrentSnackBar();
+                                                      if (updateBB.text != '') {
+                                                        loadingIndicator(
+                                                            context);
+                                                        Provider.of<Weight>(
+                                                                context,
+                                                                listen: false)
+                                                            .updateWeight(
+                                                          element['id']
+                                                              .toString(),
+                                                          widget.userEmail,
+                                                          updateBB.text,
+                                                          updateDate
+                                                              .toString()
+                                                              .split(' ')[0],
+                                                          widget.isGuide,
+                                                        )
+                                                            .then((response) {
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+                                                          if (response[
+                                                                  'status'] ==
+                                                              'success') {
+                                                            snackbarMessenger(
+                                                              context,
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.5,
+                                                              const Color
+                                                                  .fromARGB(255,
+                                                                  0, 120, 18),
+                                                              'berhasil memperbarui berat badan',
+                                                            );
+                                                          } else {
+                                                            snackbarMessenger(
+                                                              context,
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.5,
+                                                              Colors.red,
+                                                              response[
+                                                                  'message'],
+                                                            );
+                                                          }
+                                                        }).catchError((error) {
+                                                          snackbarMessenger(
+                                                            context,
+                                                            MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.5,
+                                                            Colors.red,
+                                                            'Gagal terhubung ke server',
+                                                          );
+                                                        });
+                                                      } else {
+                                                        snackbarMessenger(
+                                                          context,
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.5,
+                                                          Colors.red,
+                                                          'terdapat data yang kosong',
+                                                        );
+                                                      }
+                                                    },
+                                                    child: const Text(
+                                                      'Perbarui',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                                actionPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8.0,
+                                                        vertical: 12.0),
                                               ),
-                                              onPressed: () {
-                                                loadingIndicator(context);
-                                                Provider.of<Weight>(context,
-                                                        listen: false)
-                                                    .deleteWeight(
-                                                  weightId:
-                                                      element['id'].toString(),
-                                                  email: widget.userEmail,
-                                                  isGuide: true,
-                                                )
-                                                    .then(
-                                                  (response) {
-                                                    Navigator.pop(context);
-                                                    Navigator.pop(context);
-                                                    snackbarMessenger(
-                                                      context,
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.5,
-                                                      response['status'] ==
-                                                              'success'
-                                                          ? const Color
-                                                              .fromARGB(
-                                                              255, 0, 120, 18)
-                                                          : Colors.red,
-                                                      response['message'],
-                                                    );
-                                                  },
-                                                ).catchError((error) {
-                                                  Navigator.pop(context);
-                                                  Navigator.pop(context);
-                                                  snackbarMessenger(
-                                                    context,
-                                                    MediaQuery.of(context)
-                                                            .size
-                                                            .width *
-                                                        0.5,
-                                                    Colors.red,
-                                                    'Gagal terhubung ke server',
-                                                  );
-                                                });
-                                              },
-                                              child: const Text('Hapus'),
-                                            ),
-                                          ],
+                                            );
+                                          },
                                         ),
-                                      );
-                                    },
+                                        CircleButtonModis(
+                                          icon: Icons.delete,
+                                          label: 'Hapus',
+                                          colors: const [
+                                            Color.fromARGB(255, 136, 9, 0),
+                                            Color.fromARGB(255, 255, 123, 114),
+                                          ],
+                                          margin: const EdgeInsets.only(
+                                            top: 8.0,
+                                            bottom: 8.0,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  AlertDialog.adaptive(
+                                                backgroundColor: Colors.white,
+                                                surfaceTintColor: Colors.white,
+                                                title:
+                                                    const Text('Peringatan!!!'),
+                                                contentPadding:
+                                                    const EdgeInsets.only(
+                                                        left: 25.0,
+                                                        top: 10.0,
+                                                        bottom: 10.0,
+                                                        right: 20.0),
+                                                actionsPadding:
+                                                    const EdgeInsets.only(
+                                                  bottom: 20.0,
+                                                  top: 10.0,
+                                                ),
+                                                content: const Text(
+                                                  'Apakah yakin menghapus data berat badan?',
+                                                ),
+                                                actionsAlignment:
+                                                    MainAxisAlignment.center,
+                                                actions: [
+                                                  FilledButton(
+                                                      style: const ButtonStyle(
+                                                        backgroundColor:
+                                                            MaterialStatePropertyAll(
+                                                          Color.fromRGBO(
+                                                              248, 198, 48, 1),
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child:
+                                                          const Text('Batal')),
+                                                  FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Colors.red,
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      loadingIndicator(context);
+                                                      Provider.of<Weight>(
+                                                              context,
+                                                              listen: false)
+                                                          .deleteWeight(
+                                                        weightId: element['id']
+                                                            .toString(),
+                                                        email: widget.userEmail,
+                                                        isGuide: widget.isGuide,
+                                                      )
+                                                          .then(
+                                                        (response) {
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+                                                          snackbarMessenger(
+                                                            context,
+                                                            MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.5,
+                                                            response['status'] ==
+                                                                    'success'
+                                                                ? const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    0,
+                                                                    120,
+                                                                    18)
+                                                                : Colors.red,
+                                                            response['message'],
+                                                          );
+                                                        },
+                                                      ).catchError((error) {
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                        snackbarMessenger(
+                                                          context,
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.5,
+                                                          Colors.red,
+                                                          'Gagal terhubung ke server',
+                                                        );
+                                                      });
+                                                    },
+                                                    child: const Text('Hapus'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              );
+                            },
+                            height: 60,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  dateToString(element["date"]),
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                                Text(
+                                  '${element["weight"]} kg',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              ],
                             ),
-                          ),
-                        );
-                      },
-                      height: 60,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            dateToString(element["date"]),
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                          Text(
-                            '${element["weight"]} kg',
-                            style: const TextStyle(
-                              color: Colors.black,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                ).toList(),
+                          );
+                        },
+                      ).toList()
+                    : [],
               ),
             ),
           ),
