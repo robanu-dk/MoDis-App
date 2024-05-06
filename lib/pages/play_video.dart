@@ -41,7 +41,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(
-          'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
+          'https://modis.techcreator.my.id/${widget.dataVideo["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
         ),
       );
 

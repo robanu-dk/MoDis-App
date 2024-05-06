@@ -82,7 +82,7 @@ class _EditVideoState extends State<EditVideo> {
           ? VideoPlayerController.file(video!)
           : VideoPlayerController.networkUrl(
               Uri.parse(
-                'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                'https://modis.techcreator.my.id/${widget.videoOldData["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
               ),
             );
 
@@ -291,9 +291,18 @@ class _EditVideoState extends State<EditVideo> {
                   ),
                 ),
                 updateThumbnail
-                    ? Image.file(thumbnail!)
+                    ? Image.file(
+                        thumbnail!,
+                        fit: BoxFit.cover,
+                        height: MediaQuery.of(context).size.width,
+                        width: MediaQuery.of(context).size.width,
+                      )
                     : Image.network(
-                        'https://modis.techcreator.my.id/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
+                        'https://modis.techcreator.my.id/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                        fit: BoxFit.cover,
+                        height: MediaQuery.of(context).size.width,
+                        width: MediaQuery.of(context).size.width,
+                      ),
               ],
             ),
           ),
@@ -361,7 +370,7 @@ class _EditVideoState extends State<EditVideo> {
                             .videoPlayerController.value.isInitialized
                     ? SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: 235,
+                        height: MediaQuery.of(context).size.width * 9 / 16,
                         child: Chewie(controller: chewieController!),
                       )
                     : const Row(
