@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class CircleButtonModis extends StatelessWidget {
   const CircleButtonModis({
@@ -45,7 +43,7 @@ class CircleButtonModis extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 80,
+            width: 70,
             child: Text(
               label,
               textAlign: TextAlign.center,
