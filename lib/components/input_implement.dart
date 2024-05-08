@@ -13,6 +13,7 @@ class Input extends StatelessWidget {
     this.keyboardType = TextInputType.emailAddress,
     this.textInputAction = TextInputAction.next,
     this.maxLines = 1,
+    this.width,
   });
   final TextEditingController textController;
   final bool isPassword;
@@ -22,12 +23,13 @@ class Input extends StatelessWidget {
   final TextInputType keyboardType;
   final TextInputAction textInputAction;
   final int? maxLines;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 20.0),
-      width: MediaQuery.of(context).size.width * 0.8,
+      width: width ?? MediaQuery.of(context).size.width * 0.8,
       child: TextField(
         onTap: () {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
