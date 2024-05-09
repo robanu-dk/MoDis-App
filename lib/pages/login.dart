@@ -340,7 +340,7 @@ class _LoginPageState extends State<LoginPage> {
                                   const Color.fromARGB(255, 0, 120, 18),
                                   'berhasil login',
                                   bottomPadding:
-                                      MediaQuery.of(context).size.height * 0.75,
+                                      MediaQuery.of(context).size.height * 0.65,
                                 );
                                 if (_rememberMe) {
                                   saveLocalData(response['data']);
