@@ -74,7 +74,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TabButton(
-                          listAccount: _listAccount,
+                          isActive: _listAccount,
                           onPressed: () {
                             setState(() {
                               _listAccount = true;
@@ -84,7 +84,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
                           label: 'Daftar Akun',
                         ),
                         TabButton(
-                          listAccount: !_listAccount,
+                          isActive: !_listAccount,
                           onPressed: () {
                             setState(() {
                               _listAccount = false;
@@ -116,7 +116,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TabButton(
-                          listAccount: _listAccount,
+                          isActive: _listAccount,
                           onPressed: () {
                             setState(() {
                               _listAccount = true;
@@ -126,7 +126,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
                           label: 'Daftar Akun',
                         ),
                         TabButton(
-                          listAccount: !_listAccount,
+                          isActive: !_listAccount,
                           onPressed: () {
                             setState(() {
                               _listAccount = false;

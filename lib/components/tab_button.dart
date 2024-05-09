@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 class TabButton extends StatelessWidget {
   const TabButton({
     super.key,
-    required this.listAccount,
+    required this.isActive,
     required this.onPressed,
     required this.label,
   });
 
-  final bool listAccount;
+  final bool isActive;
   final VoidCallback onPressed;
   final String label;
 
@@ -17,7 +17,7 @@ class TabButton extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.4,
       height: 50.0,
-      child: listAccount
+      child: isActive
           ? FilledButton(
               onPressed: onPressed,
               style: const ButtonStyle(

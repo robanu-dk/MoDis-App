@@ -147,7 +147,7 @@ class _VideoState extends State<Video> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TabButton(
-                          listAccount: _allVideo,
+                          isActive: _allVideo,
                           onPressed: () {
                             setState(() {
                               _allVideo = true;
@@ -166,7 +166,7 @@ class _VideoState extends State<Video> {
                           label: 'Semua Video',
                         ),
                         TabButton(
-                          listAccount: !_allVideo,
+                          isActive: !_allVideo,
                           onPressed: () {
                             setState(() {
                               _allVideo = false;

@@ -83,7 +83,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TabButton(
-                    listAccount: isBMICalculate,
+                    isActive: isBMICalculate,
                     onPressed: () {
                       ScaffoldMessenger.of(context).removeCurrentSnackBar();
                       ftb.unfocus();
@@ -101,7 +101,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                     label: 'BMI',
                   ),
                   TabButton(
-                    listAccount: !isBMICalculate,
+                    isActive: !isBMICalculate,
                     onPressed: () {
                       ScaffoldMessenger.of(context).removeCurrentSnackBar();
                       ftb.unfocus();
