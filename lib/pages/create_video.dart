@@ -411,7 +411,7 @@ class _CreateVideoState extends State<CreateVideo> {
                       .then((response) {
                     Navigator.pop(context);
                     if (response['status'] == 'success') {
-                      Navigator.pop(context);
+                      Navigator.pop(context, true);
                       snackbarMessenger(
                         context,
                         MediaQuery.of(context).size.width * 0.4,

@@ -420,7 +420,7 @@ class _EditVideoState extends State<EditVideo> {
                       .then((response) {
                     Navigator.pop(context);
                     if (response['status'] == 'success') {
-                      Navigator.pop(context);
+                      Navigator.pop(context, true);
                       Navigator.pop(context);
                       snackbarMessenger(
                         context,

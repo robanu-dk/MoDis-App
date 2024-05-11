@@ -30,7 +30,7 @@ class _VideoState extends State<Video> {
   final TextEditingController searchController = TextEditingController();
   final FocusNode fSearchController = FocusNode();
   bool _allVideo = true;
-  int limit = 10, start = 0;
+  int limit = 10, start = 0, a = 0;
   dynamic categoryId = '';
 
   @override
@@ -74,12 +74,20 @@ class _VideoState extends State<Video> {
         .getVideoBasedGuide(limit, start, categoryId, keyword)
         .then((response) {
       if (response['status'] == 'error') {
-        snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
-            Colors.red, 'Gagal terhubung ke server', null);
+        snackbarMessenger(
+            context,
+            MediaQuery.of(context).size.width * 0.4,
+            Colors.red,
+            'Gagal terhubung ke server',
+            MediaQuery.of(context).size.height * 0.6);
       }
     }).catchError((error) {
-      snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
-          Colors.red, 'Gagal terhubung ke server', null);
+      snackbarMessenger(
+          context,
+          MediaQuery.of(context).size.width * 0.4,
+          Colors.red,
+          'Gagal terhubung ke server',
+          MediaQuery.of(context).size.height * 0.6);
     });
   }
 
@@ -237,7 +245,17 @@ class _VideoState extends State<Video> {
                         left: 15.0,
                         right: 15.0,
                       ),
-                      child: SearchModis(onSubmitted: (value) {}),
+                      child: SearchModis(
+                        onSubmitted: (value) {
+                          setState(() {
+                            keyword = value;
+                            start = 0;
+                          });
+                          getAllVideo();
+                        },
+                        focusNode: fSearchController,
+                        controller: searchController,
+                      ),
                     ),
                   ],
                 ),
@@ -304,7 +322,14 @@ class _VideoState extends State<Video> {
                       );
                     },
                   ),
-                );
+                ).then((value) {
+                  if (value == true) {
+                    setState(() {
+                      start = 0;
+                    });
+                    getVideoBasedGuide();
+                  }
+                });
               },
             ),
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 2),
@@ -408,7 +433,14 @@ class _VideoState extends State<Video> {
                                         );
                                       },
                                     ),
-                                  );
+                                  ).then((value) {
+                                    if (value == true) {
+                                      setState(() {
+                                        start = 0;
+                                      });
+                                      getVideoBasedGuide();
+                                    }
+                                  });
                                 },
                               ),
                               CircleButtonModis(
@@ -484,6 +516,7 @@ class _VideoState extends State<Video> {
                                                   setState(() {
                                                     start = 0;
                                                   });
+                                                  getVideoBasedGuide();
                                                 }
                                                 snackbarMessenger(
                                                   context,
