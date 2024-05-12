@@ -544,7 +544,7 @@ class _VideoState extends State<Video> {
                                                         .width *
                                                     0.5,
                                                 Colors.red,
-                                                'Gagal terhubung ke server $error',
+                                                'Gagal terhubung ke server',
                                                 MediaQuery.of(context)
                                                         .size
                                                         .height *
