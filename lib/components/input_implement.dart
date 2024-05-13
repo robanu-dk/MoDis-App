@@ -14,6 +14,8 @@ class Input extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.maxLines = 1,
     this.width,
+    this.readonly = false,
+    this.onTap,
   });
   final TextEditingController textController;
   final bool isPassword;
@@ -24,6 +26,8 @@ class Input extends StatelessWidget {
   final TextInputAction textInputAction;
   final int? maxLines;
   final double? width;
+  final bool readonly;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +35,11 @@ class Input extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20.0),
       width: width ?? MediaQuery.of(context).size.width * 0.8,
       child: TextField(
-        onTap: () {
-          ScaffoldMessenger.of(context).removeCurrentSnackBar();
-        },
+        readOnly: readonly,
+        onTap: onTap ??
+            () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            },
         focusNode: focusNode,
         controller: textController,
         decoration: InputDecoration(

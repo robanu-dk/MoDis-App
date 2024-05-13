@@ -11,6 +11,9 @@ class SearchModis extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onSubmitted: onSubmitted,
+      onTap: () {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+      },
       focusNode: focusNode,
       controller: controller,
       textInputAction: TextInputAction.search,
