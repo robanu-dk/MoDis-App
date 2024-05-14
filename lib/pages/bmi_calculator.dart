@@ -29,7 +29,7 @@ class _BMICalculatorState extends State<BMICalculator> {
         margin: EdgeInsets.only(
           left: leftPadding,
           right: 9,
-          bottom: MediaQuery.of(context).size.height * 0.75,
+          bottom: MediaQuery.of(context).size.height * 0.72,
         ),
         behavior: SnackBarBehavior.floating,
         content: Text(
@@ -164,7 +164,10 @@ class _BMICalculatorState extends State<BMICalculator> {
                         children: [
                           OutlinedButtonModis(
                             childrens: const [
-                              Text('Hitung'),
+                              Text(
+                                'Hitung',
+                                style: TextStyle(color: Colors.black),
+                              ),
                             ],
                             onPressed: () {
                               ScaffoldMessenger.of(context)
@@ -280,7 +283,10 @@ class _BMICalculatorState extends State<BMICalculator> {
                             margin: const EdgeInsets.only(left: 10.0),
                             child: OutlinedButtonModis(
                                 childrens: const [
-                                  Text('Ulang'),
+                                  Text(
+                                    'Ulang',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
                                 ],
                                 onPressed: () {
                                   tb.text = '';
@@ -513,7 +519,10 @@ class _BMICalculatorState extends State<BMICalculator> {
                         children: [
                           OutlinedButtonModis(
                             childrens: const [
-                              Text('Hitung'),
+                              Text(
+                                'Hitung',
+                                style: TextStyle(color: Colors.black),
+                              ),
                             ],
                             onPressed: () {
                               ScaffoldMessenger.of(context)
@@ -528,17 +537,17 @@ class _BMICalculatorState extends State<BMICalculator> {
                                   age.text == '') {
                                 snackbarMessenger(
                                   context,
-                                  MediaQuery.of(context).size.width * 0.5,
+                                  MediaQuery.of(context).size.width * 0.38,
                                   Colors.red,
                                   gender == null
                                       ? 'Jenis kelamin harus dipilih'
-                                      : (activity == null
-                                          ? 'Jenis aktivitas harus dipilih'
-                                          : (tb.text == ''
-                                              ? 'Tinggi badan harus diisi'
-                                              : (bb.text == ''
-                                                  ? 'Berat badan harus diisi'
-                                                  : 'Usia harus diisi'))),
+                                      : (tb.text == ''
+                                          ? 'Tinggi badan harus diisi'
+                                          : (bb.text == ''
+                                              ? 'Berat badan harus diisi'
+                                              : (age.text == ''
+                                                  ? 'Usia harus diisi'
+                                                  : 'Jenis aktivitas harus dipilih'))),
                                 );
                               } else if (RegExp(r'[^0-9.]').hasMatch(tb.text) ||
                                   RegExp(r'[^0-9.]').hasMatch(bb.text) ||
@@ -627,7 +636,10 @@ class _BMICalculatorState extends State<BMICalculator> {
                             margin: const EdgeInsets.only(left: 10.0),
                             child: OutlinedButtonModis(
                                 childrens: const [
-                                  Text('Ulang'),
+                                  Text(
+                                    'Ulang',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
                                 ],
                                 onPressed: () {
                                   tb.text = '';
