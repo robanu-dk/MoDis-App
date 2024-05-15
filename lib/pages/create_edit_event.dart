@@ -244,7 +244,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                         )).then((selectedTime) {
                   if (selectedTime != null) {
                     String time =
-                        '${selectedTime.hour.toString().length > 1 ? selectedTime.hour : "0${selectedTime.hour}"}:${selectedTime.minute}';
+                        '${selectedTime.hour.toString().length > 1 ? selectedTime.hour : "0${selectedTime.hour}"}:${selectedTime.minute.toString().length > 1 ? selectedTime.minute : "0${selectedTime.minute}"}';
                     startTime.text = time;
                     setState(() {
                       eventStartTime = time;
@@ -278,7 +278,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                         )).then((selectedTime) {
                   if (selectedTime != null) {
                     String time =
-                        '${selectedTime.hour.toString().length > 1 ? selectedTime.hour : "0${selectedTime.hour}"}:${selectedTime.minute}';
+                        '${selectedTime.hour.toString().length > 1 ? selectedTime.hour : "0${selectedTime.hour}"}:${selectedTime.minute.toString().length > 1 ? selectedTime.minute : "0${selectedTime.minute}"}';
                     endTime.text = time;
                     setState(() {
                       eventEndTime = time;
