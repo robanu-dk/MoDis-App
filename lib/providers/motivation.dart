@@ -161,10 +161,6 @@ class MotivationVideo extends ChangeNotifier {
       var response = await http.Response.fromStream(post);
 
       var responseBody = jsonDecode(response.body);
-      if (responseBody['status'] == 'success') {
-        listVideo = responseBody['data'];
-        notifyListeners();
-      }
 
       return responseBody;
     } catch (error) {
@@ -210,10 +206,6 @@ class MotivationVideo extends ChangeNotifier {
       var response = await http.Response.fromStream(update);
 
       var responseBody = jsonDecode(response.body);
-      if (responseBody['status'] == 'success') {
-        listVideo = responseBody['data'];
-        notifyListeners();
-      }
 
       return responseBody;
     } catch (error) {
@@ -241,9 +233,6 @@ class MotivationVideo extends ChangeNotifier {
       );
 
       var response = jsonDecode(deleteVideo.body);
-      if (response['status'] == 'success') {
-        getVideoBasedGuide(limit, start, categoryId ?? '', search);
-      }
 
       return response;
     } catch (error) {

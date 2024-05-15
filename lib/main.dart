@@ -3,6 +3,7 @@ import 'package:modis/pages/splash_screen.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/chats.dart';
 import 'package:modis/providers/child.dart';
+import 'package:modis/providers/events.dart';
 import 'package:modis/providers/motivation.dart';
 import 'package:modis/providers/user.dart';
 import 'package:modis/providers/weight.dart';
@@ -47,6 +48,11 @@ class MoDis extends StatelessWidget {
           create: (context) => Chats(),
           update: (context, user, chat) =>
               chat!..updateEmailToken(user.userEmail, user.userToken),
+        ),
+        ChangeNotifierProxyProvider<User, EventsForDilans>(
+          create: (_) => EventsForDilans(),
+          update: (context, user, event) =>
+              event!..setUserEmailToken(user.userEmail, user.userToken),
         ),
       ],
       child: MaterialApp(
