@@ -27,9 +27,9 @@ class _CreateEditEventState extends State<CreateEditEvent> {
       location = TextEditingController(),
       coordinateLocation = TextEditingController();
   List<dynamic> eventType = [
-    {'index': '0', 'type': 'Offline'},
-    {'index': '1', 'type': 'Online'},
-    {'index': '2', 'type': 'Hybrid'}
+    {'index': 0, 'type': 'Offline'},
+    {'index': 1, 'type': 'Online'},
+    {'index': 2, 'type': 'Hybrid'}
   ];
   String? eventDate, eventStartTime, eventEndTime;
   final FocusNode fEventName = FocusNode(),
@@ -54,14 +54,45 @@ class _CreateEditEventState extends State<CreateEditEvent> {
     '11': 'November',
     '12': 'Desember',
   };
-  bool needLocation = false;
+  bool needLocation = false, hasPoster = false;
   final ImagePicker picker = ImagePicker();
   File? eventPoster;
 
   @override
   void initState() {
     super.initState();
-    if (widget.data != null) {}
+    if (widget.data != null) {
+      dynamic typeData = eventType.where((type) {
+        if (type['type'] == widget.data['type']) {
+          return true;
+        } else {
+          return false;
+        }
+      }).toList();
+
+      setState(() {
+        eventDate = widget.data['date'];
+        eventStartTime =
+            '${widget.data["start_time"].toString().split(":")[0]}:${widget.data["start_time"].toString().split(":")[1]}';
+        eventEndTime =
+            '${widget.data["end_time"].toString().split(":")[0]}:${widget.data["end_time"].toString().split(":")[1]}';
+        eventIndex = typeData[0]['index'];
+        if (typeData[0]['type'] != 'Online') {
+          needLocation = true;
+        }
+        if (widget.data['poster'] != null) {
+          hasPoster = true;
+        }
+      });
+
+      eventName.text = widget.data['name'];
+      date.text = convertDateToString(widget.data['date']);
+      startTime.text = eventStartTime!;
+      endTime.text = eventEndTime!;
+      contactPerson.text = widget.data['contact_person'];
+      location.text = widget.data['location'] ?? '';
+      coordinateLocation.text = widget.data['coordinate_location'] ?? '';
+    }
   }
 
   convertDateToString(String date) {
@@ -332,7 +363,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
               items: eventType
                   .map<DropdownMenuItem<int>>(
                     (type) => DropdownMenuItem<int>(
-                      value: int.parse(type['index']),
+                      value: type['index'],
                       child: Row(
                         children: [
                           const Padding(
@@ -424,6 +455,9 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                     });
                   }
                 });
+                setState(() {
+                  hasPoster = false;
+                });
               }),
           eventPoster != null
               ? Container(
@@ -442,6 +476,28 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                         ),
                       ),
                       Image.file(eventPoster!),
+                    ],
+                  ),
+                )
+              : Container(),
+          hasPoster
+              ? Container(
+                  margin: EdgeInsets.only(
+                    top: 6.0,
+                    left: MediaQuery.of(context).size.width * 0.05,
+                    right: MediaQuery.of(context).size.width * 0.05,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Preview:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Image.network(
+                          'https://modis.techcreator.my.id/${widget.data["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
                     ],
                   ),
                 )
@@ -515,7 +571,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                           context,
                           MediaQuery.of(context).size.width * 0.35,
                           const Color.fromARGB(255, 0, 120, 18),
-                          'berhasil mengunggah video',
+                          'berhasil menyimpan event',
                           MediaQuery.of(context).size.height * 0.6,
                         );
                       } else {
@@ -523,7 +579,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                           context,
                           MediaQuery.of(context).size.width * 0.35,
                           Colors.red,
-                          'gagal terhubung ke server',
+                          response['message'],
                           MediaQuery.of(context).size.height * 0.72,
                         );
                       }
@@ -539,12 +595,53 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                     });
                   } else {
                     Provider.of<EventsForDilans>(context, listen: false)
-                        .updateEvent();
+                        .updateEvent(
+                      eventName.text,
+                      widget.data['id'],
+                      eventPoster,
+                      eventType[eventIndex!]['type'],
+                      eventDate!,
+                      eventStartTime!,
+                      eventEndTime!,
+                      contactPerson.text,
+                      location.text,
+                      coordinateLocation.text,
+                    )
+                        .then((response) {
+                      Navigator.pop(context);
+                      if (response['status'] == 'success') {
+                        Navigator.pop(context, true);
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          const Color.fromARGB(255, 0, 120, 18),
+                          'berhasil memperbarui event',
+                          MediaQuery.of(context).size.height * 0.6,
+                        );
+                      } else {
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          Colors.red,
+                          response['message'],
+                          MediaQuery.of(context).size.height * 0.72,
+                        );
+                      }
+                    }).catchError((error) {
+                      Navigator.pop(context, true);
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.35,
+                        Colors.red,
+                        'gagal terhubung ke server',
+                        MediaQuery.of(context).size.height * 0.72,
+                      );
+                    });
                   }
                 }
               },
-              child: const Text(
-                'Simpan',
+              child: Text(
+                widget.data == null ? 'Simpan' : 'Perbarui',
               ),
             ),
           ),
