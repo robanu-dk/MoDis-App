@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
@@ -9,6 +10,7 @@ import 'package:modis/pages/create_edit_event.dart';
 import 'package:modis/providers/events.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DilansEvents extends StatefulWidget {
   const DilansEvents({super.key});
@@ -272,7 +274,9 @@ class _DilansEventsState extends State<DilansEvents> {
                                     onPressed: () {
                                       ScaffoldMessenger.of(context)
                                           .removeCurrentSnackBar();
-                                      if (isManageEvent) {
+                                      if (isManageEvent &&
+                                          DateTime.parse(event['date'])
+                                              .isAfter(DateTime.now())) {
                                         showDialog(
                                           context: context,
                                           builder: (context) => Dialog(
@@ -512,8 +516,189 @@ class _DilansEventsState extends State<DilansEvents> {
                                         showDialog(
                                           context: context,
                                           builder: (cpntext) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            surfaceTintColor: Colors.white,
+                                            title: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                const Text(
+                                                  'Informasi Event',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  icon: const Icon(
+                                                      Ionicons.md_close),
+                                                )
+                                              ],
+                                            ),
                                             scrollable: true,
-                                            content: Column(),
+                                            content: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                event['poster'] != null
+                                                    ? InkWell(
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (context) =>
+                                                                    Dialog(
+                                                              backgroundColor:
+                                                                  Colors
+                                                                      .transparent,
+                                                              child:
+                                                                  FractionallySizedBox(
+                                                                widthFactor:
+                                                                    1.25,
+                                                                heightFactor:
+                                                                    2.0,
+                                                                child: InkWell(
+                                                                  onTap: () {
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  },
+                                                                  child:
+                                                                      InteractiveViewer(
+                                                                    minScale:
+                                                                        0.5,
+                                                                    maxScale:
+                                                                        4.0,
+                                                                    child: Image
+                                                                        .network(
+                                                                      'https://modis.techcreator.my.id/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Image.network(
+                                                          'https://modis.techcreator.my.id/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                        ),
+                                                      )
+                                                    : Container(),
+                                                Text(event['name']),
+                                                Text(
+                                                    'Tanggal: ${convertDateToString(event["date"])}'),
+                                                Text(
+                                                  'Waktu: ${event["start_time"].toString().split(":")[0]}:${event["start_time"].toString().split(":")[1]} - ${event["end_time"].toString().split(":")[0]}:${event["end_time"].toString().split(":")[1]}',
+                                                ),
+                                                Text(
+                                                    'Jenis Event: ${event["type"]}'),
+                                                event['type'] != 'Online'
+                                                    ? Text(
+                                                        'Lokasi: ${event["location"]}')
+                                                    : Container(),
+                                                event['type'] != 'Online'
+                                                    ? FilledButton(
+                                                        onPressed: () async {
+                                                          Uri url = Uri.parse(
+                                                            event[
+                                                                'coordinate_location'],
+                                                          );
+
+                                                          if (await canLaunchUrl(
+                                                              url)) {
+                                                            await launchUrl(
+                                                                url);
+                                                          } else {
+                                                            Navigator.pop(
+                                                                context);
+                                                            snackbarMessenger(
+                                                              context,
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.5,
+                                                              Colors.red,
+                                                              'Tidak bisa mengakses lokasi',
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  0.6,
+                                                            );
+                                                          }
+                                                        },
+                                                        style: ButtonStyle(
+                                                          shape:
+                                                              MaterialStatePropertyAll(
+                                                            RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8.0),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: const Text(
+                                                          'Lihat Lokasi',
+                                                        ),
+                                                      )
+                                                    : Container(),
+                                              ],
+                                            ),
+                                            actions: [
+                                              FilledButton(
+                                                onPressed: () async {
+                                                  if (event['contact_person']
+                                                          .toString()
+                                                          .length >
+                                                      9) {
+                                                    String phone = event[
+                                                                        'contact_person']
+                                                                    .toString()[
+                                                                0] ==
+                                                            '0'
+                                                        ? event['contact_person']
+                                                            .toString()
+                                                            .replaceFirst(
+                                                                '0', '62')
+                                                        : (event['contact_person']
+                                                                        .toString()[
+                                                                    0] ==
+                                                                '8'
+                                                            ? '62${event["contact_person"]}'
+                                                            : event[
+                                                                'contact_person']);
+                                                    String templateChat =
+                                                        'Selamat ${DateTime.now().hour < 12 ? "pagi" : (DateTime.now().hour < 18 ? "Siang" : "Malam")},%0ASaya hendak mengikuti kegiatan "${event["name"]}", berikut adalah data diri saya,%0ANama Lengkap:%0A';
+                                                    Uri url = Uri.parse(
+                                                      'https://api.whatsapp.com/send/?phone=$phone&text=$templateChat',
+                                                    );
+
+                                                    await launchUrl(url);
+                                                  } else {
+                                                    Navigator.pop(context);
+                                                    snackbarMessenger(
+                                                      context,
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.5,
+                                                      Colors.red,
+                                                      'Tidak bisa mendaftar',
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          0.6,
+                                                    );
+                                                  }
+                                                },
+                                                child: const Text('Daftar'),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       }
