@@ -587,28 +587,150 @@ class _DilansEventsState extends State<DilansEvents> {
                                                         ),
                                                       )
                                                     : Container(),
-                                                Text(event['name']),
-                                                Text(
-                                                    'Tanggal: ${convertDateToString(event["date"])}'),
-                                                Text(
-                                                  'Waktu: ${event["start_time"].toString().split(":")[0]}:${event["start_time"].toString().split(":")[1]} - ${event["end_time"].toString().split(":")[0]}:${event["end_time"].toString().split(":")[1]}',
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: Text(
+                                                    event['name'],
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16.0),
+                                                  ),
                                                 ),
-                                                Text(
-                                                    'Jenis Event: ${event["type"]}'),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: Text(
+                                                      'Tanggal: ${convertDateToString(event["date"])}'),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: Text(
+                                                    'Waktu: ${event["start_time"].toString().split(":")[0]}:${event["start_time"].toString().split(":")[1]} - ${event["end_time"].toString().split(":")[0]}:${event["end_time"].toString().split(":")[1]}',
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: Text(
+                                                      'Jenis Event: ${event["type"]}'),
+                                                ),
                                                 event['type'] != 'Online'
-                                                    ? Text(
-                                                        'Lokasi: ${event["location"]}')
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 8.0),
+                                                        child: Text(
+                                                            'Lokasi: ${event["location"]}'),
+                                                      )
                                                     : Container(),
                                                 event['type'] != 'Online'
-                                                    ? FilledButton(
-                                                        onPressed: () async {
-                                                          Uri url = Uri.parse(
-                                                            event[
-                                                                'coordinate_location'],
-                                                          );
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 4.0),
+                                                        child: FilledButton(
+                                                          onPressed: () async {
+                                                            Uri url = Uri.parse(
+                                                              event[
+                                                                  'coordinate_location'],
+                                                            );
 
-                                                          if (await canLaunchUrl(
-                                                              url)) {
+                                                            if (await canLaunchUrl(
+                                                                url)) {
+                                                              await launchUrl(
+                                                                  url);
+                                                            } else {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              snackbarMessenger(
+                                                                context,
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.5,
+                                                                Colors.red,
+                                                                'Tidak bisa mengakses lokasi',
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height *
+                                                                    0.6,
+                                                              );
+                                                            }
+                                                          },
+                                                          style: ButtonStyle(
+                                                            backgroundColor:
+                                                                const MaterialStatePropertyAll(
+                                                                    Color.fromARGB(
+                                                                        255,
+                                                                        1,
+                                                                        108,
+                                                                        195)),
+                                                            shape:
+                                                                MaterialStatePropertyAll(
+                                                              RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8.0),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          child: const Text(
+                                                            'Lihat Lokasi',
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Container(),
+                                              ],
+                                            ),
+                                            actionsAlignment:
+                                                MainAxisAlignment.center,
+                                            actions: DateTime.parse(
+                                                        '${event["date"]} ${event["start_time"]}')
+                                                    .isAfter(DateTime.now())
+                                                ? [
+                                                    SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      child: FilledButton(
+                                                        onPressed: () async {
+                                                          if (event['contact_person']
+                                                                  .toString()
+                                                                  .length >
+                                                              9) {
+                                                            String phone = event['contact_person']
+                                                                            .toString()[
+                                                                        0] ==
+                                                                    '0'
+                                                                ? event['contact_person']
+                                                                    .toString()
+                                                                    .replaceFirst(
+                                                                        '0',
+                                                                        '62')
+                                                                : (event['contact_person'].toString()[
+                                                                            0] ==
+                                                                        '8'
+                                                                    ? '62${event["contact_person"]}'
+                                                                    : event[
+                                                                        'contact_person']);
+                                                            String
+                                                                templateChat =
+                                                                'Selamat ${DateTime.now().hour < 12 ? "pagi" : (DateTime.now().hour < 18 ? "Siang" : "Malam")},%0ASaya hendak mengikuti kegiatan "${event["name"]}", berikut adalah data diri saya,%0ANama Lengkap:%0A';
+                                                            Uri url = Uri.parse(
+                                                              'https://api.whatsapp.com/send/?phone=$phone&text=$templateChat',
+                                                            );
+
                                                             await launchUrl(
                                                                 url);
                                                           } else {
@@ -622,7 +744,7 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                       .width *
                                                                   0.5,
                                                               Colors.red,
-                                                              'Tidak bisa mengakses lokasi',
+                                                              'Tidak bisa mendaftar',
                                                               MediaQuery.of(
                                                                           context)
                                                                       .size
@@ -631,74 +753,19 @@ class _DilansEventsState extends State<DilansEvents> {
                                                             );
                                                           }
                                                         },
-                                                        style: ButtonStyle(
-                                                          shape:
-                                                              MaterialStatePropertyAll(
-                                                            RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8.0),
-                                                            ),
-                                                          ),
-                                                        ),
+                                                        style:
+                                                            const ButtonStyle(
+                                                                backgroundColor:
+                                                                    MaterialStatePropertyAll(
+                                                          Color.fromRGBO(
+                                                              1, 98, 104, 1.0),
+                                                        )),
                                                         child: const Text(
-                                                          'Lihat Lokasi',
-                                                        ),
-                                                      )
-                                                    : Container(),
-                                              ],
-                                            ),
-                                            actions: [
-                                              FilledButton(
-                                                onPressed: () async {
-                                                  if (event['contact_person']
-                                                          .toString()
-                                                          .length >
-                                                      9) {
-                                                    String phone = event[
-                                                                        'contact_person']
-                                                                    .toString()[
-                                                                0] ==
-                                                            '0'
-                                                        ? event['contact_person']
-                                                            .toString()
-                                                            .replaceFirst(
-                                                                '0', '62')
-                                                        : (event['contact_person']
-                                                                        .toString()[
-                                                                    0] ==
-                                                                '8'
-                                                            ? '62${event["contact_person"]}'
-                                                            : event[
-                                                                'contact_person']);
-                                                    String templateChat =
-                                                        'Selamat ${DateTime.now().hour < 12 ? "pagi" : (DateTime.now().hour < 18 ? "Siang" : "Malam")},%0ASaya hendak mengikuti kegiatan "${event["name"]}", berikut adalah data diri saya,%0ANama Lengkap:%0A';
-                                                    Uri url = Uri.parse(
-                                                      'https://api.whatsapp.com/send/?phone=$phone&text=$templateChat',
-                                                    );
-
-                                                    await launchUrl(url);
-                                                  } else {
-                                                    Navigator.pop(context);
-                                                    snackbarMessenger(
-                                                      context,
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.5,
-                                                      Colors.red,
-                                                      'Tidak bisa mendaftar',
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.6,
-                                                    );
-                                                  }
-                                                },
-                                                child: const Text('Daftar'),
-                                              ),
-                                            ],
+                                                            'Daftar'),
+                                                      ),
+                                                    ),
+                                                  ]
+                                                : [],
                                           ),
                                         );
                                       }
