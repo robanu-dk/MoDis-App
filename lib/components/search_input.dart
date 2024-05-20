@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 class SearchModis extends StatelessWidget {
-  const SearchModis(
-      {super.key, required this.onSubmitted, this.focusNode, this.controller});
+  const SearchModis({
+    super.key,
+    required this.onSubmitted,
+    this.focusNode,
+    this.controller,
+    this.label = const Text('Ketik disini untuk pencarian'),
+  });
   final ValueChanged onSubmitted;
   final FocusNode? focusNode;
   final TextEditingController? controller;
+  final Text label;
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +23,15 @@ class SearchModis extends StatelessWidget {
       focusNode: focusNode,
       controller: controller,
       textInputAction: TextInputAction.search,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(30.0),
           ),
         ),
-        contentPadding: EdgeInsets.only(left: 22.0),
-        suffixIcon: Icon(Icons.search),
-        label: Text('Ketik disini untuk pencarian'),
+        contentPadding: const EdgeInsets.only(left: 22.0),
+        suffixIcon: const Icon(Icons.search),
+        label: label,
       ),
     );
   }
