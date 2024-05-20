@@ -395,10 +395,13 @@ class ListAvailableChild extends StatelessWidget {
                                         ),
                                 ),
                               ),
-                              Padding(
+                              Container(
+                                width:
+                                    MediaQuery.of(context).size.width - 100.0,
                                 padding: const EdgeInsets.only(left: 10.0),
                                 child: Text(
                                   element['username'],
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(color: Colors.black),
                                 ),
                               ),
