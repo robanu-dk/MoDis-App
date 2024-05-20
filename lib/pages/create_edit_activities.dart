@@ -5,6 +5,7 @@ import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
+import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
@@ -456,6 +457,9 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.width * 0.05),
             child: Input(
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               focusNode: fNote,
               textController: note,
               label: 'Keterangan',
@@ -494,7 +498,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                                 MediaQuery.of(context).size.width * 0.35,
                                 Colors.red,
                                 'gagal terhubung ke server',
-                                MediaQuery.of(context).size.height * 0.72,
+                                MediaQuery.of(context).size.height * 0.77,
                               );
                             }
                           }).catchError((error) {
@@ -503,7 +507,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                               MediaQuery.of(context).size.width * 0.35,
                               Colors.red,
                               'gagal terhubung ke server',
-                              MediaQuery.of(context).size.height * 0.72,
+                              MediaQuery.of(context).size.height * 0.77,
                             );
                           });
                           showListChildAccount();
@@ -626,7 +630,131 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
               horizontal: MediaQuery.of(context).size.width * 0.08,
             ),
             child: FilledButton(
-              onPressed: () {},
+              onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                String dateNow = DateTime.now().toString().split(' ')[0];
+                if (name.text == '' ||
+                    dateInput == null ||
+                    date.text == '' ||
+                    startTime.text == '' ||
+                    endTime.text == '') {
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.35,
+                    Colors.red,
+                    'Terdapat data yang belum terisi!!!',
+                    MediaQuery.of(context).size.height * 0.75,
+                  );
+                } else if (dateNow.contains(dateInput!) &&
+                    int.parse(startTime.text.split(':')[0]) <=
+                        TimeOfDay.now().hour) {
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.35,
+                    Colors.red,
+                    'Salah memilih tanggal dan waktu!!!',
+                    MediaQuery.of(context).size.height * 0.75,
+                  );
+                } else if ((int.parse(startTime.text.split(':')[0]) >
+                        int.parse(endTime.text.split(':')[0]) ||
+                    ((int.parse(startTime.text.split(':')[0]) ==
+                            int.parse(endTime.text.split(':')[0])) &&
+                        (int.parse(startTime.text.split(':')[1]) >
+                            int.parse(endTime.text.split(':')[1]))))) {
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.35,
+                    Colors.red,
+                    'Waktu mulai harus sebelum waktu selesai!!!',
+                    MediaQuery.of(context).size.height * 0.75,
+                  );
+                } else {
+                  loadingIndicator(context);
+                  if (widget.data == null) {
+                    Provider.of<Activity>(context, listen: false)
+                        .saveActivity(
+                      name.text,
+                      dateInput!,
+                      startTime.text,
+                      endTime.text,
+                      note.text,
+                      participantIdList,
+                    )
+                        .then((response) {
+                      Navigator.pop(context);
+                      if (response['status'] == 'success') {
+                        Navigator.pop(context, true);
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          const Color.fromARGB(255, 0, 120, 18),
+                          'berhasil menyimpan kegiatan',
+                          MediaQuery.of(context).size.height * 0.6,
+                        );
+                      } else {
+                        print('cekkk${response["message"]}');
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          Colors.red,
+                          response['message'],
+                          MediaQuery.of(context).size.height * 0.77,
+                        );
+                      }
+                    }).catchError((error) {
+                      Navigator.pop(context);
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.35,
+                        Colors.red,
+                        'gagal terhubung ke server',
+                        MediaQuery.of(context).size.height * 0.77,
+                      );
+                    });
+                  } else {
+                    Provider.of<Activity>(context, listen: false)
+                        .updateActivity(
+                      widget.data['id'],
+                      name.text,
+                      dateInput!,
+                      startTime.text,
+                      endTime.text,
+                      note.text,
+                      participantIdList,
+                    )
+                        .then((response) {
+                      Navigator.pop(context);
+                      if (response['status'] == 'success') {
+                        Navigator.pop(context, true);
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          const Color.fromARGB(255, 0, 120, 18),
+                          'berhasil menyimpan kegiatan',
+                          MediaQuery.of(context).size.height * 0.6,
+                        );
+                      } else {
+                        snackbarMessenger(
+                          context,
+                          MediaQuery.of(context).size.width * 0.35,
+                          Colors.red,
+                          response['message'],
+                          MediaQuery.of(context).size.height * 0.77,
+                        );
+                      }
+                    }).catchError((error) {
+                      Navigator.pop(context);
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.35,
+                        Colors.red,
+                        'gagal terhubung ke server',
+                        MediaQuery.of(context).size.height * 0.77,
+                      );
+                    });
+                  }
+                }
+              },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromRGBO(1, 98, 104, 1.0))),
