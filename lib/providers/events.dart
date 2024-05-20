@@ -68,7 +68,10 @@ class EventsForDilans extends ChangeNotifier {
         'end_time': eventEndTime,
         'location': location,
         'coordinate_location': coordinateLocation,
-        'contact_person': contactPerson,
+        'contact_person': contactPerson
+            .replaceAll('-', '')
+            .replaceAll('+', '')
+            .replaceAll(' ', ''),
       };
 
       if (eventPoster == null) {
@@ -134,7 +137,10 @@ class EventsForDilans extends ChangeNotifier {
           'end_time': eventEndTime,
           'location': location,
           'coordinate_location': coordinateLocation,
-          'contact_person': contactPerson,
+          'contact_person': contactPerson
+              .replaceAll('-', '')
+              .replaceAll('+', '')
+              .replaceAll(' ', ''),
           'update_poster': 'true',
         };
       } else {
