@@ -53,6 +53,34 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
     '12': 'Desember',
   };
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data != null) {
+      setState(() {
+        dateInput = widget.data[0]['date'];
+      });
+      name.text = widget.data[0]['name'];
+      date.text = convertDateToString(dateInput!);
+      startTime.text =
+          '${widget.data[0]['start_time'].toString().split(':')[0]}:${widget.data[0]['start_time'].toString().split(':')[1]}';
+      endTime.text =
+          '${widget.data[0]['end_time'].toString().split(':')[0]}:${widget.data[0]['end_time'].toString().split(':')[1]}';
+      note.text = widget.data[0]['note'] ?? '';
+      for (var participant in widget.data) {
+        if (participant['email'] !=
+            Provider.of<User>(context, listen: false).userEmail) {
+          participantList.add({
+            'id': int.parse(participant['user_id'].toString()),
+            'name': participant['user_name'],
+            'profile_image': participant['profile_image'],
+          });
+        }
+        participantIdList.add(int.parse(participant['user_id'].toString()));
+      }
+    }
+  }
+
   String convertDateToString(String date) {
     List splitDate = date.split('-');
     return '${splitDate[2]} ${month[splitDate[1]]} ${splitDate[0]}';
@@ -692,7 +720,6 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                           MediaQuery.of(context).size.height * 0.6,
                         );
                       } else {
-                        print('cekkk${response["message"]}');
                         snackbarMessenger(
                           context,
                           MediaQuery.of(context).size.width * 0.35,
@@ -714,7 +741,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                   } else {
                     Provider.of<Activity>(context, listen: false)
                         .updateActivity(
-                      widget.data['id'],
+                      int.parse(widget.data[0]['id'].toString()),
                       name.text,
                       dateInput!,
                       startTime.text,
