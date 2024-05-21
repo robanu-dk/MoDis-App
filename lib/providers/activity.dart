@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 class Activity extends ChangeNotifier {
   String email = '',
       token = '',
-      apiDomain = 'https://modis.techcreator.my.id/api/event';
-  dynamic listTodayActivity;
+      apiDomain = 'https://modis.techcreator.my.id/api/activity';
+  dynamic listTodayActivity, listMyActivities;
 
   updateEmailToken(String userEmail, String userToken) {
     email = userEmail;
@@ -19,7 +19,7 @@ class Activity extends ChangeNotifier {
     try {
       listTodayActivity = null;
 
-      Uri url = Uri.parse('$apiDomain/all-today-event-child-user-based-id');
+      Uri url = Uri.parse('$apiDomain/all-today-activity-child-user-based-id');
 
       var post = await http.post(
         url,
@@ -42,6 +42,168 @@ class Activity extends ChangeNotifier {
       }
 
       return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> getListActivities() async {
+    try {
+      Uri url = Uri.parse('$apiDomain/get-all-my-activities');
+
+      var get = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      var response = jsonDecode(get.body);
+      if (response['status'] == 'success') {
+        listMyActivities = response['data'];
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> getDetailActivities() async {
+    try {
+      Uri url = Uri.parse('$apiDomain/get-detail-activity');
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> getUserCoordinates() async {
+    try {
+      Uri url = Uri.parse('$apiDomain/get-user-activity-coordinates');
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> saveActivity(
+    String name,
+    String date,
+    String startTime,
+    String endTime,
+    String note,
+    List<dynamic> participantId,
+  ) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/create-activity');
+
+      Map<String, dynamic> data = {
+        'email': email,
+        'activity_name': name,
+        'activity_date': date,
+        'activity_start_time': startTime,
+        'activity_end_time': endTime,
+        'activity_note': note,
+      };
+
+      if (participantId.isNotEmpty) {
+        data['child_account_id'] = participantId;
+      }
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      var response = jsonDecode(post.body);
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> updateActivity(
+    int activityId,
+    String name,
+    String date,
+    String startTime,
+    String endTime,
+    String note,
+    List<dynamic> participantId,
+  ) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/update-activity');
+
+      Map<String, dynamic> data = {
+        'activity_id': activityId,
+        'email': email,
+        'activity_name': name,
+        'activity_date': date,
+        'activity_start_time': startTime,
+        'activity_end_time': endTime,
+        'activity_note': note,
+        'child_account_id': participantId,
+      };
+
+      var update = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      var response = jsonDecode(update.body);
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> deleteActivity(String activityId) async {
+    try {
+      Uri url = Uri.parse('$apiDomain/delete-activity');
+
+      var delete = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'email': email,
+          'activity_id': activityId,
+        }),
+      );
+
+      var response = jsonDecode(delete.body);
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<void> startActivity() async {
+    try {} catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> finishActivity() async {
+    try {
+      Uri url = Uri.parse('$apiDomain/finish-activity');
     } catch (error) {
       throw error.toString();
     }
