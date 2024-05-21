@@ -74,9 +74,27 @@ class Activity extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> getDetailActivities() async {
+  Future<dynamic> getDetailActivities(String activityId) async {
     try {
       Uri url = Uri.parse('$apiDomain/get-detail-activity');
+
+      var get = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: jsonEncode(
+          {
+            'email': email,
+            'activity_id': activityId,
+          },
+        ),
+      );
+
+      var response = jsonDecode(get.body);
+
+      return response;
     } catch (error) {
       throw error.toString();
     }
