@@ -726,7 +726,7 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                         'contact_person']);
                                                             String
                                                                 templateChat =
-                                                                'Selamat ${DateTime.now().hour < 12 ? "pagi" : (DateTime.now().hour < 18 ? "Siang" : "Malam")},%0ASaya hendak mengikuti kegiatan "${event["name"]}", berikut adalah data diri saya,%0ANama Lengkap:%0A';
+                                                                'Selamat ${DateTime.now().hour < 12 ? "pagi" : (DateTime.now().hour < 18 ? "Siang" : "Malam")},%0A%0APerkenalkan saya,%0ANama Lengkap:%0A%0ASaya ingin mengikuti kegiatan "${event["name"]}". Terima kasih';
                                                             Uri url = Uri.parse(
                                                               'https://api.whatsapp.com/send/?phone=$phone&text=$templateChat',
                                                             );
