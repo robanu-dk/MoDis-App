@@ -16,6 +16,8 @@ class Input extends StatelessWidget {
     this.width,
     this.readonly = false,
     this.onTap,
+    this.padding = const EdgeInsets.only(top: 20.0),
+    this.onChanged,
   });
   final TextEditingController textController;
   final bool isPassword;
@@ -28,13 +30,16 @@ class Input extends StatelessWidget {
   final double? width;
   final bool readonly;
   final VoidCallback? onTap;
+  final EdgeInsets padding;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 20.0),
+      padding: padding,
       width: width ?? MediaQuery.of(context).size.width * 0.8,
       child: TextField(
+        onChanged: onChanged,
         readOnly: readonly,
         onTap: onTap ??
             () {

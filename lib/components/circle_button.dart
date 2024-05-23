@@ -43,7 +43,7 @@ class CircleButtonModis extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 70,
+            width: 80,
             child: Text(
               label,
               textAlign: TextAlign.center,
