@@ -26,13 +26,18 @@ class WeightTracker extends StatefulWidget {
 }
 
 class _WeightTrackerState extends State<WeightTracker> {
-  int? filter;
+  int filter = 0;
   final TextEditingController addBB = TextEditingController(),
       addDateToString = TextEditingController(),
       updateBB = TextEditingController(),
-      updateDateToString = TextEditingController();
-  final FocusNode fAddBB = FocusNode(), fUpdateBB = FocusNode();
+      updateDateToString = TextEditingController(),
+      filterValue = TextEditingController();
+  final FocusNode fAddBB = FocusNode(),
+      fUpdateBB = FocusNode(),
+      fFilterValue = FocusNode();
   late DateTime addDate, updateDate;
+  String unit = '';
+  int? indexUnit = 0;
 
   final Map<String, String> month = {
     '01': 'Januari',
@@ -193,78 +198,168 @@ class _WeightTrackerState extends State<WeightTracker> {
             alignment: Alignment.topRight,
             child: OutlinedButton(
               onPressed: () {
-                showMenu(
+                showDialog(
                   context: context,
-                  color: Colors.white,
-                  position: RelativeRect.fromDirectional(
-                    textDirection: TextDirection.ltr,
-                    start: 1.0,
-                    top: 145,
-                    end: 0,
-                    bottom: 0,
+                  builder: (context) => AlertDialog(
+                    surfaceTintColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Filter',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Ionicons.md_close,
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: LayoutBuilder(
+                      builder: (context, constraint) {
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: constraint.maxWidth * 0.4,
+                              child: Input(
+                                textController: filterValue,
+                                label: 'Nilai',
+                                border: const OutlineInputBorder(),
+                                focusNode: fFilterValue,
+                                padding: EdgeInsets.zero,
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  filterValue.text =
+                                      RegExp(r'[-]?\d+(?:[.]\d+)?')
+                                          .allMatches(filterValue.text)
+                                          .map((m) => m.group(0)!)
+                                          .toList()[0];
+                                },
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  left: constraint.maxWidth * 0.1),
+                              width: constraint.maxWidth * 0.5,
+                              child: DropdownButtonFormField(
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(8.0),
+                                ),
+                                value: indexUnit,
+                                items: const [
+                                  DropdownMenuItem<int>(
+                                    value: 0,
+                                    child: Text('Tahun'),
+                                  ),
+                                  DropdownMenuItem<int>(
+                                    value: 1,
+                                    child: Text('Bulan'),
+                                  ),
+                                  DropdownMenuItem<int>(
+                                    value: 2,
+                                    child: Text('Minggu'),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    indexUnit = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    actions: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                                right:
+                                    MediaQuery.of(context).size.width * 0.04),
+                            child: FilledButton(
+                              style: const ButtonStyle(
+                                backgroundColor:
+                                    MaterialStatePropertyAll(Colors.red),
+                                shape: MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {
+                                filterValue.text = '';
+                                setState(() {
+                                  unit = '';
+                                  indexUnit = 0;
+                                  filter = 0;
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
+                                'Reset',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width * 0.04),
+                            child: FilledButton(
+                              style: const ButtonStyle(
+                                backgroundColor: MaterialStatePropertyAll(
+                                    Color.fromRGBO(248, 198, 48, 1)),
+                                shape: MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {
+                                filter = int.parse(filterValue.text);
+                                setState(() {
+                                  unit = indexUnit == 0
+                                      ? 'tahun'
+                                      : (indexUnit == 1 ? 'bulan' : 'minggu');
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
+                                'Filter',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
                   ),
-                  items: [
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = null;
-                        });
-                      },
-                      child: const Text('Reset Filter'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 23;
-                        });
-                      },
-                      child: const Text('2 Tahun Terakhir'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 11;
-                        });
-                      },
-                      child: const Text('1 Tahun Terakhir'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 5;
-                        });
-                      },
-                      child: const Text('6 Bulan Terakhir'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 2;
-                        });
-                      },
-                      child: const Text('3 Bulan Terakhir'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 1;
-                        });
-                      },
-                      child: const Text('2 Bulan Terakhir'),
-                    ),
-                    PopupMenuItem(
-                      onTap: () {
-                        setState(() {
-                          filter = 0;
-                        });
-                      },
-                      child: const Text('1 Bulan Terakhir'),
-                    ),
-                  ],
                 );
               },
               child: SizedBox(
-                width: filter == null ? 60.0 : 130.0,
+                width: filter != 0
+                    ? double.parse(
+                        ('$filter $unit terakhir'.length * 8).toString())
+                    : 60.0,
                 child: Row(
                   children: [
                     const Icon(
@@ -272,13 +367,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                       color: Colors.black,
                     ),
                     Text(
-                      filter != null
-                          ? (filter! < 11
-                              ? '${filter! + 1} bulan terakhir'
-                              : (filter! == 11
-                                  ? '1 tahun terakhir'
-                                  : '2 tahun terakhir'))
-                          : 'Filter',
+                      filter != 0 ? '$filter $unit terakhir' : 'Filter',
                       style: const TextStyle(
                         color: Colors.black,
                       ),
@@ -349,7 +438,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                               );
 
                                               String date =
-                                                  '${weight.filter(weight.listWeightUser, filter).reversed.toList()[touchedSpot.x.round()]["date"]}';
+                                                  '${weight.filter(weight.listWeightUser, filter, unit).reversed.toList()[touchedSpot.x.round()]["date"]}';
                                               date = dateToString(date);
                                               String label =
                                                   '${touchedSpot.y} kg';
@@ -366,16 +455,16 @@ class _WeightTrackerState extends State<WeightTracker> {
                                 lineBarsData: [
                                   LineChartBarData(
                                     spots: weight.filter(weight.listWeightUser,
-                                                filter) !=
+                                                filter, unit) !=
                                             null
                                         ? weight
-                                            .filter(
-                                                weight.listWeightUser, filter)
+                                            .filter(weight.listWeightUser,
+                                                filter, unit)
                                             .map<FlSpot>(
                                             (element) {
                                               var index = weight
                                                   .filter(weight.listWeightUser,
-                                                      filter)
+                                                      filter, unit)
                                                   .reversed
                                                   .toList()
                                                   .indexOf(element);
@@ -395,13 +484,13 @@ class _WeightTrackerState extends State<WeightTracker> {
                                   ),
                                 ],
                                 minX: 0,
-                                maxX: weight.filter(
-                                            weight.listWeightUser, filter) !=
+                                maxX: weight.filter(weight.listWeightUser,
+                                            filter, unit) !=
                                         null
                                     ? double.parse(
                                         weight
-                                            .filter(
-                                                weight.listWeightUser, filter)
+                                            .filter(weight.listWeightUser,
+                                                filter, unit)
                                             .length
                                             .toString(),
                                       )
@@ -427,11 +516,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       getTitlesWidget: (value, titleMeta) {
                                         dynamic data = weight.filter(
                                                     weight.listWeightUser,
-                                                    filter) !=
+                                                    filter,
+                                                    unit) !=
                                                 null
                                             ? weight
                                                 .filter(weight.listWeightUser,
-                                                    filter)
+                                                    filter, unit)
                                                 .reversed
                                                 .toList()
                                             : [];
@@ -482,8 +572,11 @@ class _WeightTrackerState extends State<WeightTracker> {
             padding: const EdgeInsets.only(bottom: 80.0),
             child: Consumer<Weight>(
               builder: (context, weight, child) => Column(
-                children: weight.filter(weight.listWeightUser, filter) != null
-                    ? weight.filter(weight.listWeightUser, filter).map<Widget>(
+                children: weight.filter(weight.listWeightUser, filter, unit) !=
+                        null
+                    ? weight
+                        .filter(weight.listWeightUser, filter, unit)
+                        .map<Widget>(
                         (element) {
                           return TileButton(
                             onPressed: () {

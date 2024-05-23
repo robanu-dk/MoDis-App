@@ -16,22 +16,18 @@ class Weight extends ChangeNotifier {
     notifyListeners();
   }
 
-  dynamic filter(dynamic data, int? filter) {
-    if (filter != null) {
+  dynamic filter(dynamic data, int filter, String unit) {
+    if (filter != 0) {
       return data.where((element) {
-        List<String> date = element['date'].toString().split('-');
-        List<String> now = DateTime.now().toString().split(' ')[0].split('-');
+        DateTime today = DateTime.now();
+        DateTime dateFilter = DateTime(
+            unit == 'tahun' ? today.year - filter : today.year,
+            unit == 'bulan' ? today.month - filter : today.month,
+            unit == 'minggu' ? today.day - (filter * 7) : today.day);
+        DateTime date =
+            DateTime.parse(element['date'].toString().split(' ')[0]);
 
-        int diffYears = int.parse(now[0]) - int.parse(date[0]);
-        int diffMonths = int.parse(now[1]) - int.parse(date[1]);
-
-        int diff = diffYears * 12 + diffMonths;
-
-        if (diff <= filter) {
-          return true;
-        }
-
-        return false;
+        return date.isAfter(dateFilter);
       }).toList();
     }
 
