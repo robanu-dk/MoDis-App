@@ -53,7 +53,7 @@ class _DilansEventsState extends State<DilansEvents> {
 
   void getAllEvents() {
     Provider.of<EventsForDilans>(context, listen: false)
-        .getAllEvents(keyword)
+        .getAllEvents(keyword, isManageEvent)
         .then((response) {
       setState(() {
         isGetData = false;
@@ -690,6 +690,13 @@ class _DilansEventsState extends State<DilansEvents> {
                                                         ),
                                                       )
                                                     : Container(),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: Text(
+                                                      'PIC: ${event["pic_name"]}'),
+                                                ),
                                               ],
                                             ),
                                             actionsAlignment:

@@ -16,7 +16,7 @@ class EventsForDilans extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> getAllEvents(String keyword) async {
+  Future<dynamic> getAllEvents(String keyword, bool isManageEvent) async {
     try {
       Uri url = Uri.parse('$apiDomain/get-all-event');
 
@@ -29,6 +29,7 @@ class EventsForDilans extends ChangeNotifier {
         body: jsonEncode({
           'email': email,
           'search': keyword,
+          'is_manage': isManageEvent,
         }),
       );
 
