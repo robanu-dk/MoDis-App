@@ -355,6 +355,23 @@ class _WeightTrackerState extends State<WeightTracker> {
                   ),
                 );
               },
+              style: const ButtonStyle(
+                shape: MaterialStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(
+                        8.0,
+                      ),
+                    ),
+                  ),
+                ),
+                padding: MaterialStatePropertyAll(
+                  EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 3.0,
+                  ),
+                ),
+              ),
               child: SizedBox(
                 width: filter != 0
                     ? double.parse(
