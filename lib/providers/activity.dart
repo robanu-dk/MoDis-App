@@ -7,11 +7,18 @@ class Activity extends ChangeNotifier {
   String email = '',
       token = '',
       apiDomain = 'https://modis.techcreator.my.id/api/activity';
-  dynamic listTodayActivity, listMyActivities;
+  dynamic listTodayActivity, listMyActivities, userCoordinates;
+  List<String> dateActivities = [];
+  bool loadingGetData = true;
 
   updateEmailToken(String userEmail, String userToken) {
     email = userEmail;
     token = userToken;
+    notifyListeners();
+  }
+
+  setLoadingGetData() {
+    loadingGetData = true;
     notifyListeners();
   }
 
@@ -49,6 +56,8 @@ class Activity extends ChangeNotifier {
 
   Future<dynamic> getListActivities() async {
     try {
+      dateActivities = [];
+
       Uri url = Uri.parse('$apiDomain/get-all-my-activities');
 
       var get = await http.post(
@@ -65,6 +74,13 @@ class Activity extends ChangeNotifier {
       var response = jsonDecode(get.body);
       if (response['status'] == 'success') {
         listMyActivities = response['data'];
+
+        for (var activity in listMyActivities) {
+          if (!dateActivities.contains(activity['date'])) {
+            dateActivities.add(activity['date']);
+          }
+        }
+        loadingGetData = false;
         notifyListeners();
       }
 
@@ -129,7 +145,7 @@ class Activity extends ChangeNotifier {
       };
 
       if (participantId.isNotEmpty) {
-        data['child_account_id'] = participantId;
+        data['list_child_account_id'] = participantId;
       }
 
       var post = await http.post(
@@ -169,7 +185,7 @@ class Activity extends ChangeNotifier {
         'activity_start_time': startTime,
         'activity_end_time': endTime,
         'activity_note': note,
-        'child_account_id': participantId,
+        'list_child_account_id': participantId,
       };
 
       var update = await http.post(
