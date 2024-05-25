@@ -1080,6 +1080,5 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
         ],
       ),
     );
-    ;
   }
 }
