@@ -5,6 +5,7 @@ import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
+import 'package:modis/components/input_implement.dart';
 import 'package:modis/pages/bmi_calculator.dart';
 import 'package:modis/pages/create_edit_activities.dart';
 import 'package:modis/pages/dilans_events.dart';
@@ -21,10 +22,40 @@ class Beranda extends StatefulWidget {
 }
 
 class _BerandaState extends State<Beranda> {
+  TextEditingController startDate = TextEditingController(),
+      endDate = TextEditingController();
+
+  String filterStartDate = '',
+      filterEndDate = '',
+      initialFilterStartDate = '',
+      initialFilterEndDate = '';
+
+  FocusNode fStartDate = FocusNode(), fEndDate = FocusNode();
+
+  Map<String, String> month = {
+    '01': 'Januari',
+    '02': 'Februari',
+    '03': 'Maret',
+    '04': 'April',
+    '05': 'Mei',
+    '06': 'Juni',
+    '07': 'Juli',
+    '08': 'Agustus',
+    '09': 'September',
+    '10': 'Oktober',
+    '11': 'November',
+    '12': 'Desember',
+  };
+
   @override
   void initState() {
     super.initState();
     getAllActivity();
+  }
+
+  convertDateToString(String date) {
+    List<String> splitDate = date.split('-');
+    return '${splitDate[2]} ${month[splitDate[1]]} ${splitDate[0]}';
   }
 
   getAllActivity() {
@@ -67,6 +98,63 @@ class _BerandaState extends State<Beranda> {
         ),
         backgroundColor: backgroundColor,
       ),
+    );
+  }
+
+  filterDatePicker(
+    TextEditingController controller,
+    FocusNode focusNode,
+    String initialDate,
+    ValueChanged onChange,
+    bool forStart,
+  ) {
+    return Input(
+      textController: controller,
+      focusNode: focusNode,
+      label: 'Tanggal ${forStart ? "Mulai" : "Berakhir"}',
+      border: const OutlineInputBorder(),
+      padding: EdgeInsets.zero,
+      readonly: true,
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Pilih Tanggal',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Ionicons.md_close),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              height: 260,
+              child: CalendarDatePicker(
+                  initialDate: initialDate == ''
+                      ? DateTime.now()
+                      : DateTime.parse(initialDate),
+                  firstDate: initialFilterStartDate == '' || forStart
+                      ? DateTime(1990)
+                      : DateTime.parse(initialFilterStartDate),
+                  lastDate: initialFilterEndDate != '' && forStart
+                      ? DateTime.parse(initialFilterEndDate)
+                      : DateTime(3000),
+                  onDateChanged: onChange),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -282,7 +370,206 @@ class _BerandaState extends State<Beranda> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => StatefulBuilder(
+                          builder: (context, setState) => AlertDialog(
+                            surfaceTintColor: Colors.white,
+                            backgroundColor: Colors.white,
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Rentang Tanggal',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    if (filterStartDate == '' &&
+                                        filterEndDate == '') {
+                                      setState(() {
+                                        initialFilterStartDate = '';
+                                        initialFilterEndDate = '';
+                                      });
+                                      startDate.text = '';
+                                      endDate.text = '';
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(Ionicons.md_close),
+                                ),
+                              ],
+                            ),
+                            content: LayoutBuilder(
+                              builder: (context, constraint) => SizedBox(
+                                height: 130,
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: constraint.maxWidth * 0.3,
+                                          child: const Text('Tanggal Mulai'),
+                                        ),
+                                        const Text(':'),
+                                        SizedBox(
+                                          width: constraint.maxWidth * 0.6,
+                                          child: filterDatePicker(
+                                            startDate,
+                                            fStartDate,
+                                            initialFilterStartDate,
+                                            (value) {
+                                              fStartDate.unfocus();
+                                              String date = value
+                                                  .toString()
+                                                  .split(' ')[0];
+                                              setState(() {
+                                                initialFilterStartDate = date;
+                                              });
+                                              startDate.text =
+                                                  convertDateToString(date);
+                                              Navigator.pop(context);
+                                            },
+                                            true,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 18.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: constraint.maxWidth * 0.3,
+                                            child:
+                                                const Text('Tanggal Berakhir'),
+                                          ),
+                                          const Text(':'),
+                                          SizedBox(
+                                            width: constraint.maxWidth * 0.6,
+                                            child: filterDatePicker(
+                                              endDate,
+                                              fEndDate,
+                                              initialFilterEndDate,
+                                              (value) {
+                                                fEndDate.unfocus();
+                                                String date = value
+                                                    .toString()
+                                                    .split(' ')[0];
+                                                setState(() {
+                                                  initialFilterEndDate = date;
+                                                });
+                                                endDate.text =
+                                                    convertDateToString(date);
+                                                Navigator.pop(context);
+                                              },
+                                              false,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            actions: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        right:
+                                            MediaQuery.of(context).size.width *
+                                                0.04),
+                                    child: FilledButton(
+                                      style: const ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                Colors.red),
+                                        shape: MaterialStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8.0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          filterStartDate = '';
+                                          filterEndDate = '';
+                                          initialFilterStartDate = '';
+                                          initialFilterEndDate = '';
+                                        });
+                                        startDate.text = '';
+                                        endDate.text = '';
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text(
+                                        'Reset',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        left:
+                                            MediaQuery.of(context).size.width *
+                                                0.04),
+                                    child: FilledButton(
+                                      style: const ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                Color.fromRGBO(
+                                                    248, 198, 48, 1)),
+                                        shape: MaterialStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8.0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          filterStartDate =
+                                              initialFilterStartDate;
+                                          filterEndDate = initialFilterEndDate;
+                                        });
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text(
+                                        'Filter',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    },
                     style: const ButtonStyle(
                       shape: MaterialStatePropertyAll(
                         RoundedRectangleBorder(
@@ -305,7 +592,15 @@ class _BerandaState extends State<Beranda> {
                           color: Colors.black,
                         ),
                         Text(
-                          'Filter',
+                          filterStartDate != '' && filterEndDate != ''
+                              ? (filterStartDate == filterEndDate
+                                  ? '${convertDateToString(filterStartDate)}'
+                                  : '${convertDateToString(filterStartDate)} - ${convertDateToString(filterEndDate)}')
+                              : (filterStartDate != ''
+                                  ? '${convertDateToString(filterStartDate)}'
+                                  : (filterEndDate != ''
+                                      ? '${convertDateToString(filterEndDate)}'
+                                      : 'Filter')),
                           style: const TextStyle(color: Colors.black),
                         ),
                       ],
