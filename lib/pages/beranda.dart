@@ -786,21 +786,76 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
         child: SizedBox(
           height: 120,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircleButtonModis(
-                icon: Icons.play_arrow,
-                label: 'Mulai',
-                colors: const [
-                  Color.fromARGB(255, 0, 84, 13),
-                  Color.fromARGB(255, 40, 196, 63),
-                ],
-                margin: const EdgeInsets.only(
-                  top: 8.0,
-                  bottom: 8.0,
-                  left: 20.0,
-                ),
-                onPressed: () {},
-              ),
+              DateTime.parse(DateTime.now().toString().split(' ')[0])
+                      .isAtSameMomentAs(DateTime.parse(element['date']))
+                  ? CircleButtonModis(
+                      icon: Icons.play_arrow,
+                      label: 'Mulai',
+                      colors: const [
+                        Color.fromARGB(255, 0, 84, 13),
+                        Color.fromARGB(255, 40, 196, 63),
+                      ],
+                      margin: const EdgeInsets.only(
+                        top: 8.0,
+                        bottom: 8.0,
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        Provider.of<Activity>(context, listen: false)
+                            .getDetailActivities(element['id'])
+                            .then((response) {
+                          Navigator.pop(context);
+                          if (response['status'] == 'success') {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                transitionDuration: const Duration(
+                                    milliseconds: 300), // Durasi animasi
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return DetailActivity(
+                                    data: response['data'],
+                                  );
+                                },
+                                transitionsBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation,
+                                    Widget child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                              ),
+                            ).then((value) {
+                              if (value) {
+                                getAllActivity();
+                              }
+                            });
+                          } else {
+                            snackbarMessenger(
+                              context,
+                              MediaQuery.of(context).size.width * 0.35,
+                              Colors.red,
+                              response['message'],
+                              MediaQuery.of(context).size.height * 0.6,
+                            );
+                          }
+                        }).catchError((error) {
+                          snackbarMessenger(
+                            context,
+                            MediaQuery.of(context).size.width * 0.35,
+                            Colors.red,
+                            'gagal terhubung ke server',
+                            MediaQuery.of(context).size.height * 0.6,
+                          );
+                        });
+                      },
+                    )
+                  : Container(),
               CircleButtonModis(
                 icon: Icons.edit,
                 label: 'Ubah',
@@ -1042,16 +1097,18 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                             onPressed: () {
                               ScaffoldMessenger.of(context)
                                   .removeCurrentSnackBar();
-                              DateTime.now().isAfter(DateTime.parse(
-                                          '${element["date"]} ${element["start_time"]}')) ||
-                                      int.parse(element['done'].toString()) ==
-                                          1 ||
-                                      (element['created_by_guide'] == '1' &&
-                                          Provider.of<User>(context,
-                                                      listen: false)
-                                                  .userRole ==
-                                              0)
-                                  ? Navigator.push(
+                              if (DateTime.now().isAfter(DateTime.parse(
+                                      '${element["date"]} ${element["start_time"]}')) ||
+                                  int.parse(element['done'].toString()) == 1 ||
+                                  (element['created_by_guide'] == '1' &&
+                                      Provider.of<User>(context, listen: false)
+                                              .userRole ==
+                                          0)) {
+                                Provider.of<Activity>(context, listen: false)
+                                    .getDetailActivities(element['id'])
+                                    .then((response) {
+                                  if (response['status'] == 'success') {
+                                    Navigator.push(
                                       context,
                                       PageRouteBuilder(
                                         transitionDuration: const Duration(
@@ -1061,7 +1118,9 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                             Animation<double> animation,
                                             Animation<double>
                                                 secondaryAnimation) {
-                                          return const DetailActivity();
+                                          return DetailActivity(
+                                            data: response['data'],
+                                          );
                                         },
                                         transitionsBuilder:
                                             (BuildContext context,
@@ -1075,8 +1134,32 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                           );
                                         },
                                       ),
-                                    )
-                                  : showAction(element);
+                                    ).then((value) {
+                                      if (value) {
+                                        getAllActivity();
+                                      }
+                                    });
+                                  } else {
+                                    snackbarMessenger(
+                                      context,
+                                      MediaQuery.of(context).size.width * 0.35,
+                                      Colors.red,
+                                      response['message'],
+                                      MediaQuery.of(context).size.height * 0.6,
+                                    );
+                                  }
+                                }).catchError((error) {
+                                  snackbarMessenger(
+                                    context,
+                                    MediaQuery.of(context).size.width * 0.35,
+                                    Colors.red,
+                                    'gagal terhubung ke server',
+                                    MediaQuery.of(context).size.height * 0.6,
+                                  );
+                                });
+                              } else {
+                                showAction(element);
+                              }
                             },
                             style: ButtonStyle(
                                 shape: const MaterialStatePropertyAll(
