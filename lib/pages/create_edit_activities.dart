@@ -372,6 +372,9 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                   builder: (context) => AlertDialog(
                     surfaceTintColor: Colors.white,
                     backgroundColor: Colors.white,
+                    contentPadding: EdgeInsets.zero,
+                    titlePadding:
+                        const EdgeInsets.only(left: 3.0, right: 3.0, top: 10.0),
                     scrollable: true,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
