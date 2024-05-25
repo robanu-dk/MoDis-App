@@ -101,6 +101,37 @@ class _BerandaState extends State<Beranda> {
     );
   }
 
+  filterDate({required List<String> listDate}) {
+    if (filterStartDate != '' && filterEndDate != '') {
+      return listDate
+          .where((date) =>
+              (DateTime.parse(date).isAfter(DateTime.parse(filterStartDate)) ||
+                      DateTime.parse(date)
+                          .isAtSameMomentAs(DateTime.parse(filterStartDate))) &&
+                  (DateTime.parse(date)
+                      .isBefore(DateTime.parse(filterEndDate))) ||
+              DateTime.parse(date)
+                  .isAtSameMomentAs(DateTime.parse(filterEndDate)))
+          .toList();
+    } else if (filterStartDate != '') {
+      return listDate
+          .where((date) =>
+              DateTime.parse(date).isAfter(DateTime.parse(filterStartDate)) ||
+              DateTime.parse(date)
+                  .isAtSameMomentAs(DateTime.parse(filterStartDate)))
+          .toList();
+    } else if (filterEndDate != '') {
+      return listDate
+          .where((date) =>
+              DateTime.parse(date).isBefore(DateTime.parse(filterEndDate)) ||
+              DateTime.parse(date)
+                  .isAtSameMomentAs(DateTime.parse(filterEndDate)))
+          .toList();
+    } else {
+      return listDate;
+    }
+  }
+
   filterDatePicker(
     TextEditingController controller,
     FocusNode focusNode,
@@ -597,9 +628,9 @@ class _BerandaState extends State<Beranda> {
                                   ? '${convertDateToString(filterStartDate)}'
                                   : '${convertDateToString(filterStartDate)} - ${convertDateToString(filterEndDate)}')
                               : (filterStartDate != ''
-                                  ? '${convertDateToString(filterStartDate)}'
+                                  ? 'Tanggal mulai: ${convertDateToString(filterStartDate)}'
                                   : (filterEndDate != ''
-                                      ? '${convertDateToString(filterEndDate)}'
+                                      ? 'Tanggal terakhir: ${convertDateToString(filterEndDate)}'
                                       : 'Filter')),
                           style: const TextStyle(color: Colors.black),
                         ),
@@ -631,15 +662,18 @@ class _BerandaState extends State<Beranda> {
                 : activity.dateActivities.isNotEmpty
                     ? Column(
                         children: [
-                          ButtonDropdownActivities(
-                              date: 'Hari ini', activity: activity),
+                          filterStartDate == '' && filterEndDate == ''
+                              ? ButtonDropdownActivities(
+                                  date: 'Hari ini', activity: activity)
+                              : Container(),
                           Column(
-                            children: activity.dateActivities
-                                .map<Widget>(
-                                  (date) => ButtonDropdownActivities(
-                                      date: date, activity: activity),
-                                )
-                                .toList(),
+                            children:
+                                filterDate(listDate: activity.dateActivities)
+                                    .map<Widget>(
+                                      (date) => ButtonDropdownActivities(
+                                          date: date, activity: activity),
+                                    )
+                                    .toList(),
                           )
                         ],
                       )
