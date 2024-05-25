@@ -56,6 +56,7 @@ class Activity extends ChangeNotifier {
 
   Future<dynamic> getListActivities() async {
     try {
+      loadingGetData = true;
       dateActivities = [];
 
       Uri url = Uri.parse('$apiDomain/get-all-my-activities');
