@@ -8,6 +8,7 @@ import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/pages/bmi_calculator.dart';
 import 'package:modis/pages/create_edit_activities.dart';
+import 'package:modis/pages/detail_activity.dart';
 import 'package:modis/pages/dilans_events.dart';
 import 'package:modis/pages/weight_tracker.dart';
 import 'package:modis/providers/activity.dart';
@@ -193,6 +194,7 @@ class _BerandaState extends State<Beranda> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ModisAppBar(
+        paddingHeader: 1.25,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -660,22 +662,25 @@ class _BerandaState extends State<Beranda> {
                     ),
                   )
                 : activity.dateActivities.isNotEmpty
-                    ? Column(
-                        children: [
-                          filterStartDate == '' && filterEndDate == ''
-                              ? ButtonDropdownActivities(
-                                  date: 'Hari ini', activity: activity)
-                              : Container(),
-                          Column(
-                            children:
-                                filterDate(listDate: activity.dateActivities)
-                                    .map<Widget>(
-                                      (date) => ButtonDropdownActivities(
-                                          date: date, activity: activity),
-                                    )
-                                    .toList(),
-                          )
-                        ],
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 80.0),
+                        child: Column(
+                          children: [
+                            filterStartDate == '' && filterEndDate == ''
+                                ? ButtonDropdownActivities(
+                                    date: 'Hari ini', activity: activity)
+                                : Container(),
+                            Column(
+                              children:
+                                  filterDate(listDate: activity.dateActivities)
+                                      .map<Widget>(
+                                        (date) => ButtonDropdownActivities(
+                                            date: date, activity: activity),
+                                      )
+                                      .toList(),
+                            )
+                          ],
+                        ),
                       )
                     : Padding(
                         padding: EdgeInsets.only(
@@ -796,171 +801,158 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                 ),
                 onPressed: () {},
               ),
-              element['created_by_guide'] == '1' &&
-                      Provider.of<User>(context, listen: false).userRole == 0
-                  ? Container()
-                  : CircleButtonModis(
-                      icon: Icons.edit,
-                      label: 'Ubah',
-                      colors: const [
-                        Color.fromARGB(255, 162, 111, 0),
-                        Color.fromARGB(255, 255, 202, 87),
-                      ],
-                      margin: const EdgeInsets.only(
-                        top: 8.0,
-                        bottom: 8.0,
-                      ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        Provider.of<Activity>(context, listen: false)
-                            .getDetailActivities(element['id'])
-                            .then((response) {
-                          Navigator.pop(context);
-                          if (response['status'] == 'success') {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                transitionDuration: const Duration(
-                                    milliseconds: 300), // Durasi animasi
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation) {
-                                  return CreateEditActivity(
-                                    data: response['data'],
-                                  );
-                                },
-                                transitionsBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation,
-                                    Widget child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                              ),
-                            ).then((value) {
-                              if (value) {
-                                getAllActivity();
-                              }
-                            });
-                          } else {
-                            snackbarMessenger(
-                              context,
-                              MediaQuery.of(context).size.width * 0.35,
-                              Colors.red,
-                              response['message'],
-                              MediaQuery.of(context).size.height * 0.6,
+              CircleButtonModis(
+                icon: Icons.edit,
+                label: 'Ubah',
+                colors: const [
+                  Color.fromARGB(255, 162, 111, 0),
+                  Color.fromARGB(255, 255, 202, 87),
+                ],
+                margin: const EdgeInsets.only(
+                  top: 8.0,
+                  bottom: 8.0,
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  Provider.of<Activity>(context, listen: false)
+                      .getDetailActivities(element['id'])
+                      .then((response) {
+                    Navigator.pop(context);
+                    if (response['status'] == 'success') {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(
+                              milliseconds: 300), // Durasi animasi
+                          pageBuilder: (BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secondaryAnimation) {
+                            return CreateEditActivity(
+                              data: response['data'],
                             );
-                          }
-                        }).catchError((error) {
-                          snackbarMessenger(
-                            context,
-                            MediaQuery.of(context).size.width * 0.35,
-                            Colors.red,
-                            'gagal terhubung ke server',
-                            MediaQuery.of(context).size.height * 0.6,
-                          );
-                        });
-                      },
-                    ),
-              element['created_by_guide'] == '1' &&
-                      Provider.of<User>(context, listen: false).userRole == 0
-                  ? Container()
-                  : CircleButtonModis(
-                      icon: Icons.delete,
-                      label: 'Hapus',
-                      colors: const [
-                        Color.fromARGB(255, 136, 9, 0),
-                        Color.fromARGB(255, 255, 123, 114),
-                      ],
-                      margin: const EdgeInsets.only(
-                        top: 8.0,
-                        bottom: 8.0,
+                          },
+                          transitionsBuilder: (BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secondaryAnimation,
+                              Widget child) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
+                        ),
+                      ).then((value) {
+                        if (value) {
+                          getAllActivity();
+                        }
+                      });
+                    } else {
+                      snackbarMessenger(
+                        context,
+                        MediaQuery.of(context).size.width * 0.35,
+                        Colors.red,
+                        response['message'],
+                        MediaQuery.of(context).size.height * 0.6,
+                      );
+                    }
+                  }).catchError((error) {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.35,
+                      Colors.red,
+                      'gagal terhubung ke server',
+                      MediaQuery.of(context).size.height * 0.6,
+                    );
+                  });
+                },
+              ),
+              CircleButtonModis(
+                icon: Icons.delete,
+                label: 'Hapus',
+                colors: const [
+                  Color.fromARGB(255, 136, 9, 0),
+                  Color.fromARGB(255, 255, 123, 114),
+                ],
+                margin: const EdgeInsets.only(
+                  top: 8.0,
+                  bottom: 8.0,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog.adaptive(
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      title: const Text('Peringatan!!!'),
+                      contentPadding: const EdgeInsets.only(
+                          left: 25.0, top: 10.0, bottom: 10.0, right: 20.0),
+                      actionsPadding: const EdgeInsets.only(
+                        bottom: 20.0,
+                        top: 10.0,
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog.adaptive(
-                            backgroundColor: Colors.white,
-                            surfaceTintColor: Colors.white,
-                            title: const Text('Peringatan!!!'),
-                            contentPadding: const EdgeInsets.only(
-                                left: 25.0,
-                                top: 10.0,
-                                bottom: 10.0,
-                                right: 20.0),
-                            actionsPadding: const EdgeInsets.only(
-                              bottom: 20.0,
-                              top: 10.0,
+                      content: const Text(
+                        'Apakah yakin menghapus kegiatan?',
+                      ),
+                      actionsAlignment: MainAxisAlignment.center,
+                      actions: [
+                        FilledButton(
+                          style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(
+                              Color.fromRGBO(248, 198, 48, 1),
                             ),
-                            content: const Text(
-                              'Apakah yakin menghapus kegiatan?',
-                            ),
-                            actionsAlignment: MainAxisAlignment.center,
-                            actions: [
-                              FilledButton(
-                                style: const ButtonStyle(
-                                  backgroundColor: MaterialStatePropertyAll(
-                                    Color.fromRGBO(248, 198, 48, 1),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Batal'),
-                              ),
-                              FilledButton(
-                                style: const ButtonStyle(
-                                  backgroundColor: MaterialStatePropertyAll(
-                                    Colors.red,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Provider.of<Activity>(context, listen: false)
-                                      .deleteActivity(element['id'].toString())
-                                      .then((response) {
-                                    Navigator.pop(context);
-                                    if (response['status'] == 'success') {
-                                      snackbarMessenger(
-                                        context,
-                                        MediaQuery.of(context).size.width *
-                                            0.35,
-                                        const Color.fromARGB(255, 0, 120, 18),
-                                        'berhasil menghapus kegiatan',
-                                        MediaQuery.of(context).size.height *
-                                            0.6,
-                                      );
-                                      getAllActivity();
-                                    } else {
-                                      snackbarMessenger(
-                                        context,
-                                        MediaQuery.of(context).size.width *
-                                            0.35,
-                                        Colors.red,
-                                        response['message'],
-                                        MediaQuery.of(context).size.height *
-                                            0.6,
-                                      );
-                                    }
-                                  }).catchError((error) {
-                                    snackbarMessenger(
-                                      context,
-                                      MediaQuery.of(context).size.width * 0.35,
-                                      Colors.red,
-                                      'gagal terhubung ke server',
-                                      MediaQuery.of(context).size.height * 0.6,
-                                    );
-                                  });
-                                },
-                                child: const Text('Hapus'),
-                              ),
-                            ],
                           ),
-                        );
-                      },
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Batal'),
+                        ),
+                        FilledButton(
+                          style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(
+                              Colors.red,
+                            ),
+                          ),
+                          onPressed: () {
+                            Provider.of<Activity>(context, listen: false)
+                                .deleteActivity(element['id'].toString())
+                                .then((response) {
+                              Navigator.pop(context);
+                              if (response['status'] == 'success') {
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.35,
+                                  const Color.fromARGB(255, 0, 120, 18),
+                                  'berhasil menghapus kegiatan',
+                                  MediaQuery.of(context).size.height * 0.6,
+                                );
+                                getAllActivity();
+                              } else {
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.35,
+                                  Colors.red,
+                                  response['message'],
+                                  MediaQuery.of(context).size.height * 0.6,
+                                );
+                              }
+                            }).catchError((error) {
+                              snackbarMessenger(
+                                context,
+                                MediaQuery.of(context).size.width * 0.35,
+                                Colors.red,
+                                'gagal terhubung ke server',
+                                MediaQuery.of(context).size.height * 0.6,
+                              );
+                            });
+                          },
+                          child: const Text('Hapus'),
+                        ),
+                      ],
                     ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -1052,7 +1044,13 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                   .removeCurrentSnackBar();
                               DateTime.now().isAfter(DateTime.parse(
                                           '${element["date"]} ${element["start_time"]}')) ||
-                                      int.parse(element['done'].toString()) == 1
+                                      int.parse(element['done'].toString()) ==
+                                          1 ||
+                                      (element['created_by_guide'] == '1' &&
+                                          Provider.of<User>(context,
+                                                      listen: false)
+                                                  .userRole ==
+                                              0)
                                   ? Navigator.push(
                                       context,
                                       PageRouteBuilder(
@@ -1063,7 +1061,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                             Animation<double> animation,
                                             Animation<double>
                                                 secondaryAnimation) {
-                                          return const CreateEditActivity();
+                                          return const DetailActivity();
                                         },
                                         transitionsBuilder:
                                             (BuildContext context,
@@ -1080,28 +1078,43 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                     )
                                   : showAction(element);
                             },
-                            style: const ButtonStyle(
-                              shape: MaterialStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(
-                                      8.0,
+                            style: ButtonStyle(
+                                shape: const MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(
+                                        8.0,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              padding: MaterialStatePropertyAll(
-                                EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                  vertical: 3.0,
+                                padding: const MaterialStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 3.0,
+                                  ),
                                 ),
-                              ),
-                            ),
+                                backgroundColor: MaterialStatePropertyAll(int
+                                            .parse(
+                                                element['done'].toString()) ==
+                                        1
+                                    ? const Color.fromRGBO(1, 98, 104, 1.0)
+                                    : (DateTime.now().isAfter(DateTime.parse(
+                                            '${element["date"]} ${element["end_time"]}'))
+                                        ? Colors.red
+                                        : Colors.white))),
                             child: Row(
                               children: [
                                 Text(
                                   element['name'],
-                                  style: const TextStyle(color: Colors.black),
+                                  style: TextStyle(
+                                      color: int.parse(element['done']
+                                                      .toString()) ==
+                                                  1 ||
+                                              DateTime.now().isAfter(DateTime.parse(
+                                                  '${element["date"]} ${element["end_time"]}'))
+                                          ? Colors.white
+                                          : Colors.black),
                                 ),
                               ],
                             ),
