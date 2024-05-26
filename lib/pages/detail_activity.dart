@@ -19,14 +19,18 @@ class DetailActivity extends StatefulWidget {
 
 class _DetailActivityState extends State<DetailActivity> {
   bool start = false;
+
   int second = 0, minute = 0, hour = 0;
+
   Timer? duration, tracking;
+
   MapController mapController = MapController();
+
   LatLng currentPosition = const LatLng(-6.175392, 106.827183);
 
   List<Position> position = [];
 
-  String emailFilter = '';
+  String emailFilter = '', startTime = '', endTime = '';
 
   Map<String, String> month = {
     '01': 'Januari',
@@ -143,6 +147,24 @@ class _DetailActivityState extends State<DetailActivity> {
     }
 
     return data[0];
+  }
+
+  countingDuration() {
+    setState(() {
+      duration = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          second++;
+          if (second >= 60) {
+            minute++;
+            second = 0;
+            if (minute >= 60) {
+              minute = 0;
+              hour++;
+            }
+          }
+        });
+      });
+    });
   }
 
   Container rowInformation(BuildContext context, String label,
@@ -374,24 +396,34 @@ class _DetailActivityState extends State<DetailActivity> {
             rowInformation(
               context,
               'Waktu Mulai',
-              filter(widget.data, emailFilter)['start_activity_time'] ?? '-',
+              filter(widget.data, emailFilter)['start_activity_time'] ??
+                      startTime == ''
+                  ? '-'
+                  : startTime,
               15.0,
             ),
             rowInformation(
               context,
               'Waktu Selesai',
               filter(widget.data, emailFilter)['finishing_activity_time'] ??
-                  '-',
+                      endTime == ''
+                  ? '-'
+                  : endTime,
               15.0,
             ),
             rowInformation(
               context,
               'Durasi',
               filter(widget.data, emailFilter)['finishing_activity_time'] ??
-                  '-',
+                  '${hour.toString().length == 1 ? "0$hour" : hour}:${minute.toString().length == 1 ? "0$minute" : minute}:${second.toString().length == 1 ? "0$second" : second}',
               15.0,
             ),
-            widget.data.length > 1
+            widget.data.length > 1 &&
+                    DateTime.parse(
+                            '${widget.data[0]["date"]} ${widget.data[0]["end_time"]}')
+                        .isBefore(DateTime.now()) &&
+                    emailFilter ==
+                        Provider.of<User>(context, listen: false).userEmail
                 ? Column(
                     children: [
                       rowInformation(
@@ -499,215 +531,235 @@ class _DetailActivityState extends State<DetailActivity> {
                           //   a.cancel();
                           // }
 
-                          // if (start) {
-                          //   showDialog(
-                          //     context: context,
-                          //     builder: (context) => AlertDialog(
-                          //       surfaceTintColor: Colors.white,
-                          //       backgroundColor: Colors.white,
-                          //       titlePadding: const EdgeInsets.only(
-                          //         left: 20.0,
-                          //         right: 17.0,
-                          //         top: 4.0,
-                          //       ),
-                          //       title: Row(
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceBetween,
-                          //         children: [
-                          //           const Text(
-                          //             'Peringatan',
-                          //             style: TextStyle(
-                          //               color: Colors.black,
-                          //               fontWeight: FontWeight.bold,
-                          //               fontSize: 14.0,
-                          //             ),
-                          //           ),
-                          //           IconButton(
-                          //             onPressed: () {
-                          //               Navigator.pop(context);
-                          //             },
-                          //             icon: const Icon(Ionicons.md_close),
-                          //           )
-                          //         ],
-                          //       ),
-                          //       content: const Text(
-                          //         'Apakah anda yakin menyelesaikan aktivitas?',
-                          //       ),
-                          //       actions: [
-                          //         Row(
-                          //           mainAxisAlignment: MainAxisAlignment.center,
-                          //           children: [
-                          //             Container(
-                          //               margin: EdgeInsets.only(
-                          //                   right: MediaQuery.of(context)
-                          //                           .size
-                          //                           .width *
-                          //                       0.04),
-                          //               child: FilledButton(
-                          //                 style: const ButtonStyle(
-                          //                   backgroundColor:
-                          //                       MaterialStatePropertyAll(
-                          //                     Color.fromRGBO(248, 198, 48, 1),
-                          //                   ),
-                          //                   shape: MaterialStatePropertyAll(
-                          //                     RoundedRectangleBorder(
-                          //                       borderRadius: BorderRadius.all(
-                          //                         Radius.circular(8.0),
-                          //                       ),
-                          //                     ),
-                          //                   ),
-                          //                 ),
-                          //                 onPressed: () {},
-                          //                 child: const Text(
-                          //                   'Batal',
-                          //                   style: TextStyle(
-                          //                     fontWeight: FontWeight.bold,
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //             ),
-                          //             Container(
-                          //               margin: EdgeInsets.only(
-                          //                   left: MediaQuery.of(context)
-                          //                           .size
-                          //                           .width *
-                          //                       0.04),
-                          //               child: FilledButton(
-                          //                 style: const ButtonStyle(
-                          //                   backgroundColor:
-                          //                       MaterialStatePropertyAll(
-                          //                     Color.fromRGBO(1, 98, 104, 1.0),
-                          //                   ),
-                          //                   shape: MaterialStatePropertyAll(
-                          //                     RoundedRectangleBorder(
-                          //                       borderRadius: BorderRadius.all(
-                          //                         Radius.circular(8.0),
-                          //                       ),
-                          //                     ),
-                          //                   ),
-                          //                 ),
-                          //                 onPressed: () {
-                          //                   setState(() {
-                          //                     start = false;
-                          //                   });
+                          if (start) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                surfaceTintColor: Colors.white,
+                                backgroundColor: Colors.white,
+                                titlePadding: const EdgeInsets.only(
+                                  left: 20.0,
+                                  right: 17.0,
+                                  top: 4.0,
+                                ),
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Peringatan',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Ionicons.md_close),
+                                    )
+                                  ],
+                                ),
+                                content: const Text(
+                                  'Apakah anda yakin menyelesaikan aktivitas?',
+                                ),
+                                actions: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            right: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04),
+                                        child: FilledButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                              Color.fromRGBO(248, 198, 48, 1),
+                                            ),
+                                            shape: MaterialStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            'Batal',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            left: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04),
+                                        child: FilledButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                              Color.fromRGBO(1, 98, 104, 1.0),
+                                            ),
+                                            shape: MaterialStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            DateTime now = DateTime.now();
+                                            setState(() {
+                                              start = false;
+                                              endTime =
+                                                  '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
+                                            });
 
-                          //                   Navigator.pop(context);
-                          //                 },
-                          //                 child: const Text(
-                          //                   'Iya',
-                          //                   style: TextStyle(
-                          //                     fontWeight: FontWeight.bold,
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   );
-                          // } else {
-                          //   showDialog(
-                          //     context: context,
-                          //     builder: (context) => AlertDialog(
-                          //       surfaceTintColor: Colors.white,
-                          //       backgroundColor: Colors.white,
-                          //       titlePadding: const EdgeInsets.only(
-                          //         left: 20.0,
-                          //         right: 17.0,
-                          //         top: 4.0,
-                          //       ),
-                          //       title: Row(
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceBetween,
-                          //         children: [
-                          //           const Text(
-                          //             'Peringatan',
-                          //             style: TextStyle(
-                          //               color: Colors.black,
-                          //               fontWeight: FontWeight.bold,
-                          //               fontSize: 14.0,
-                          //             ),
-                          //           ),
-                          //           IconButton(
-                          //             onPressed: () {
-                          //               Navigator.pop(context);
-                          //             },
-                          //             icon: const Icon(Ionicons.md_close),
-                          //           )
-                          //         ],
-                          //       ),
-                          //       content: const Text(
-                          //         'Apakah anda yakin akan memulai aktivitas?',
-                          //       ),
-                          //       actions: [
-                          //         Row(
-                          //           mainAxisAlignment: MainAxisAlignment.center,
-                          //           children: [
-                          //             Container(
-                          //               margin: EdgeInsets.only(
-                          //                   right: MediaQuery.of(context)
-                          //                           .size
-                          //                           .width *
-                          //                       0.04),
-                          //               child: FilledButton(
-                          //                 style: const ButtonStyle(
-                          //                   backgroundColor:
-                          //                       MaterialStatePropertyAll(
-                          //                     Color.fromRGBO(248, 198, 48, 1),
-                          //                   ),
-                          //                   shape: MaterialStatePropertyAll(
-                          //                     RoundedRectangleBorder(
-                          //                       borderRadius: BorderRadius.all(
-                          //                         Radius.circular(8.0),
-                          //                       ),
-                          //                     ),
-                          //                   ),
-                          //                 ),
-                          //                 onPressed: () {},
-                          //                 child: const Text(
-                          //                   'Batal',
-                          //                   style: TextStyle(
-                          //                     fontWeight: FontWeight.bold,
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //             ),
-                          //             Container(
-                          //               margin: EdgeInsets.only(
-                          //                   left: MediaQuery.of(context)
-                          //                           .size
-                          //                           .width *
-                          //                       0.04),
-                          //               child: FilledButton(
-                          //                 style: const ButtonStyle(
-                          //                   backgroundColor:
-                          //                       MaterialStatePropertyAll(
-                          //                     Color.fromRGBO(1, 98, 104, 1.0),
-                          //                   ),
-                          //                   shape: MaterialStatePropertyAll(
-                          //                     RoundedRectangleBorder(
-                          //                       borderRadius: BorderRadius.all(
-                          //                         Radius.circular(8.0),
-                          //                       ),
-                          //                     ),
-                          //                   ),
-                          //                 ),
-                          //                 onPressed: () {},
-                          //                 child: const Text(
-                          //                   'Iya',
-                          //                   style: TextStyle(
-                          //                     fontWeight: FontWeight.bold,
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   );
-                          // }
+                                            duration!.cancel();
+
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            'Iya',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                surfaceTintColor: Colors.white,
+                                backgroundColor: Colors.white,
+                                titlePadding: const EdgeInsets.only(
+                                  left: 20.0,
+                                  right: 17.0,
+                                  top: 4.0,
+                                ),
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Peringatan',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Ionicons.md_close),
+                                    )
+                                  ],
+                                ),
+                                content: const Text(
+                                  'Apakah anda yakin akan memulai aktivitas?',
+                                ),
+                                actions: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            right: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04),
+                                        child: FilledButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                              Color.fromRGBO(248, 198, 48, 1),
+                                            ),
+                                            shape: MaterialStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            'Batal',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            left: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04),
+                                        child: FilledButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                              Color.fromRGBO(1, 98, 104, 1.0),
+                                            ),
+                                            shape: MaterialStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            DateTime now = DateTime.now();
+                                            setState(() {
+                                              start = true;
+                                              startTime =
+                                                  '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
+                                            });
+
+                                            countingDuration();
+
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            'Iya',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                         }
                       },
                       style: ButtonStyle(
