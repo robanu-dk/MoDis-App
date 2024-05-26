@@ -167,6 +167,17 @@ class _DetailActivityState extends State<DetailActivity> {
     });
   }
 
+  timeSubstract(String date, String startTime, String endTime) {
+    final difference = DateTime.parse('$date $endTime')
+        .difference(DateTime.parse('$date $startTime'));
+
+    final inHours = difference.inHours;
+    final inMinutes = difference.inMinutes.remainder(60);
+    final inSeconds = difference.inSeconds.remainder(60);
+
+    return '${inHours.toString().length == 1 ? "0$inHours" : inHours}:${inMinutes.toString().length == 1 ? "0$inMinutes" : inMinutes}:${inSeconds.toString().length == 1 ? "0$inSeconds" : inSeconds}';
+  }
+
   Container rowInformation(BuildContext context, String label,
       String information, double paddingTop) {
     return Container(
@@ -397,25 +408,35 @@ class _DetailActivityState extends State<DetailActivity> {
               context,
               'Waktu Mulai',
               filter(widget.data, emailFilter)['start_activity_time'] ??
-                      startTime == ''
-                  ? '-'
-                  : startTime,
+                  (startTime == '' ? '-' : startTime),
               15.0,
             ),
             rowInformation(
               context,
               'Waktu Selesai',
               filter(widget.data, emailFilter)['finishing_activity_time'] ??
-                      endTime == ''
-                  ? '-'
-                  : endTime,
+                  (endTime == '' ? '-' : endTime),
               15.0,
             ),
             rowInformation(
               context,
               'Durasi',
-              filter(widget.data, emailFilter)['finishing_activity_time'] ??
-                  '${hour.toString().length == 1 ? "0$hour" : hour}:${minute.toString().length == 1 ? "0$minute" : minute}:${second.toString().length == 1 ? "0$second" : second}',
+              DateTime.parse('${widget.data[0]["date"]} ${widget.data[0]["end_time"]}')
+                          .isBefore(DateTime.now()) ||
+                      int.parse(filter(widget.data, emailFilter)['done']
+                              .toString()) ==
+                          1
+                  ? (filter(widget.data, emailFilter)[
+                              'finishing_activity_time'] !=
+                          null
+                      ? timeSubstract(
+                          filter(widget.data, emailFilter)['date'],
+                          filter(
+                              widget.data, emailFilter)['start_activity_time'],
+                          filter(widget.data, emailFilter)[
+                              'finishing_activity_time'])
+                      : '-')
+                  : '${hour.toString().length == 1 ? "0$hour" : hour}:${minute.toString().length == 1 ? "0$minute" : minute}:${second.toString().length == 1 ? "0$second" : second}',
               15.0,
             ),
             widget.data.length > 1 &&
