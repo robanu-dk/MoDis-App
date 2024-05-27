@@ -804,7 +804,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                       onPressed: () {
                         ScaffoldMessenger.of(context).removeCurrentSnackBar();
                         Provider.of<Activity>(context, listen: false)
-                            .getDetailActivities(element['id'])
+                            .getDetailActivities(element['id'].toString())
                             .then((response) {
                           Navigator.pop(context);
                           if (response['status'] == 'success') {
@@ -870,7 +870,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   Provider.of<Activity>(context, listen: false)
-                      .getDetailActivities(element['id'])
+                      .getDetailActivities(element['id'].toString())
                       .then((response) {
                     Navigator.pop(context);
                     if (response['status'] == 'success') {
