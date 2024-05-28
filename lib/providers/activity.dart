@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 class Activity extends ChangeNotifier {
   String email = '',
@@ -10,6 +12,9 @@ class Activity extends ChangeNotifier {
   dynamic listTodayActivity, listMyActivities, userCoordinates;
   List<String> dateActivities = [];
   bool loadingGetData = true;
+  int seconds = 0, minutes = 0, hours = 0;
+  List<LatLng> coordinates = [];
+  Position? lastPosition;
 
   updateEmailToken(String userEmail, String userToken) {
     email = userEmail;
@@ -20,6 +25,84 @@ class Activity extends ChangeNotifier {
   setLoadingGetData() {
     loadingGetData = true;
     notifyListeners();
+  }
+
+  resetDuration() {
+    seconds = 0;
+    minutes = 0;
+    hours = 0;
+  }
+
+  resetCoordinates() {
+    coordinates = [];
+  }
+
+  bool countingDuration() {
+    bool updateLocation = false;
+    seconds++;
+
+    if (seconds == 1 || seconds % 10 == 0) {
+      trackingLocation();
+    }
+
+    if (seconds % 30 == 0) {
+      updateLocation = true;
+    }
+
+    if (seconds >= 60) {
+      minutes++;
+      if (minutes >= 60) {
+        hours++;
+        minutes = 0;
+      }
+      seconds = 0;
+    }
+    notifyListeners();
+
+    return updateLocation;
+  }
+
+  Future<List> setCoordinatesData(dynamic data, String email) async {
+    coordinates = [];
+    List<LatLng> latlong = [];
+
+    try {
+      dynamic filteredData =
+          data.where((item) => item['email'] == email).toList()[0];
+
+      if (filteredData['coordinates'] != null) {
+        filteredData['coordinates'].toString().split(';').forEach((element) {
+          double lat = double.parse(element.toString().split(' ')[0]);
+          double lng = double.parse(element.toString().split(' ')[1]);
+          latlong.add(LatLng(lat, lng));
+        });
+      }
+
+      coordinates.addAll(latlong);
+      return coordinates;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  trackingLocation() async {
+    Position coordinate = await Geolocator.getCurrentPosition();
+    if (coordinates.isNotEmpty) {
+      if (Geolocator.distanceBetween(
+              lastPosition!.latitude,
+              lastPosition!.longitude,
+              coordinate.latitude,
+              coordinate.longitude) >
+          5.0) {
+        lastPosition = coordinate;
+        coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
+        notifyListeners();
+      }
+    } else {
+      lastPosition = coordinate;
+      coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
+      notifyListeners();
+    }
   }
 
   Future<dynamic> getListTodayActivityBasedGuide(String childEmail) async {
@@ -112,14 +195,6 @@ class Activity extends ChangeNotifier {
       var response = jsonDecode(get.body);
 
       return response;
-    } catch (error) {
-      throw error.toString();
-    }
-  }
-
-  Future<dynamic> getUserCoordinates() async {
-    try {
-      Uri url = Uri.parse('$apiDomain/get-user-activity-coordinates');
     } catch (error) {
       throw error.toString();
     }
@@ -239,6 +314,20 @@ class Activity extends ChangeNotifier {
   Future<dynamic> finishActivity() async {
     try {
       Uri url = Uri.parse('$apiDomain/finish-activity');
+
+      // String coordinate
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $token',
+        },
+        body: {
+          'email': email,
+          //
+        },
+      );
     } catch (error) {
       throw error.toString();
     }
