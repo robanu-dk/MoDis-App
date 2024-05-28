@@ -404,7 +404,9 @@ class _DetailActivityState extends State<DetailActivity> {
               canPop: !start,
               child: ListView(
                 children: [
-                  Provider.of<User>(context, listen: false).userRole == 1 &&
+                  data.length > 1 &&
+                          Provider.of<User>(context, listen: false).userRole ==
+                              1 &&
                           (DateTime.now()
                                   .add(const Duration(minutes: 30))
                                   .isAfter(DateTime.parse(
