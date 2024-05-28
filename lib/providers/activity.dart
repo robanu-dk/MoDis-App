@@ -311,11 +311,25 @@ class Activity extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> finishActivity() async {
+  Future<dynamic> finishActivity(
+      String activityId,
+      String startTime,
+      String finishingTime,
+      List<LatLng> coordinates,
+      List<dynamic> participants) async {
     try {
       Uri url = Uri.parse('$apiDomain/finish-activity');
 
-      // String coordinate
+      String coordinate = '';
+      List participantId = [];
+
+      for (var item in coordinates) {
+        coordinate += '${item.latitude} ${item.longitude};';
+      }
+
+      for (var participant in participants) {
+        participantId.add(participant['user_id']);
+      }
 
       var post = await http.post(
         url,
@@ -323,11 +337,19 @@ class Activity extends ChangeNotifier {
           'Content-Type': 'application/json',
           'authorization': 'Bearer $token',
         },
-        body: {
+        body: jsonEncode({
           'email': email,
-          //
-        },
+          'activity_id': activityId,
+          'list_child_account_id': participantId,
+          'start_time': startTime,
+          'finishing_time': finishingTime,
+          'track_coordinates': coordinate,
+        }),
       );
+
+      var response = jsonDecode(post.body);
+
+      return response;
     } catch (error) {
       throw error.toString();
     }

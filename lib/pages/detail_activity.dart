@@ -216,10 +216,58 @@ class _DetailActivityState extends State<DetailActivity> {
       duration = Timer.periodic(const Duration(seconds: 1), (timer) {
         bool updateTracking =
             Provider.of<Activity>(context, listen: false).countingDuration();
+
         if (updateTracking) {
           List coordinates =
               Provider.of<Activity>(context, listen: false).coordinates;
           mapController.move(coordinates[coordinates.length - 1], 18.0);
+        }
+
+        if (DateTime.now().isAfter(
+            DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
+                .add(const Duration(minutes: 30)))) {
+          loadingIndicator(context);
+          Provider.of<Activity>(context, listen: false)
+              .finishActivity(
+            data[0]['id'].toString(),
+            startTime,
+            endTime,
+            Provider.of<Activity>(context, listen: false).coordinates,
+            presentParticipants,
+          )
+              .then((response) {
+            Navigator.pop(context);
+            if (response['status'] == 'success') {
+              Navigator.pop(context, true);
+
+              snackbarMessenger(
+                context,
+                MediaQuery.of(context).size.width * 0.35,
+                const Color.fromARGB(255, 0, 120, 18),
+                'berhasil menyelesaikan kegiatan',
+                MediaQuery.of(context).size.height * 0.6,
+              );
+            } else {
+              snackbarMessenger(
+                context,
+                MediaQuery.of(context).size.width * 0.35,
+                Colors.red,
+                response['message'],
+                MediaQuery.of(context).size.height * 0.6,
+              );
+            }
+          }).catchError((error) {
+            Navigator.pop(context);
+
+            snackbarMessenger(
+              context,
+              MediaQuery.of(context).size.width * 0.35,
+              Colors.red,
+              'Gagal terhubung ke server',
+              MediaQuery.of(context).size.height * 0.6,
+            );
+          });
+          duration!.cancel();
         }
       });
     });
@@ -1099,11 +1147,66 @@ class _DetailActivityState extends State<DetailActivity> {
                                                                       ),
                                                                       onPressed:
                                                                           () {
+                                                                        duration!
+                                                                            .cancel();
+
                                                                         loadingIndicator(
                                                                             context);
 
-                                                                        Navigator.pop(
-                                                                            context);
+                                                                        Provider.of<Activity>(context,
+                                                                                listen: false)
+                                                                            .finishActivity(
+                                                                          data[0]['id']
+                                                                              .toString(),
+                                                                          startTime,
+                                                                          endTime,
+                                                                          Provider.of<Activity>(context, listen: false)
+                                                                              .coordinates,
+                                                                          presentParticipants,
+                                                                        )
+                                                                            .then((response) {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          Navigator.pop(
+                                                                              context);
+
+                                                                          if (response['status'] ==
+                                                                              'success') {
+                                                                            Navigator.pop(context,
+                                                                                true);
+
+                                                                            snackbarMessenger(
+                                                                              context,
+                                                                              MediaQuery.of(context).size.width * 0.35,
+                                                                              const Color.fromARGB(255, 0, 120, 18),
+                                                                              'berhasil menyelesaikan kegiatan',
+                                                                              MediaQuery.of(context).size.height * 0.6,
+                                                                            );
+                                                                          } else {
+                                                                            snackbarMessenger(
+                                                                              context,
+                                                                              MediaQuery.of(context).size.width * 0.35,
+                                                                              Colors.red,
+                                                                              response['message'],
+                                                                              MediaQuery.of(context).size.height * 0.6,
+                                                                            );
+                                                                          }
+                                                                        }).catchError((error) {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          Navigator.pop(
+                                                                              context);
+
+                                                                          snackbarMessenger(
+                                                                            context,
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.35,
+                                                                            Colors.red,
+                                                                            'gagal terhubung ke server',
+                                                                            MediaQuery.of(context).size.height *
+                                                                                0.6,
+                                                                          );
+                                                                        });
                                                                       },
                                                                       child:
                                                                           const Text(
@@ -1126,10 +1229,77 @@ class _DetailActivityState extends State<DetailActivity> {
                                                       setState(() {});
                                                     });
                                                   } else {
+                                                    loadingIndicator(context);
+
                                                     Provider.of<Activity>(
                                                             context,
                                                             listen: false)
-                                                        .finishActivity();
+                                                        .finishActivity(
+                                                      data[0]['id'].toString(),
+                                                      startTime,
+                                                      endTime,
+                                                      Provider.of<Activity>(
+                                                              context,
+                                                              listen: false)
+                                                          .coordinates,
+                                                      presentParticipants,
+                                                    )
+                                                        .then((response) {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+
+                                                      if (response['status'] ==
+                                                          'success') {
+                                                        Navigator.pop(
+                                                            context, true);
+
+                                                        snackbarMessenger(
+                                                          context,
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.35,
+                                                          const Color.fromARGB(
+                                                              255, 0, 120, 18),
+                                                          'berhasil menyelesaikan kegiatan',
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height *
+                                                              0.6,
+                                                        );
+                                                      } else {
+                                                        snackbarMessenger(
+                                                          context,
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.35,
+                                                          Colors.red,
+                                                          response['message'],
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height *
+                                                              0.6,
+                                                        );
+                                                      }
+                                                    }).catchError((error) {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+
+                                                      snackbarMessenger(
+                                                        context,
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.35,
+                                                        Colors.red,
+                                                        'gagal terhubung ke server',
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.6,
+                                                      );
+                                                    });
                                                   }
                                                 },
                                                 child: const Text(
