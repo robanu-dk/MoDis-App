@@ -68,7 +68,7 @@ class _DetailActivityState extends State<DetailActivity> {
     });
   }
 
-  setCoordinatesData(dynamic data, String email) {
+  setCoordinatesData(dynamic data, String email) async {
     coordinates = [];
     List<LatLng> latlong = [];
 
@@ -86,40 +86,47 @@ class _DetailActivityState extends State<DetailActivity> {
         coordinates.addAll(latlong);
       });
 
-      mapController.move(coordinates[0], 15.0);
+      Future.delayed(const Duration(seconds: 2), () {
+        mapController.move(coordinates[0], 15.0);
+      });
     }
   }
 
   getCurrentPosition() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission != LocationPermission.always &&
-        permission != LocationPermission.whileInUse) {
-      LocationPermission permission = await Geolocator.requestPermission();
+    if (int.parse(widget.data[0]['done'].toString()) != 1 &&
+        DateTime.parse(
+                '${widget.data[0]["date"]} ${widget.data[0]["end_time"]}')
+            .isAfter(DateTime.now())) {
+      LocationPermission permission = await Geolocator.checkPermission();
       if (permission != LocationPermission.always &&
           permission != LocationPermission.whileInUse) {
-        snackbarMessenger(
-          context,
-          MediaQuery.of(context).size.width * 0.35,
-          Colors.red,
-          'gagal memberikan izin mengakses lokasi',
-          MediaQuery.of(context).size.height * 0.6,
-        );
-        Navigator.pop(context);
+        LocationPermission permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.always &&
+            permission != LocationPermission.whileInUse) {
+          snackbarMessenger(
+            context,
+            MediaQuery.of(context).size.width * 0.35,
+            Colors.red,
+            'gagal memberikan izin mengakses lokasi',
+            MediaQuery.of(context).size.height * 0.6,
+          );
+          Navigator.pop(context);
+        }
+        Position pos = await Geolocator.getCurrentPosition();
+        setState(() {
+          currentPosition = LatLng(pos.latitude, pos.longitude);
+        });
+        mapController.move(currentPosition, 15.0);
+      } else {
+        Position pos = await Geolocator.getCurrentPosition();
+        setState(() {
+          currentPosition = LatLng(pos.latitude, pos.longitude);
+        });
+        mapController.move(currentPosition, 15.0);
       }
-      Position pos = await Geolocator.getCurrentPosition();
-      setState(() {
-        currentPosition = LatLng(pos.latitude, pos.longitude);
-      });
-      mapController.move(currentPosition, 15.0);
     } else {
-      Position pos = await Geolocator.getCurrentPosition();
-      setState(() {
-        currentPosition = LatLng(pos.latitude, pos.longitude);
-      });
-      mapController.move(currentPosition, 15.0);
+      setCoordinatesData(widget.data, emailFilter);
     }
-
-    setCoordinatesData(widget.data, emailFilter);
   }
 
   getPosition() async {
