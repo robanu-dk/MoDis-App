@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
@@ -30,6 +31,12 @@ class _DetailActivityState extends State<DetailActivity> {
 
   List<Position> position = [];
 
+  List<dynamic> participants = [], presentParticipants = [];
+
+  List<LatLng> coordinates = [];
+
+  Position? lastPosition;
+
   String emailFilter = '', startTime = '', endTime = '';
 
   Map<String, String> month = {
@@ -51,12 +58,39 @@ class _DetailActivityState extends State<DetailActivity> {
   void initState() {
     super.initState();
     getCurrentPosition();
+
     setState(() {
       emailFilter = Provider.of<User>(context, listen: false).userEmail;
+
+      if (widget.data.length > 1) {
+        participants.addAll(widget.data);
+      }
     });
   }
 
-  Future getCurrentPosition() async {
+  setCoordinatesData(dynamic data, String email) {
+    coordinates = [];
+    List<LatLng> latlong = [];
+
+    dynamic filteredData =
+        data.where((item) => item['email'] == emailFilter).toList()[0];
+
+    if (filteredData['coordinates'] != null) {
+      filteredData['coordinates'].toString().split(';').forEach((element) {
+        double lat = double.parse(element.toString().split(' ')[0]);
+        double lng = double.parse(element.toString().split(' ')[1]);
+        latlong.add(LatLng(lat, lng));
+      });
+
+      setState(() {
+        coordinates.addAll(latlong);
+      });
+
+      mapController.move(coordinates[0], 15.0);
+    }
+  }
+
+  getCurrentPosition() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission != LocationPermission.always &&
         permission != LocationPermission.whileInUse) {
@@ -84,6 +118,34 @@ class _DetailActivityState extends State<DetailActivity> {
       });
       mapController.move(currentPosition, 15.0);
     }
+
+    setCoordinatesData(widget.data, emailFilter);
+  }
+
+  getPosition() async {
+    Position coordinate = await Geolocator.getCurrentPosition();
+    setState(() {
+      if (coordinates.isNotEmpty) {
+        if (Geolocator.distanceBetween(
+                lastPosition!.latitude,
+                lastPosition!.longitude,
+                coordinate.latitude,
+                coordinate.longitude) >
+            5.0) {
+          coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
+          lastPosition = coordinate;
+        }
+      } else {
+        coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
+        lastPosition = coordinate;
+      }
+    });
+  }
+
+  trackingCoordinates() {
+    tracking = Timer.periodic(const Duration(seconds: 10), (timer) {
+      getPosition();
+    });
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
@@ -142,6 +204,8 @@ class _DetailActivityState extends State<DetailActivity> {
   }
 
   filter(dynamic data, String email) {
+    setCoordinatesData(data, email);
+
     if (email != '') {
       return data.where((element) => element['email'] == email).toList()[0];
     }
@@ -165,6 +229,252 @@ class _DetailActivityState extends State<DetailActivity> {
         });
       });
     });
+  }
+
+  showDialogChooseParticipant() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            surfaceTintColor: Colors.white,
+            backgroundColor: Colors.white,
+            titlePadding: const EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+              top: 15.0,
+            ),
+            scrollable: true,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: const Text(
+                    'Peserta kegiatan yang hadir',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      endTime = '';
+                    });
+
+                    countingDuration();
+
+                    getPosition();
+
+                    trackingCoordinates();
+
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Ionicons.md_close,
+                  ),
+                )
+              ],
+            ),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Daftar peserta:',
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(8.0),
+                    ),
+                  ),
+                  child: ListView(
+                    children: participants
+                        .map(
+                          (element) => Container(
+                            margin: const EdgeInsets.only(
+                              left: 5.0,
+                              right: 5.0,
+                              top: 3.0,
+                            ),
+                            child: FilledButton(
+                              onPressed: () {
+                                setState(() {
+                                  presentParticipants.add(element);
+                                  participants.remove(element);
+                                });
+                              },
+                              style: const ButtonStyle(
+                                shape: MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                    side: BorderSide(),
+                                  ),
+                                ),
+                                backgroundColor:
+                                    MaterialStatePropertyAll(Colors.white),
+                                padding: MaterialStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: 5.0, vertical: 3.0),
+                                ),
+                                alignment: Alignment.centerLeft,
+                              ),
+                              child: Text(
+                                element['user_name'],
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Daftar peserta hadir:',
+                  ),
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(8.0),
+                    ),
+                  ),
+                  child: ListView(
+                    children: presentParticipants
+                        .map(
+                          (element) => Container(
+                            margin: const EdgeInsets.only(
+                              left: 5.0,
+                              right: 5.0,
+                              top: 3.0,
+                            ),
+                            child: FilledButton(
+                              onPressed: () {
+                                setState(() {
+                                  presentParticipants.remove(element);
+                                  participants.add(element);
+                                });
+                              },
+                              style: const ButtonStyle(
+                                shape: MaterialStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                    side: BorderSide.none,
+                                  ),
+                                ),
+                                backgroundColor: MaterialStatePropertyAll(
+                                    Color.fromRGBO(1, 98, 104, 1.0)),
+                                padding: MaterialStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: 5.0, vertical: 3.0),
+                                ),
+                                alignment: Alignment.centerLeft,
+                              ),
+                              child: Text(
+                                element['user_name'],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(
+                        right: MediaQuery.of(context).size.width * 0.04),
+                    child: FilledButton(
+                      style: const ButtonStyle(
+                        backgroundColor: MaterialStatePropertyAll(
+                          Color.fromRGBO(248, 198, 48, 1),
+                        ),
+                        shape: MaterialStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          endTime = '';
+                        });
+
+                        countingDuration();
+
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        'Batal',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width * 0.04),
+                    child: FilledButton(
+                      style: const ButtonStyle(
+                        backgroundColor: MaterialStatePropertyAll(
+                          Color.fromRGBO(1, 98, 104, 1.0),
+                        ),
+                        shape: MaterialStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {
+                        DateTime now = DateTime.now();
+                        setState(() {
+                          endTime =
+                              '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
+                        });
+                      },
+                      child: const Text(
+                        'Iya',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }),
+    );
   }
 
   timeSubstract(String date, String startTime, String endTime) {
@@ -385,7 +695,6 @@ class _DetailActivityState extends State<DetailActivity> {
                     ),
                   )
                 : Container(),
-            Text('data ${widget.data}'),
             rowInformation(
               context,
               'Nama Aktivitas',
@@ -506,6 +815,23 @@ class _DetailActivityState extends State<DetailActivity> {
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  ),
+                  MarkerLayer(
+                    markers: coordinates
+                        .map<Marker>(
+                          (coordinate) => Marker(
+                            point: coordinate,
+                            width: 12,
+                            height: 12,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   )
                 ],
               ),
@@ -522,36 +848,13 @@ class _DetailActivityState extends State<DetailActivity> {
                     ),
                     child: FilledButton(
                       onPressed: () async {
-                        if (await Geolocator.checkPermission() ==
-                            LocationPermission.denied) {
+                        LocationPermission geolocatorPermission =
+                            await Geolocator.checkPermission();
+                        if (geolocatorPermission != LocationPermission.always &&
+                            geolocatorPermission !=
+                                LocationPermission.whileInUse) {
                           await Geolocator.requestPermission();
                         } else {
-                          // print(
-                          //     'cekk ${await Geolocator.getCurrentPosition()}');
-                          // print(
-                          //     'cekk${Geolocator.distanceBetween(-7.2676037, 112.7796517, -7.2675799, 112.7795996)}');
-                          print('cekk$currentPosition');
-                          // Timer a =
-                          //     Timer.periodic(Duration(seconds: 5), (timer) {
-                          //   print('cekk $position');
-                          // });
-                          // if (!start) {
-                          //   setState(() {
-                          //     start = true;
-                          //   });
-                          //   tracking = Timer.periodic(
-                          //       const Duration(seconds: 5), (timer) async {
-                          //     Position pos =
-                          //         await Geolocator.getCurrentPosition();
-                          //     setState(() {
-                          //       position.add(pos);
-                          //     });
-                          //   });
-                          // } else {
-                          //   tracking!.cancel();
-                          //   a.cancel();
-                          // }
-
                           if (start) {
                             showDialog(
                               context: context,
@@ -644,14 +947,21 @@ class _DetailActivityState extends State<DetailActivity> {
                                           onPressed: () {
                                             DateTime now = DateTime.now();
                                             setState(() {
-                                              start = false;
                                               endTime =
                                                   '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
                                             });
 
                                             duration!.cancel();
+                                            tracking!.cancel();
 
-                                            Navigator.pop(context);
+                                            if (widget.data.length > 1) {
+                                              Navigator.pop(context);
+                                              showDialogChooseParticipant();
+                                            } else {
+                                              Provider.of<Activity>(context,
+                                                      listen: false)
+                                                  .finishActivity();
+                                            }
                                           },
                                           child: const Text(
                                             'Iya',
@@ -764,6 +1074,10 @@ class _DetailActivityState extends State<DetailActivity> {
                                             });
 
                                             countingDuration();
+
+                                            getPosition();
+
+                                            trackingCoordinates();
 
                                             Navigator.pop(context);
                                           },
