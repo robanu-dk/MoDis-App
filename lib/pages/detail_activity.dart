@@ -404,7 +404,7 @@ class _DetailActivityState extends State<DetailActivity> {
               canPop: !start,
               child: ListView(
                 children: [
-                  int.parse(data[0]['created_by_guide'].toString()) == 1 &&
+                  Provider.of<User>(context, listen: false).userRole == 1 &&
                           (DateTime.now()
                                   .add(const Duration(minutes: 30))
                                   .isAfter(DateTime.parse(
@@ -533,13 +533,7 @@ class _DetailActivityState extends State<DetailActivity> {
                   rowInformation(
                     context,
                     'Nama Aktivitas',
-                    int.parse(data[0]['created_by_guide'].toString()) == 1 &&
-                            (DateTime.now()
-                                .add(const Duration(minutes: 30))
-                                .isAfter(DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')))
-                        ? filter(data, emailFilter)['name'].toString()
-                        : data[0]['name'].toString(),
+                    data[0]['name'].toString(),
                     25.0,
                   ),
                   rowInformation(
@@ -551,12 +545,7 @@ class _DetailActivityState extends State<DetailActivity> {
                   rowInformation(
                     context,
                     'Keterangan',
-                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
-                                DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
-                            checkIfDataDone(data)
-                        ? (filter(data, emailFilter)['note'] ?? '-')
-                        : data[0]['note'] ?? '-',
+                    data[0]['note'] ?? '-',
                     15.0,
                   ),
                   rowInformation(
