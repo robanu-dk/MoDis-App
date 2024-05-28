@@ -114,7 +114,7 @@ class _DetailActivityState extends State<DetailActivity> {
 
   getCurrentPosition() async {
     LatLng currentPosition;
-    if (int.parse(data[0]['done'].toString()) != 1 &&
+    if (!checkIfDataDone(data) &&
         DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
             .isAfter(DateTime.now())) {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -163,6 +163,21 @@ class _DetailActivityState extends State<DetailActivity> {
         backgroundColor: backgroundColor,
       ),
     );
+  }
+
+  checkIfDataDone(List data) {
+    bool isDone = false;
+
+    for (var item in data) {
+      if (int.parse(item['done'].toString()) == 1 &&
+          item['email'] ==
+              Provider.of<User>(context, listen: false).userEmail) {
+        isDone = true;
+        break;
+      }
+    }
+
+    return isDone;
   }
 
   filterParticipantStatus(dynamic data, bool isDone) {
@@ -391,9 +406,10 @@ class _DetailActivityState extends State<DetailActivity> {
                 children: [
                   int.parse(data[0]['created_by_guide'].toString()) == 1 &&
                           (DateTime.now()
-                              .add(const Duration(minutes: 30))
-                              .isAfter(DateTime.parse(
-                                  '${data[0]["date"]} ${data[0]["end_time"]}')))
+                                  .add(const Duration(minutes: 30))
+                                  .isAfter(DateTime.parse(
+                                      '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                              checkIfDataDone(data))
                       ? Container(
                           margin: EdgeInsets.symmetric(
                               horizontal:
@@ -535,11 +551,10 @@ class _DetailActivityState extends State<DetailActivity> {
                   rowInformation(
                     context,
                     'Keterangan',
-                    int.parse(data[0]['created_by_guide'].toString()) == 1 &&
-                            (DateTime.now()
-                                .add(const Duration(minutes: 30))
-                                .isAfter(DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')))
+                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
+                                DateTime.parse(
+                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                            checkIfDataDone(data)
                         ? (filter(data, emailFilter)['note'] ?? '-')
                         : data[0]['note'] ?? '-',
                     15.0,
@@ -547,11 +562,10 @@ class _DetailActivityState extends State<DetailActivity> {
                   rowInformation(
                     context,
                     'Waktu Mulai',
-                    int.parse(data[0]['created_by_guide'].toString()) == 1 &&
-                            (DateTime.now()
-                                .add(const Duration(minutes: 30))
-                                .isAfter(DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')))
+                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
+                                DateTime.parse(
+                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                            checkIfDataDone(data)
                         ? (filter(data, emailFilter)['start_activity_time'] ??
                             '-')
                         : (startTime == '' ? '-' : startTime),
@@ -560,11 +574,10 @@ class _DetailActivityState extends State<DetailActivity> {
                   rowInformation(
                     context,
                     'Waktu Selesai',
-                    int.parse(data[0]['created_by_guide'].toString()) == 1 &&
-                            (DateTime.now()
-                                .add(const Duration(minutes: 30))
-                                .isAfter(DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')))
+                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
+                                DateTime.parse(
+                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                            checkIfDataDone(data)
                         ? filter(
                                 data, emailFilter)['finishing_activity_time'] ??
                             '-'
@@ -575,9 +588,9 @@ class _DetailActivityState extends State<DetailActivity> {
                     builder: (context, activity, child) => rowInformation(
                       context,
                       'Durasi',
-                      DateTime.parse(
-                                  '${data[0]["date"]} ${data[0]["end_time"]}')
-                              .isBefore(DateTime.now())
+                      DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
+                                  .isBefore(DateTime.now()) ||
+                              checkIfDataDone(data)
                           ? (filter(data, emailFilter)[
                                       'finishing_activity_time'] !=
                                   null
@@ -593,9 +606,10 @@ class _DetailActivityState extends State<DetailActivity> {
                     ),
                   ),
                   data.length > 1 &&
-                          DateTime.parse(
-                                  '${data[0]["date"]} ${data[0]["end_time"]}')
-                              .isBefore(DateTime.now()) &&
+                          (DateTime.parse(
+                                      '${data[0]["date"]} ${data[0]["end_time"]}')
+                                  .isBefore(DateTime.now()) ||
+                              checkIfDataDone(data)) &&
                           emailFilter ==
                               Provider.of<User>(context, listen: false)
                                   .userEmail
@@ -723,7 +737,7 @@ class _DetailActivityState extends State<DetailActivity> {
                       ],
                     ),
                   ),
-                  int.parse(data[0]['done'].toString()) != 1 &&
+                  !checkIfDataDone(data) &&
                           DateTime.parse(
                                   '${data[0]["date"]} ${data[0]["end_time"]}')
                               .isAfter(DateTime.now())

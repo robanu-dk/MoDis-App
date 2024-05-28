@@ -72,13 +72,17 @@ class Activity extends ChangeNotifier {
 
       if (filteredData['coordinates'] != null) {
         filteredData['coordinates'].toString().split(';').forEach((element) {
-          double lat = double.parse(element.toString().split(' ')[0]);
-          double lng = double.parse(element.toString().split(' ')[1]);
-          latlong.add(LatLng(lat, lng));
+          List splitCoordinate = element.toString().split(' ');
+          if (splitCoordinate.length == 2) {
+            double lat = double.parse(splitCoordinate[0]);
+            double lng = double.parse(splitCoordinate[1]);
+            latlong.add(LatLng(lat, lng));
+          }
         });
       }
 
       coordinates.addAll(latlong);
+
       return coordinates;
     } catch (error) {
       throw error.toString();
