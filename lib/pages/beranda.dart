@@ -803,55 +803,35 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                       ),
                       onPressed: () {
                         ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                        Provider.of<Activity>(context, listen: false)
-                            .getDetailActivities(element['id'].toString())
-                            .then((response) {
-                          Navigator.pop(context);
-                          if (response['status'] == 'success') {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                transitionDuration: const Duration(
-                                    milliseconds: 300), // Durasi animasi
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation) {
-                                  return DetailActivity(
-                                    data: response['data'],
-                                  );
-                                },
-                                transitionsBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation,
-                                    Widget child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                              ),
-                            ).then((value) {
-                              if (value) {
-                                getAllActivity();
-                              }
-                            });
-                          } else {
-                            snackbarMessenger(
-                              context,
-                              MediaQuery.of(context).size.width * 0.35,
-                              Colors.red,
-                              response['message'],
-                              MediaQuery.of(context).size.height * 0.6,
-                            );
+
+                        Navigator.pop(context);
+
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(
+                                milliseconds: 300), // Durasi animasi
+                            pageBuilder: (BuildContext context,
+                                Animation<double> animation,
+                                Animation<double> secondaryAnimation) {
+                              return DetailActivity(
+                                activityId: element['id'].toString(),
+                              );
+                            },
+                            transitionsBuilder: (BuildContext context,
+                                Animation<double> animation,
+                                Animation<double> secondaryAnimation,
+                                Widget child) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                          ),
+                        ).then((value) {
+                          if (value) {
+                            getAllActivity();
                           }
-                        }).catchError((error) {
-                          snackbarMessenger(
-                            context,
-                            MediaQuery.of(context).size.width * 0.35,
-                            Colors.red,
-                            'gagal terhubung ke server',
-                            MediaQuery.of(context).size.height * 0.6,
-                          );
                         });
                       },
                     )
@@ -869,55 +849,35 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  Provider.of<Activity>(context, listen: false)
-                      .getDetailActivities(element['id'].toString())
-                      .then((response) {
-                    Navigator.pop(context);
-                    if (response['status'] == 'success') {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          transitionDuration: const Duration(
-                              milliseconds: 300), // Durasi animasi
-                          pageBuilder: (BuildContext context,
-                              Animation<double> animation,
-                              Animation<double> secondaryAnimation) {
-                            return CreateEditActivity(
-                              data: response['data'],
-                            );
-                          },
-                          transitionsBuilder: (BuildContext context,
-                              Animation<double> animation,
-                              Animation<double> secondaryAnimation,
-                              Widget child) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
-                        ),
-                      ).then((value) {
-                        if (value) {
-                          getAllActivity();
-                        }
-                      });
-                    } else {
-                      snackbarMessenger(
-                        context,
-                        MediaQuery.of(context).size.width * 0.35,
-                        Colors.red,
-                        response['message'],
-                        MediaQuery.of(context).size.height * 0.6,
-                      );
+
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      transitionDuration:
+                          const Duration(milliseconds: 300), // Durasi animasi
+                      pageBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation) {
+                        return CreateEditActivity(
+                          activityId: element['id'].toString(),
+                        );
+                      },
+                      transitionsBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                          Widget child) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                    ),
+                  ).then((value) {
+                    if (value) {
+                      getAllActivity();
                     }
-                  }).catchError((error) {
-                    snackbarMessenger(
-                      context,
-                      MediaQuery.of(context).size.width * 0.35,
-                      Colors.red,
-                      'gagal terhubung ke server',
-                      MediaQuery.of(context).size.height * 0.6,
-                    );
                   });
                 },
               ),
@@ -1104,58 +1064,32 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                       Provider.of<User>(context, listen: false)
                                               .userRole ==
                                           0)) {
-                                Provider.of<Activity>(context, listen: false)
-                                    .getDetailActivities(element['id'])
-                                    .then((response) {
-                                  if (response['status'] == 'success') {
-                                    Navigator.push(
-                                      context,
-                                      PageRouteBuilder(
-                                        transitionDuration: const Duration(
-                                            milliseconds:
-                                                300), // Durasi animasi
-                                        pageBuilder: (BuildContext context,
-                                            Animation<double> animation,
-                                            Animation<double>
-                                                secondaryAnimation) {
-                                          return DetailActivity(
-                                            data: response['data'],
-                                          );
-                                        },
-                                        transitionsBuilder:
-                                            (BuildContext context,
-                                                Animation<double> animation,
-                                                Animation<double>
-                                                    secondaryAnimation,
-                                                Widget child) {
-                                          return FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                          );
-                                        },
-                                      ),
-                                    ).then((value) {
-                                      if (value) {
-                                        getAllActivity();
-                                      }
-                                    });
-                                  } else {
-                                    snackbarMessenger(
-                                      context,
-                                      MediaQuery.of(context).size.width * 0.35,
-                                      Colors.red,
-                                      response['message'],
-                                      MediaQuery.of(context).size.height * 0.6,
-                                    );
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    transitionDuration: const Duration(
+                                        milliseconds: 300), // Durasi animasi
+                                    pageBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secondaryAnimation) {
+                                      return DetailActivity(
+                                        activityId: element['id'].toString(),
+                                      );
+                                    },
+                                    transitionsBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secondaryAnimation,
+                                        Widget child) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                ).then((value) {
+                                  if (value) {
+                                    getAllActivity();
                                   }
-                                }).catchError((error) {
-                                  snackbarMessenger(
-                                    context,
-                                    MediaQuery.of(context).size.width * 0.35,
-                                    Colors.red,
-                                    'gagal terhubung ke server',
-                                    MediaQuery.of(context).size.height * 0.6,
-                                  );
                                 });
                               } else {
                                 showAction(element);
