@@ -87,7 +87,7 @@ class _DetailActivityState extends State<DetailActivity> {
       });
 
       Future.delayed(const Duration(seconds: 2), () {
-        mapController.move(coordinates[0], 15.0);
+        mapController.move(coordinates[0], 18.0);
       });
     }
   }
@@ -774,8 +774,27 @@ class _DetailActivityState extends State<DetailActivity> {
                             horizontal:
                                 MediaQuery.of(context).size.width * 0.05),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: filterParticipantStatus(widget.data, true)
-                              .map<Widget>((data) => Text(data['user_name']))
+                              .map<Widget>(
+                                (data) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5.0, vertical: 6.0),
+                                  alignment: Alignment.centerLeft,
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromRGBO(1, 98, 104, 1.0),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    data['user_name'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
                               .toList(),
                         ),
                       ),
@@ -791,7 +810,25 @@ class _DetailActivityState extends State<DetailActivity> {
                                 MediaQuery.of(context).size.width * 0.05),
                         child: Column(
                           children: filterParticipantStatus(widget.data, false)
-                              .map<Widget>((data) => Text(data['user_name']))
+                              .map<Widget>(
+                                (data) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5.0, vertical: 6.0),
+                                  alignment: Alignment.centerLeft,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    data['user_name'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
                               .toList(),
                         ),
                       ),
