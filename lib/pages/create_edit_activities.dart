@@ -723,6 +723,10 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                 Container(
                   margin: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width * 0.08,
+                    vertical:
+                        Provider.of<User>(context, listen: false).userRole != 1
+                            ? 30.0
+                            : 0.0,
                   ),
                   child: FilledButton(
                     onPressed: () {
