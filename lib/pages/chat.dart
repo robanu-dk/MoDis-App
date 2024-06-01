@@ -73,8 +73,8 @@ class _ChatState extends State<Chat> {
 
   @override
   void dispose() {
-    super.dispose();
     _polling?.cancel();
+    super.dispose();
   }
 
   void snackbarMessenger(BuildContext context, double leftPadding,
