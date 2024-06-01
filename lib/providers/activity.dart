@@ -37,29 +37,26 @@ class Activity extends ChangeNotifier {
     coordinates = [];
   }
 
-  bool countingDuration() {
-    bool updateLocation = false;
-    seconds++;
+  setDuration(int second, int minute, int hour) {
+    seconds = second;
+    minutes = minute;
+    hours = hour;
+    notifyListeners();
+  }
 
-    if (seconds == 1 || seconds % 10 == 0) {
-      trackingLocation();
+  Future<LatLng> updateCoordinate(
+      List<Map<String, Object?>> coordinates) async {
+    List<LatLng> latlong = [];
+
+    for (var coordinate in coordinates) {
+      latlong.add(LatLng(double.parse(coordinate['latitude'].toString()),
+          double.parse(coordinate['longitude'].toString())));
     }
 
-    if (seconds % 30 == 0) {
-      updateLocation = true;
-    }
-
-    if (seconds >= 60) {
-      minutes++;
-      if (minutes >= 60) {
-        hours++;
-        minutes = 0;
-      }
-      seconds = 0;
-    }
+    this.coordinates = latlong;
     notifyListeners();
 
-    return updateLocation;
+    return latlong[latlong.length - 1];
   }
 
   Future<List> setCoordinatesData(dynamic data, String email) async {
@@ -86,26 +83,6 @@ class Activity extends ChangeNotifier {
       return coordinates;
     } catch (error) {
       throw error.toString();
-    }
-  }
-
-  trackingLocation() async {
-    Position coordinate = await Geolocator.getCurrentPosition();
-    if (coordinates.isNotEmpty) {
-      if (Geolocator.distanceBetween(
-              lastPosition!.latitude,
-              lastPosition!.longitude,
-              coordinate.latitude,
-              coordinate.longitude) >
-          5.0) {
-        lastPosition = coordinate;
-        coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
-        notifyListeners();
-      }
-    } else {
-      lastPosition = coordinate;
-      coordinates.add(LatLng(coordinate.latitude, coordinate.longitude));
-      notifyListeners();
     }
   }
 
@@ -322,6 +299,11 @@ class Activity extends ChangeNotifier {
       List<LatLng> coordinates,
       List<dynamic> participants) async {
     try {
+      Position currentCoordinate = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+        forceAndroidLocationManager: true,
+      );
+
       Uri url = Uri.parse('$apiDomain/finish-activity');
 
       String coordinate = '';
@@ -330,6 +312,9 @@ class Activity extends ChangeNotifier {
       for (var item in coordinates) {
         coordinate += '${item.latitude} ${item.longitude};';
       }
+
+      coordinate +=
+          '${currentCoordinate.latitude} ${currentCoordinate.longitude};';
 
       for (var participant in participants) {
         participantId.add(participant['user_id']);

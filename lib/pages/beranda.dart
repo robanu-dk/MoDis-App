@@ -716,7 +716,7 @@ class _BerandaState extends State<Beranda> {
             },
           ),
         ).then((value) {
-          if (value) {
+          if (value != null) {
             Provider.of<Activity>(context, listen: false).setLoadingGetData();
             getAllActivity();
           }
@@ -829,7 +829,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                             },
                           ),
                         ).then((value) {
-                          if (value) {
+                          if (value != null) {
                             getAllActivity();
                           }
                         });
@@ -875,7 +875,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                       },
                     ),
                   ).then((value) {
-                    if (value) {
+                    if (value != null) {
                       getAllActivity();
                     }
                   });
@@ -1087,7 +1087,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                     },
                                   ),
                                 ).then((value) {
-                                  if (value) {
+                                  if (value != null) {
                                     getAllActivity();
                                   }
                                 });

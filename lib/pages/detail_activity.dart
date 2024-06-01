@@ -1,15 +1,65 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/helper/helper_database.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
+
+@pragma('vm:entry-point')
+void onStart(ServiceInstance service) async {
+  Position? lastPosition;
+  int second = 0;
+  var db = DatabaseHelper.instance;
+
+  await db.delete();
+
+  service.on('stopService').listen((event) {
+    service.stopSelf();
+  });
+
+  Timer.periodic(const Duration(seconds: 1), (timer) async {
+    second++;
+    if (second == 1 || second % 10 == 0) {
+      Position coordinate = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+        forceAndroidLocationManager: true,
+      );
+      if (lastPosition != null) {
+        if (Geolocator.distanceBetween(
+                lastPosition!.latitude,
+                lastPosition!.longitude,
+                coordinate.latitude,
+                coordinate.longitude) >
+            5.0) {
+          Map<String, dynamic> row = {
+            'latitude': coordinate.latitude.toString(),
+            'longitude': coordinate.longitude.toString(),
+          };
+
+          await db.insert(row);
+
+          lastPosition = coordinate;
+        }
+      } else {
+        Map<String, dynamic> row = {
+          'latitude': coordinate.latitude.toString(),
+          'longitude': coordinate.longitude.toString(),
+        };
+
+        await db.insert(row);
+        lastPosition = coordinate;
+      }
+    }
+  });
+}
 
 class DetailActivity extends StatefulWidget {
   const DetailActivity({super.key, required this.activityId});
@@ -42,6 +92,7 @@ class _DetailActivityState extends State<DetailActivity> {
     '12': 'Desember',
   };
   List data = [];
+  FlutterBackgroundService service = FlutterBackgroundService();
 
   @override
   void initState() {
@@ -49,6 +100,20 @@ class _DetailActivityState extends State<DetailActivity> {
     Provider.of<Activity>(context, listen: false).resetDuration();
     Provider.of<Activity>(context, listen: false).resetCoordinates();
     getActivityData();
+    service.configure(
+      iosConfiguration: IosConfiguration(),
+      androidConfiguration: AndroidConfiguration(
+        onStart: onStart,
+        isForegroundMode: false,
+        autoStart: false,
+      ),
+    );
+    resetTrackingCoordinate();
+  }
+
+  resetTrackingCoordinate() async {
+    var db = DatabaseHelper.instance;
+    await db.delete();
   }
 
   getActivityData() {
@@ -198,9 +263,13 @@ class _DetailActivityState extends State<DetailActivity> {
     }
   }
 
+  deletePrefTrackingCoordinate() {}
+
   @override
   void dispose() {
     mapController.dispose();
+    service.invoke('stopService');
+    deletePrefTrackingCoordinate();
     super.dispose();
   }
 
@@ -226,63 +295,26 @@ class _DetailActivityState extends State<DetailActivity> {
     return data[0];
   }
 
-  countingDuration() {
+  countingDuration() async {
+    service.startService();
+    var db = DatabaseHelper.instance;
     setState(() {
-      duration = Timer.periodic(const Duration(seconds: 1), (timer) {
-        bool updateTracking =
-            Provider.of<Activity>(context, listen: false).countingDuration();
+      duration = Timer.periodic(const Duration(seconds: 1), (timer) async {
+        DateTime now = DateTime.now();
+        Duration difference =
+            now.difference(DateTime.parse('${data[0]["date"]} $startTime'));
+        Provider.of<Activity>(context, listen: false).setDuration(
+            difference.inSeconds.remainder(60),
+            difference.inMinutes.remainder(60),
+            difference.inHours);
 
-        if (updateTracking) {
-          List coordinates =
-              Provider.of<Activity>(context, listen: false).coordinates;
-          mapController.move(coordinates[coordinates.length - 1], 18.0);
-        }
-
-        if (DateTime.now().isAfter(
-            DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
-                .add(const Duration(minutes: 30)))) {
-          loadingIndicator(context);
+        List<Map<String, Object?>> coordinates = await db.get();
+        if (coordinates.isNotEmpty) {
           Provider.of<Activity>(context, listen: false)
-              .finishActivity(
-            data[0]['id'].toString(),
-            startTime,
-            endTime,
-            Provider.of<Activity>(context, listen: false).coordinates,
-            presentParticipants,
-          )
-              .then((response) {
-            Navigator.pop(context);
-            if (response['status'] == 'success') {
-              Navigator.pop(context, true);
-
-              snackbarMessenger(
-                context,
-                MediaQuery.of(context).size.width * 0.35,
-                const Color.fromARGB(255, 0, 120, 18),
-                'berhasil menyelesaikan kegiatan',
-                MediaQuery.of(context).size.height * 0.6,
-              );
-            } else {
-              snackbarMessenger(
-                context,
-                MediaQuery.of(context).size.width * 0.35,
-                Colors.red,
-                response['message'],
-                MediaQuery.of(context).size.height * 0.6,
-              );
-            }
-          }).catchError((error) {
-            Navigator.pop(context);
-
-            snackbarMessenger(
-              context,
-              MediaQuery.of(context).size.width * 0.35,
-              Colors.red,
-              'Gagal terhubung ke server',
-              MediaQuery.of(context).size.height * 0.6,
-            );
+              .updateCoordinate(coordinates)
+              .then((lastPosition) {
+            mapController.move(lastPosition, 18.0);
           });
-          duration!.cancel();
         }
       });
     });
