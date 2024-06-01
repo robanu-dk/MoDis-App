@@ -52,19 +52,26 @@ class _ChatState extends State<Chat> {
     super.initState();
     try {
       checkKeyboardMessage();
-      _polling = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-        if (!_stillProgress) {
-          setState(() {
-            _stillProgress = true;
-          });
-          Provider.of<Chats>(context, listen: false)
-              .getAllMessage()
-              .then((value) {
+
+      if (_polling != null) {
+        _polling?.cancel();
+      }
+
+      setState(() {
+        _polling = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+          if (!_stillProgress) {
             setState(() {
-              _stillProgress = false;
+              _stillProgress = true;
             });
-          });
-        }
+            Provider.of<Chats>(context, listen: false)
+                .getAllMessage()
+                .then((value) {
+              setState(() {
+                _stillProgress = false;
+              });
+            });
+          }
+        });
       });
     } catch (error) {
       print('error: $error');
