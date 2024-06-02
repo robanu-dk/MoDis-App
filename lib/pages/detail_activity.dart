@@ -35,13 +35,13 @@ void onStart(ServiceInstance service) async {
                   lastPosition!.longitude,
                   coordinate.latitude,
                   coordinate.longitude) >
-              5.0 &&
+              10.0 &&
           Geolocator.distanceBetween(
                   lastPosition!.latitude,
                   lastPosition!.longitude,
                   coordinate.latitude,
                   coordinate.longitude) <
-              6.0) {
+              11.0) {
         Map<String, dynamic> row = {
           'latitude': coordinate.latitude.toString(),
           'longitude': coordinate.longitude.toString(),
@@ -992,47 +992,51 @@ class _DetailActivityState extends State<DetailActivity> {
                                                                   ),
                                                                   child:
                                                                       ListView(
-                                                                    children:
-                                                                        participants
-                                                                            .map(
-                                                                              (element) => Container(
-                                                                                margin: const EdgeInsets.only(
-                                                                                  left: 5.0,
-                                                                                  right: 5.0,
-                                                                                  top: 3.0,
+                                                                    children: participants
+                                                                        .where((element) => element['email'] != Provider.of<User>(context, listen: false).userEmail)
+                                                                        .toList()
+                                                                        .map(
+                                                                          (element) =>
+                                                                              Container(
+                                                                            margin:
+                                                                                const EdgeInsets.only(
+                                                                              left: 5.0,
+                                                                              right: 5.0,
+                                                                              top: 3.0,
+                                                                            ),
+                                                                            child:
+                                                                                FilledButton(
+                                                                              onPressed: () {
+                                                                                setState(() {
+                                                                                  presentParticipants.add(element);
+                                                                                  participants.remove(element);
+                                                                                });
+                                                                              },
+                                                                              style: const ButtonStyle(
+                                                                                shape: MaterialStatePropertyAll(
+                                                                                  RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.all(
+                                                                                      Radius.circular(8.0),
+                                                                                    ),
+                                                                                    side: BorderSide(),
+                                                                                  ),
                                                                                 ),
-                                                                                child: FilledButton(
-                                                                                  onPressed: () {
-                                                                                    setState(() {
-                                                                                      presentParticipants.add(element);
-                                                                                      participants.remove(element);
-                                                                                    });
-                                                                                  },
-                                                                                  style: const ButtonStyle(
-                                                                                    shape: MaterialStatePropertyAll(
-                                                                                      RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.all(
-                                                                                          Radius.circular(8.0),
-                                                                                        ),
-                                                                                        side: BorderSide(),
-                                                                                      ),
-                                                                                    ),
-                                                                                    backgroundColor: MaterialStatePropertyAll(Colors.white),
-                                                                                    padding: MaterialStatePropertyAll(
-                                                                                      EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
-                                                                                    ),
-                                                                                    alignment: Alignment.centerLeft,
-                                                                                  ),
-                                                                                  child: Text(
-                                                                                    element['user_name'],
-                                                                                    style: const TextStyle(
-                                                                                      color: Colors.black,
-                                                                                    ),
-                                                                                  ),
+                                                                                backgroundColor: MaterialStatePropertyAll(Colors.white),
+                                                                                padding: MaterialStatePropertyAll(
+                                                                                  EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
+                                                                                ),
+                                                                                alignment: Alignment.centerLeft,
+                                                                              ),
+                                                                              child: Text(
+                                                                                element['user_name'],
+                                                                                style: const TextStyle(
+                                                                                  color: Colors.black,
                                                                                 ),
                                                                               ),
-                                                                            )
-                                                                            .toList(),
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                        .toList(),
                                                                   ),
                                                                 ),
                                                                 const Padding(

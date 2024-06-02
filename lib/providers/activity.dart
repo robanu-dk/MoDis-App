@@ -315,8 +315,27 @@ class Activity extends ChangeNotifier {
         coordinate += '${item.latitude} ${item.longitude};';
       }
 
-      coordinate +=
-          '${currentCoordinate.latitude} ${currentCoordinate.longitude};';
+      if (this.coordinates.isNotEmpty) {
+        LatLng lastPosition = this.coordinates[this.coordinates.length - 1];
+        if (Geolocator.distanceBetween(
+                    lastPosition.latitude,
+                    lastPosition.longitude,
+                    currentCoordinate.latitude,
+                    currentCoordinate.longitude) >
+                10 &&
+            Geolocator.distanceBetween(
+                    lastPosition.latitude,
+                    lastPosition.longitude,
+                    currentCoordinate.latitude,
+                    currentCoordinate.longitude) <
+                11) {
+          coordinate +=
+              '${currentCoordinate.latitude} ${currentCoordinate.longitude};';
+        }
+      } else {
+        coordinate +=
+            '${currentCoordinate.latitude} ${currentCoordinate.longitude};';
+      }
 
       for (var participant in participants) {
         participantId.add(participant['user_id']);
