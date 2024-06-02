@@ -16,7 +16,6 @@ import 'package:latlong2/latlong.dart';
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   Position? lastPosition;
-  int second = 0;
   var db = DatabaseHelper.instance;
 
   await db.delete();
@@ -26,37 +25,42 @@ void onStart(ServiceInstance service) async {
   });
 
   Timer.periodic(const Duration(seconds: 1), (timer) async {
-    second++;
-    if (second == 1 || second % 10 == 0) {
-      Position coordinate = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation,
-        forceAndroidLocationManager: true,
-      );
-      if (lastPosition != null) {
-        if (Geolocator.distanceBetween(
-                lastPosition!.latitude,
-                lastPosition!.longitude,
-                coordinate.latitude,
-                coordinate.longitude) >
-            5.0) {
-          Map<String, dynamic> row = {
-            'latitude': coordinate.latitude.toString(),
-            'longitude': coordinate.longitude.toString(),
-          };
-
-          await db.insert(row);
-
-          lastPosition = coordinate;
-        }
-      } else {
+    Position coordinate = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+      forceAndroidLocationManager: true,
+    );
+    if (lastPosition != null) {
+      print(
+          'cekk jarak = ${Geolocator.distanceBetween(lastPosition!.latitude, lastPosition!.longitude, coordinate.latitude, coordinate.longitude)}');
+      if (Geolocator.distanceBetween(
+                  lastPosition!.latitude,
+                  lastPosition!.longitude,
+                  coordinate.latitude,
+                  coordinate.longitude) >
+              5.0 &&
+          Geolocator.distanceBetween(
+                  lastPosition!.latitude,
+                  lastPosition!.longitude,
+                  coordinate.latitude,
+                  coordinate.longitude) <
+              6.0) {
         Map<String, dynamic> row = {
           'latitude': coordinate.latitude.toString(),
           'longitude': coordinate.longitude.toString(),
         };
 
         await db.insert(row);
+
         lastPosition = coordinate;
       }
+    } else {
+      Map<String, dynamic> row = {
+        'latitude': coordinate.latitude.toString(),
+        'longitude': coordinate.longitude.toString(),
+      };
+
+      await db.insert(row);
+      lastPosition = coordinate;
     }
   });
 }
@@ -104,7 +108,7 @@ class _DetailActivityState extends State<DetailActivity> {
       iosConfiguration: IosConfiguration(),
       androidConfiguration: AndroidConfiguration(
         onStart: onStart,
-        isForegroundMode: false,
+        isForegroundMode: true,
         autoStart: false,
       ),
     );
@@ -263,7 +267,11 @@ class _DetailActivityState extends State<DetailActivity> {
     }
   }
 
-  deletePrefTrackingCoordinate() {}
+  deletePrefTrackingCoordinate() async {
+    var db = DatabaseHelper.instance;
+
+    await db.delete();
+  }
 
   @override
   void dispose() {
@@ -313,7 +321,9 @@ class _DetailActivityState extends State<DetailActivity> {
           Provider.of<Activity>(context, listen: false)
               .updateCoordinate(coordinates)
               .then((lastPosition) {
-            mapController.move(lastPosition, 18.0);
+            if (lastPosition != null) {
+              mapController.move(lastPosition, 18.0);
+            }
           });
         }
       });

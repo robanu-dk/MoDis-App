@@ -44,7 +44,7 @@ class Activity extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<LatLng> updateCoordinate(
+  Future<LatLng?> updateCoordinate(
       List<Map<String, Object?>> coordinates) async {
     List<LatLng> latlong = [];
 
@@ -53,10 +53,12 @@ class Activity extends ChangeNotifier {
           double.parse(coordinate['longitude'].toString())));
     }
 
+    bool move = this.coordinates.length < latlong.length;
+
     this.coordinates = latlong;
     notifyListeners();
 
-    return latlong[latlong.length - 1];
+    return move ? latlong[latlong.length - 1] : null;
   }
 
   Future<List> setCoordinatesData(dynamic data, String email) async {
