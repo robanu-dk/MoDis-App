@@ -30,8 +30,6 @@ void onStart(ServiceInstance service) async {
       forceAndroidLocationManager: true,
     );
     if (lastPosition != null) {
-      print(
-          'cekk jarak = ${Geolocator.distanceBetween(lastPosition!.latitude, lastPosition!.longitude, coordinate.latitude, coordinate.longitude)}');
       if (Geolocator.distanceBetween(
                   lastPosition!.latitude,
                   lastPosition!.longitude,
