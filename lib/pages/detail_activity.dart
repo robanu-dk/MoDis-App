@@ -24,34 +24,37 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
+  Position coordinate = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+    forceAndroidLocationManager: false,
+  );
+
+  Map<String, dynamic> row = {
+    'latitude': coordinate.latitude.toString(),
+    'longitude': coordinate.longitude.toString(),
+  };
+
+  await db.insert(row);
+  lastPosition = coordinate;
+
   Timer.periodic(const Duration(seconds: 5), (timer) async {
     Position coordinate = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
       forceAndroidLocationManager: false,
     );
-    if (lastPosition != null) {
-      if (Geolocator.distanceBetween(
-              lastPosition!.latitude,
-              lastPosition!.longitude,
-              coordinate.latitude,
-              coordinate.longitude) >
-          10) {
-        Map<String, dynamic> row = {
-          'latitude': coordinate.latitude.toString(),
-          'longitude': coordinate.longitude.toString(),
-        };
-
-        await db.insert(row);
-
-        lastPosition = coordinate;
-      }
-    } else {
+    if (Geolocator.distanceBetween(
+            lastPosition!.latitude,
+            lastPosition!.longitude,
+            coordinate.latitude,
+            coordinate.longitude) >
+        10) {
       Map<String, dynamic> row = {
         'latitude': coordinate.latitude.toString(),
         'longitude': coordinate.longitude.toString(),
       };
 
       await db.insert(row);
+
       lastPosition = coordinate;
     }
   });
