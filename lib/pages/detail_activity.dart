@@ -24,10 +24,10 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
+  Timer.periodic(const Duration(seconds: 5), (timer) async {
     Position coordinate = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.bestForNavigation,
-      forceAndroidLocationManager: true,
+      desiredAccuracy: LocationAccuracy.high,
+      forceAndroidLocationManager: false,
     );
     if (lastPosition != null) {
       if (Geolocator.distanceBetween(
@@ -202,7 +202,10 @@ class _DetailActivityState extends State<DetailActivity> {
           );
           Navigator.pop(context);
         }
-        Position pos = await Geolocator.getCurrentPosition();
+        Position pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          forceAndroidLocationManager: false,
+        );
         currentPosition = LatLng(pos.latitude, pos.longitude);
         mapController.move(currentPosition, 18.0);
       } else {

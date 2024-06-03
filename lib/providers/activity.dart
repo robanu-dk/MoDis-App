@@ -302,8 +302,8 @@ class Activity extends ChangeNotifier {
       List<dynamic> participants) async {
     try {
       Position currentCoordinate = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation,
-        forceAndroidLocationManager: true,
+        desiredAccuracy: LocationAccuracy.high,
+        forceAndroidLocationManager: false,
       );
 
       Uri url = Uri.parse('$apiDomain/finish-activity');
