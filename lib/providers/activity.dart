@@ -318,20 +318,11 @@ class Activity extends ChangeNotifier {
       if (this.coordinates.isNotEmpty) {
         LatLng lastPosition = this.coordinates[this.coordinates.length - 1];
         if (Geolocator.distanceBetween(
-                            lastPosition.latitude,
-                            lastPosition.longitude,
-                            currentCoordinate.latitude,
-                            currentCoordinate.longitude)
-                        .floor() %
-                    10 ==
-                0 &&
-            Geolocator.distanceBetween(
-                        lastPosition.latitude,
-                        lastPosition.longitude,
-                        currentCoordinate.latitude,
-                        currentCoordinate.longitude)
-                    .floor() !=
-                0) {
+                lastPosition.latitude,
+                lastPosition.longitude,
+                currentCoordinate.latitude,
+                currentCoordinate.longitude) >
+            10) {
           coordinate +=
               '${currentCoordinate.latitude} ${currentCoordinate.longitude};';
         }

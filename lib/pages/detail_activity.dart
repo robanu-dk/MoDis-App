@@ -31,20 +31,11 @@ void onStart(ServiceInstance service) async {
     );
     if (lastPosition != null) {
       if (Geolocator.distanceBetween(
-                          lastPosition!.latitude,
-                          lastPosition!.longitude,
-                          coordinate.latitude,
-                          coordinate.longitude)
-                      .floor() %
-                  10 ==
-              0 &&
-          Geolocator.distanceBetween(
-                      lastPosition!.latitude,
-                      lastPosition!.longitude,
-                      coordinate.latitude,
-                      coordinate.longitude)
-                  .floor() !=
-              0) {
+              lastPosition!.latitude,
+              lastPosition!.longitude,
+              coordinate.latitude,
+              coordinate.longitude) >
+          10) {
         Map<String, dynamic> row = {
           'latitude': coordinate.latitude.toString(),
           'longitude': coordinate.longitude.toString(),
