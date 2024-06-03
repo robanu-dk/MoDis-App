@@ -211,8 +211,6 @@ class _DetailActivityState extends State<DetailActivity> {
         currentPosition = LatLng(pos.latitude, pos.longitude);
         mapController.move(currentPosition, 18.0);
       }
-    } else {
-      setCoordinatesData();
     }
   }
 
