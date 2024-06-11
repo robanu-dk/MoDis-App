@@ -745,6 +745,17 @@ class _DetailActivityState extends State<DetailActivity> {
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
                         Consumer<Activity>(
+                          builder: (context, activity, child) => PolylineLayer(
+                            polylines: [
+                              Polyline(
+                                points: activity.coordinates,
+                                color: const Color.fromARGB(255, 67, 170, 255),
+                                strokeWidth: 6.0,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Consumer<Activity>(
                           builder: (context, activity, child) => MarkerLayer(
                             markers: activity.coordinates
                                 .map<Marker>(
