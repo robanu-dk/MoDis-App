@@ -588,6 +588,66 @@ class _DetailActivityState extends State<DetailActivity> {
                     data[0]['note'] ?? '-',
                     15.0,
                   ),
+                  data.length > 1 &&
+                          !(DateTime.parse(
+                                      '${data[0]["date"]} ${data[0]["end_time"]}')
+                                  .isBefore(DateTime.now()) ||
+                              checkIfDataDone(data))
+                      ? Column(
+                          children: [
+                            rowInformation(
+                              context,
+                              'Daftar Peserta',
+                              ' ',
+                              15.0,
+                            ),
+                            Container(
+                              height: data.length * 30.0 > 200.0
+                                  ? 200.0
+                                  : data.length * 30.0,
+                              margin: EdgeInsets.symmetric(
+                                  horizontal:
+                                      MediaQuery.of(context).size.width * 0.05),
+                              child: ListView(
+                                children: [
+                                  Column(
+                                    children: data
+                                        .where((element) =>
+                                            element['email'] != emailFilter)
+                                        .toList()
+                                        .map<Widget>(
+                                          (data) => Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5.0, vertical: 6.0),
+                                            margin:
+                                                const EdgeInsets.only(top: 8.0),
+                                            alignment: Alignment.centerLeft,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.black),
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                Radius.circular(8.0),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              data['user_name'],
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(),
                   rowInformation(
                     context,
                     'Waktu Mulai',
@@ -661,6 +721,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                       (data) => Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 5.0, vertical: 6.0),
+                                        margin: const EdgeInsets.only(top: 8.0),
                                         alignment: Alignment.centerLeft,
                                         decoration: const BoxDecoration(
                                           color:
@@ -697,6 +758,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                       (data) => Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 5.0, vertical: 6.0),
+                                        margin: const EdgeInsets.only(top: 8.0),
                                         alignment: Alignment.centerLeft,
                                         decoration: const BoxDecoration(
                                           color: Colors.red,
