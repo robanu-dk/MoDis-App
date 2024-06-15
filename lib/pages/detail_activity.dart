@@ -12,6 +12,7 @@ import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
@@ -107,6 +108,7 @@ class _DetailActivityState extends State<DetailActivity> {
         autoStart: false,
       ),
     );
+    WakelockPlus.enable();
     resetTrackingCoordinate();
   }
 
@@ -274,6 +276,7 @@ class _DetailActivityState extends State<DetailActivity> {
     mapController.dispose();
     service.invoke('stopService');
     deletePrefTrackingCoordinate();
+    WakelockPlus.disable();
     super.dispose();
   }
 
