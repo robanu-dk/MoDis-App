@@ -157,6 +157,8 @@ class _VideoState extends State<Video> {
                         TabButton(
                           isActive: _allVideo,
                           onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .removeCurrentSnackBar();
                             setState(() {
                               _allVideo = true;
                               start = 0;
@@ -176,6 +178,8 @@ class _VideoState extends State<Video> {
                         TabButton(
                           isActive: !_allVideo,
                           onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .removeCurrentSnackBar();
                             setState(() {
                               _allVideo = false;
                               start = 0;
@@ -365,6 +369,7 @@ class _VideoState extends State<Video> {
               height: 120,
               child: OutlinedButton(
                 onPressed: () {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   if (_allVideo) {
                     Navigator.push(
                       context,
@@ -656,6 +661,7 @@ class _VideoState extends State<Video> {
             ),
             child: FilledButton(
               onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 setState(() {
                   start = 0;
                   categoryId = '';
@@ -702,6 +708,7 @@ class _VideoState extends State<Video> {
                     padding: const EdgeInsets.symmetric(horizontal: 6.0),
                     child: FilledButton(
                       onPressed: () {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
                         setState(() {
                           start = 0;
                           categoryId = element['id'];

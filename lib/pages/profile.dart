@@ -177,6 +177,7 @@ class _ProfileState extends State<Profile> {
           ),
           OutlinedButtonModis(
             onPressed: () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -222,6 +223,7 @@ class _ProfileState extends State<Profile> {
           ),
           OutlinedButtonModis(
             onPressed: () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               resetValueUbahPassword();
               showDialog(
                 context: context,
@@ -376,6 +378,7 @@ class _ProfileState extends State<Profile> {
           ),
           OutlinedButtonModis(
             onPressed: () async {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               SharedPreferences pref = await SharedPreferences.getInstance();
               if (pref.containsKey('userData')) {
                 pref.clear();
