@@ -54,7 +54,7 @@ class Child extends ChangeNotifier {
     }
   }
 
-  getListAvailableChild() async {
+  Future<dynamic> getListAvailableChild() async {
     try {
       Uri url = Uri.parse('$apiDomain/all-user');
 
@@ -77,6 +77,8 @@ class Child extends ChangeNotifier {
         allAvailableChild = response['data'];
         notifyListeners();
       }
+
+      return response;
     } catch (error) {
       throw error.toString();
     }

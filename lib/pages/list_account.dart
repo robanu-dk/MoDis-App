@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
@@ -22,6 +23,7 @@ class ListAccount extends StatefulWidget {
 class _ListAccountState extends State<ListAccount> {
   String _searchChildBasedAccount = '';
   final FocusNode _fSearchChildBasedAccount = FocusNode();
+  bool isLoad = true;
 
   void snackbarMessenger(BuildContext context, double leftPadding,
       Color backgroundColor, String message) {
@@ -46,6 +48,9 @@ class _ListAccountState extends State<ListAccount> {
   void initState() {
     super.initState();
     Provider.of<Child>(context, listen: false).getListData().then((response) {
+      setState(() {
+        isLoad = false;
+      });
       if (response['status'] == 'error') {
         snackbarMessenger(
           context,
@@ -107,17 +112,36 @@ class _ListAccountState extends State<ListAccount> {
           ),
         ),
       ),
-      body: Consumer<Child>(
-        builder: (context, provider, child) => provider.search(
-                        data: provider.listChild,
-                        filter: _searchChildBasedAccount) !=
-                    null &&
-                provider.listChild.length != 0
-            ? accountButton(provider: provider)
-            : const Center(
-                child: Text('Tidak ada data'),
+      body: isLoad
+          ? Padding(
+              padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.3),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: LoadingIndicator(
+                      indicatorType: Indicator.ballSpinFadeLoader,
+                    ),
+                  ),
+                  Text('loading'),
+                ],
               ),
-      ),
+            )
+          : Consumer<Child>(
+              builder: (context, provider, child) => provider.search(
+                              data: provider.listChild,
+                              filter: _searchChildBasedAccount) !=
+                          null &&
+                      provider.listChild.length != 0
+                  ? accountButton(provider: provider)
+                  : const Center(
+                      child: Text('Tidak ada data'),
+                    ),
+            ),
       floatingActionButton: FloatingActionButtonModis(
         onPressed: () {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();

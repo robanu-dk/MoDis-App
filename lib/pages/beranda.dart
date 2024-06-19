@@ -397,6 +397,17 @@ class _BerandaState extends State<Beranda> {
             ],
           ),
           Container(
+            width: MediaQuery.of(context).size.width,
+            margin: const EdgeInsets.only(left: 10.0, top: 4.0),
+            child: const Text(
+              'Daftar kegiatan saya',
+              style: TextStyle(
+                fontFamily: 'crimson',
+                fontSize: 25.0,
+              ),
+            ),
+          ),
+          Container(
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.width * 0.01),
             child: Row(
@@ -645,7 +656,7 @@ class _BerandaState extends State<Beranda> {
             builder: (context, activity, child) => activity.loadingGetData
                 ? Padding(
                     padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.25),
+                        top: MediaQuery.of(context).size.height * 0.2),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -661,7 +672,7 @@ class _BerandaState extends State<Beranda> {
                       ],
                     ),
                   )
-                : activity.dateActivities.isNotEmpty
+                : filterDate(listDate: activity.dateActivities).isNotEmpty
                     ? Padding(
                         padding: const EdgeInsets.only(bottom: 80.0),
                         child: Column(
@@ -688,7 +699,7 @@ class _BerandaState extends State<Beranda> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [Text('Tidak ada data')],
+                          children: [Text('Tidak ada kegiatan')],
                         ),
                       ),
           ),

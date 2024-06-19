@@ -21,12 +21,52 @@ class AddChildAccount extends StatefulWidget {
 class _AddChildAccountState extends State<AddChildAccount> {
   String _searchAvailableChild = '';
   final FocusNode _fSearchAvailableChild = FocusNode();
-  bool _listAccount = true;
+  bool _listAccount = true, isLoad = true;
+
+  void snackbarMessenger(BuildContext context, double leftPadding,
+      Color backgroundColor, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: EdgeInsets.only(
+          left: leftPadding,
+          right: 9,
+          bottom: MediaQuery.of(context).size.height * 0.7,
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14),
+        ),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    Provider.of<Child>(context, listen: false).getListAvailableChild();
+    Provider.of<Child>(context, listen: false)
+        .getListAvailableChild()
+        .then((response) {
+      setState(() {
+        isLoad = false;
+      });
+      if (response['status'] == 'error') {
+        snackbarMessenger(
+          context,
+          MediaQuery.of(context).size.width * 0.4,
+          Colors.red,
+          'Gagal terhubung server',
+        );
+      }
+    }).catchError((error) {
+      snackbarMessenger(
+        context,
+        MediaQuery.of(context).size.width * 0.4,
+        Colors.red,
+        'Gagal terhubung server',
+      );
+    });
   }
 
   @override
@@ -143,9 +183,28 @@ class _AddChildAccountState extends State<AddChildAccount> {
       body: ListView(
         children: [
           _listAccount
-              ? ListAvailableChild(
-                  searchAvailableChild: _searchAvailableChild,
-                )
+              ? (isLoad
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.3),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: LoadingIndicator(
+                              indicatorType: Indicator.ballSpinFadeLoader,
+                            ),
+                          ),
+                          Text('loading'),
+                        ],
+                      ),
+                    )
+                  : ListAvailableChild(
+                      searchAvailableChild: _searchAvailableChild,
+                    ))
               : const FormCreateAccount(),
         ],
       ),
@@ -207,7 +266,12 @@ class ListAvailableChild extends StatelessWidget {
                           data: provider.allAvailableChild,
                           filter: _searchAvailableChild) !=
                       null &&
-                  provider.allAvailableChild.length != 0
+                  provider
+                          .search(
+                              data: provider.allAvailableChild,
+                              filter: _searchAvailableChild)
+                          .length !=
+                      0
               ? Column(
                   children: provider
                       .search(
@@ -411,9 +475,10 @@ class ListAvailableChild extends StatelessWidget {
                       )
                       .toList(),
                 )
-              : const Padding(
-                  padding: EdgeInsets.only(top: 20.0),
-                  child: Text('data tidak ditemukan'),
+              : Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.25),
+                  child: const Text('data tidak ditemukan'),
                 ),
         )
       ],

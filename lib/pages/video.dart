@@ -285,15 +285,16 @@ class _VideoState extends State<Video> {
                               motivation.videoCategories.length != 0
                           ? videoCategory(motivation)
                           : const Text(''),
-                      loadingContent(16.0),
+                      loadingContent(MediaQuery.of(context).size.height * 0.25),
                     ]
               : [
                   videoCategory(motivation),
                   motivation.listVideo.length != 0
                       ? listVideo(motivation)
-                      : const Padding(
-                          padding: EdgeInsets.only(top: 28.0),
-                          child: Center(
+                      : Padding(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.25),
+                          child: const Center(
                             child: Text('Tidak Ada Video'),
                           ),
                         ),
