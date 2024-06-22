@@ -3,6 +3,7 @@ import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
 import 'package:modis/providers/activity.dart';
@@ -36,7 +37,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
 
   String? dateInput, searchChild;
 
-  bool refresh = true, getData = true;
+  bool refresh = true, getData = true, isError = false;
 
   dynamic data;
 
@@ -68,6 +69,10 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
   }
 
   initData() {
+    setState(() {
+      isError = false;
+    });
+
     Provider.of<Activity>(context, listen: false)
         .getDetailActivities(widget.activityId!)
         .then((response) {
@@ -101,8 +106,12 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
           MediaQuery.of(context).size.width * 0.35,
           Colors.red,
           response['message'],
-          MediaQuery.of(context).size.height * 0.6,
+          MediaQuery.of(context).size.height * 0.72,
         );
+
+        setState(() {
+          isError = true;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(
@@ -110,8 +119,12 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
         MediaQuery.of(context).size.width * 0.35,
         Colors.red,
         'gagal terhubung ke server',
-        MediaQuery.of(context).size.height * 0.6,
+        MediaQuery.of(context).size.height * 0.72,
       );
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
@@ -358,6 +371,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
           children: [
             IconButton(
               onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 Navigator.pop(context);
               },
               icon: const Icon(
@@ -377,493 +391,522 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
           ],
         ),
       ),
-      body: getData
-          ? const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+      body: isError
+          ? ListView(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: LoadingIndicator(
-                        indicatorType: Indicator.ballSpinFadeLoader,
-                      ),
-                    ),
-                    Text('loading')
-                  ],
+                ServerErrorWidget(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                    initData();
+                  },
+                  paddingTop: MediaQuery.of(context).size.height * 0.25,
+                  label: 'Gagal memuat halaman!!!',
                 )
               ],
             )
-          : ListView(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Input(
-                    focusNode: fName,
-                    textController: name,
-                    label: 'Nama Kegiatan',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Input(
-                    focusNode: fDate,
-                    textController: date,
-                    suffixIcon: const Icon(Icons.calendar_month_outlined),
-                    label: 'Tanggal',
-                    border: const OutlineInputBorder(),
-                    readonly: true,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          surfaceTintColor: Colors.white,
-                          backgroundColor: Colors.white,
-                          contentPadding: EdgeInsets.zero,
-                          titlePadding: const EdgeInsets.only(
-                              left: 3.0, right: 3.0, top: 10.0),
-                          scrollable: true,
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 20.0),
-                                child: Text(
-                                  'Pilih Tanggal',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+          : getData
+              ? const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: LoadingIndicator(
+                            indicatorType: Indicator.ballSpinFadeLoader,
+                          ),
+                        ),
+                        Text('loading')
+                      ],
+                    )
+                  ],
+                )
+              : ListView(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05),
+                      child: Input(
+                        focusNode: fName,
+                        textController: name,
+                        label: 'Nama Kegiatan',
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05),
+                      child: Input(
+                        focusNode: fDate,
+                        textController: date,
+                        suffixIcon: const Icon(Icons.calendar_month_outlined),
+                        label: 'Tanggal',
+                        border: const OutlineInputBorder(),
+                        readonly: true,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              surfaceTintColor: Colors.white,
+                              backgroundColor: Colors.white,
+                              contentPadding: EdgeInsets.zero,
+                              titlePadding: const EdgeInsets.only(
+                                  left: 3.0, right: 3.0, top: 10.0),
+                              scrollable: true,
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 20.0),
+                                    child: Text(
+                                      'Pilih Tanggal',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      fDate.unfocus();
+                                    },
+                                    icon: const Icon(Ionicons.md_close),
+                                  )
+                                ],
+                              ),
+                              content: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: CalendarDatePicker(
+                                  initialDate: dateInput == null
+                                      ? DateTime.now()
+                                      : DateTime(
+                                          int.parse(dateInput!.split('-')[0]),
+                                          int.parse(dateInput!.split('-')[1]),
+                                          int.parse(dateInput!.split('-')[2])),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime(2100),
+                                  onDateChanged: (selectedDate) {
+                                    date.text = convertDateToString(
+                                        selectedDate.toString().split(' ')[0]);
+                                    setState(() {
+                                      dateInput =
+                                          selectedDate.toString().split(' ')[0];
+                                    });
+                                    Navigator.pop(context);
+                                  },
                                 ),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  fDate.unfocus();
-                                },
-                                icon: const Icon(Ionicons.md_close),
-                              )
-                            ],
-                          ),
-                          content: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: CalendarDatePicker(
-                              initialDate: dateInput == null
-                                  ? DateTime.now()
-                                  : DateTime(
-                                      int.parse(dateInput!.split('-')[0]),
-                                      int.parse(dateInput!.split('-')[1]),
-                                      int.parse(dateInput!.split('-')[2])),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2100),
-                              onDateChanged: (selectedDate) {
-                                date.text = convertDateToString(
-                                    selectedDate.toString().split(' ')[0]);
-                                setState(() {
-                                  dateInput =
-                                      selectedDate.toString().split(' ')[0];
-                                });
-                                Navigator.pop(context);
-                              },
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width * 0.05,
-                    right: MediaQuery.of(context).size.width * 0.05,
-                  ),
-                  child: Input(
-                    focusNode: fStartTime,
-                    textController: startTime,
-                    label: 'Waktu Mulai',
-                    border: const OutlineInputBorder(),
-                    readonly: true,
-                    suffixIcon: const Icon(Icons.access_time_sharp),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      showDialog(
-                        context: context,
-                        builder: (context) => TimePickerDialog(
-                          initialTime: TimeOfDay.now(),
-                          confirmText: 'Pilih',
-                          cancelText: 'Batal',
-                        ),
-                      ).then((value) {
-                        fStartTime.unfocus();
-                        if (value != null) {
-                          startTime.text =
-                              '${value.hour.toString().length == 1 ? "0${value.hour}" : value.hour}:${value.minute.toString().length == 1 ? "0${value.minute}" : value.minute}';
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Input(
-                    focusNode: fEndTime,
-                    textController: endTime,
-                    label: 'Waktu Selesai',
-                    border: const OutlineInputBorder(),
-                    readonly: true,
-                    suffixIcon: const Icon(Icons.access_time_sharp),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      showDialog(
-                        context: context,
-                        builder: (context) => TimePickerDialog(
-                          initialTime: TimeOfDay.now(),
-                          confirmText: 'Pilih',
-                          cancelText: 'Batal',
-                        ),
-                      ).then((value) {
-                        fEndTime.unfocus();
-                        if (value != null) {
-                          endTime.text =
-                              '${value.hour.toString().length == 1 ? "0${value.hour}" : value.hour}:${value.minute.toString().length == 1 ? "0${value.minute}" : value.minute}';
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Input(
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    focusNode: fNote,
-                    textController: note,
-                    label: 'Keterangan',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                Provider.of<User>(context, listen: false).userRole == 1
-                    ? Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.05,
-                          vertical: 20.0,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 10.0,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromRGBO(120, 120, 120, 1),
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10.0),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            FilledButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context)
-                                    .removeCurrentSnackBar();
-                                Provider.of<Child>(context, listen: false)
-                                    .getListData()
-                                    .then((response) {
-                                  if (response['status'] == 'error') {
-                                    snackbarMessenger(
-                                      context,
-                                      MediaQuery.of(context).size.width * 0.35,
-                                      Colors.red,
-                                      'gagal terhubung ke server',
-                                      MediaQuery.of(context).size.height * 0.77,
-                                    );
-                                  }
-                                }).catchError((error) {
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width * 0.05,
+                        right: MediaQuery.of(context).size.width * 0.05,
+                      ),
+                      child: Input(
+                        focusNode: fStartTime,
+                        textController: startTime,
+                        label: 'Waktu Mulai',
+                        border: const OutlineInputBorder(),
+                        readonly: true,
+                        suffixIcon: const Icon(Icons.access_time_sharp),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                          showDialog(
+                            context: context,
+                            builder: (context) => TimePickerDialog(
+                              initialTime: TimeOfDay.now(),
+                              confirmText: 'Pilih',
+                              cancelText: 'Batal',
+                            ),
+                          ).then((value) {
+                            fStartTime.unfocus();
+                            if (value != null) {
+                              startTime.text =
+                                  '${value.hour.toString().length == 1 ? "0${value.hour}" : value.hour}:${value.minute.toString().length == 1 ? "0${value.minute}" : value.minute}';
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05),
+                      child: Input(
+                        focusNode: fEndTime,
+                        textController: endTime,
+                        label: 'Waktu Selesai',
+                        border: const OutlineInputBorder(),
+                        readonly: true,
+                        suffixIcon: const Icon(Icons.access_time_sharp),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                          showDialog(
+                            context: context,
+                            builder: (context) => TimePickerDialog(
+                              initialTime: TimeOfDay.now(),
+                              confirmText: 'Pilih',
+                              cancelText: 'Batal',
+                            ),
+                          ).then((value) {
+                            fEndTime.unfocus();
+                            if (value != null) {
+                              endTime.text =
+                                  '${value.hour.toString().length == 1 ? "0${value.hour}" : value.hour}:${value.minute.toString().length == 1 ? "0${value.minute}" : value.minute}';
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05),
+                      child: Input(
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        focusNode: fNote,
+                        textController: note,
+                        label: 'Keterangan',
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    Provider.of<User>(context, listen: false).userRole == 1
+                        ? Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.05,
+                              vertical: 20.0,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 10.0,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromRGBO(120, 120, 120, 1),
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10.0),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                FilledButton(
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context)
+                                        .removeCurrentSnackBar();
+                                    Provider.of<Child>(context, listen: false)
+                                        .getListData()
+                                        .then((response) {
+                                      if (response['status'] == 'error') {
+                                        snackbarMessenger(
+                                          context,
+                                          MediaQuery.of(context).size.width *
+                                              0.35,
+                                          Colors.red,
+                                          'gagal terhubung ke server',
+                                          MediaQuery.of(context).size.height *
+                                              0.77,
+                                        );
+                                      }
+                                    }).catchError((error) {
+                                      snackbarMessenger(
+                                        context,
+                                        MediaQuery.of(context).size.width *
+                                            0.35,
+                                        Colors.red,
+                                        'gagal terhubung ke server',
+                                        MediaQuery.of(context).size.height *
+                                            0.77,
+                                      );
+                                    });
+                                    showListChildAccount();
+                                  },
+                                  style: const ButtonStyle(
+                                    shape: MaterialStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8.0),
+                                        ),
+                                      ),
+                                    ),
+                                    backgroundColor: MaterialStatePropertyAll(
+                                      Color.fromRGBO(248, 198, 48, 1),
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_circle_outline_outlined),
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 6.0),
+                                        child: Text(
+                                          'Tambah Peserta',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                refresh
+                                    ? Column(
+                                        children: participantList
+                                            .map<Widget>(
+                                              (participant) => FilledButton(
+                                                onPressed: () {
+                                                  participantList
+                                                      .remove(participant);
+                                                  participantIdList.remove(
+                                                      participant['id']);
+                                                  setState(() {
+                                                    refresh = true;
+                                                  });
+                                                },
+                                                style: const ButtonStyle(
+                                                  shape:
+                                                      MaterialStatePropertyAll(
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                        Radius.circular(8.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  padding:
+                                                      MaterialStatePropertyAll(
+                                                    EdgeInsets.symmetric(
+                                                      horizontal: 8.0,
+                                                      vertical: 6.0,
+                                                    ),
+                                                  ),
+                                                  backgroundColor:
+                                                      MaterialStatePropertyAll(
+                                                    Color.fromRGBO(
+                                                        1, 98, 104, 1.0),
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    participant['profile_image'] ==
+                                                            null
+                                                        ? ClipRRect(
+                                                            borderRadius:
+                                                                const BorderRadius
+                                                                    .all(
+                                                                    Radius.circular(
+                                                                        30.0)),
+                                                            child: Image.asset(
+                                                              'images/default_profile_image.jpg',
+                                                              height: 30.0,
+                                                              width: 30.0,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                          )
+                                                        : ClipRRect(
+                                                            borderRadius:
+                                                                const BorderRadius
+                                                                    .all(
+                                                                    Radius.circular(
+                                                                        30.0)),
+                                                            child:
+                                                                Image.network(
+                                                              'https://modis.techcreator.my.id/${participant["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                              height: 30.0,
+                                                              width: 30.0,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                          ),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                        left: 10.0,
+                                                      ),
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width -
+                                                              130,
+                                                      child: Text(
+                                                        participant['name'],
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                    const Icon(
+                                                        Ionicons.md_close)
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      )
+                                    : Container(),
+                              ],
+                            ),
+                          )
+                        : Container(),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.08,
+                        vertical: Provider.of<User>(context, listen: false)
+                                    .userRole !=
+                                1
+                            ? 30.0
+                            : 0.0,
+                      ),
+                      child: FilledButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                          String dateNow =
+                              DateTime.now().toString().split(' ')[0];
+                          if (name.text == '' ||
+                              dateInput == null ||
+                              date.text == '' ||
+                              startTime.text == '' ||
+                              endTime.text == '') {
+                            snackbarMessenger(
+                              context,
+                              MediaQuery.of(context).size.width * 0.35,
+                              Colors.red,
+                              'Terdapat data yang belum terisi!!!',
+                              MediaQuery.of(context).size.height * 0.75,
+                            );
+                          } else if (dateNow.contains(dateInput!) &&
+                              int.parse(startTime.text.split(':')[0]) <=
+                                  TimeOfDay.now().hour) {
+                            snackbarMessenger(
+                              context,
+                              MediaQuery.of(context).size.width * 0.35,
+                              Colors.red,
+                              'Salah memilih tanggal dan waktu!!!',
+                              MediaQuery.of(context).size.height * 0.75,
+                            );
+                          } else if ((int.parse(startTime.text.split(':')[0]) >
+                                  int.parse(endTime.text.split(':')[0]) ||
+                              ((int.parse(startTime.text.split(':')[0]) ==
+                                      int.parse(endTime.text.split(':')[0])) &&
+                                  (int.parse(startTime.text.split(':')[1]) >
+                                      int.parse(
+                                          endTime.text.split(':')[1]))))) {
+                            snackbarMessenger(
+                              context,
+                              MediaQuery.of(context).size.width * 0.35,
+                              Colors.red,
+                              'Waktu mulai harus sebelum waktu selesai!!!',
+                              MediaQuery.of(context).size.height * 0.75,
+                            );
+                          } else {
+                            loadingIndicator(context);
+                            if (data == null) {
+                              Provider.of<Activity>(context, listen: false)
+                                  .saveActivity(
+                                name.text,
+                                dateInput!,
+                                startTime.text,
+                                endTime.text,
+                                note.text,
+                                participantIdList,
+                              )
+                                  .then((response) {
+                                Navigator.pop(context);
+                                if (response['status'] == 'success') {
+                                  Navigator.pop(context, true);
+                                  snackbarMessenger(
+                                    context,
+                                    MediaQuery.of(context).size.width * 0.35,
+                                    const Color.fromARGB(255, 0, 120, 18),
+                                    'berhasil menyimpan kegiatan',
+                                    MediaQuery.of(context).size.height * 0.72,
+                                  );
+                                } else {
                                   snackbarMessenger(
                                     context,
                                     MediaQuery.of(context).size.width * 0.35,
                                     Colors.red,
-                                    'gagal terhubung ke server',
+                                    response['message'],
                                     MediaQuery.of(context).size.height * 0.77,
                                   );
-                                });
-                                showListChildAccount();
-                              },
-                              style: const ButtonStyle(
-                                shape: MaterialStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(8.0),
-                                    ),
-                                  ),
-                                ),
-                                backgroundColor: MaterialStatePropertyAll(
-                                  Color.fromRGBO(248, 198, 48, 1),
-                                ),
-                              ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add_circle_outline_outlined),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 6.0),
-                                    child: Text(
-                                      'Tambah Peserta',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            refresh
-                                ? Column(
-                                    children: participantList
-                                        .map<Widget>(
-                                          (participant) => FilledButton(
-                                            onPressed: () {
-                                              participantList
-                                                  .remove(participant);
-                                              participantIdList
-                                                  .remove(participant['id']);
-                                              setState(() {
-                                                refresh = true;
-                                              });
-                                            },
-                                            style: const ButtonStyle(
-                                              shape: MaterialStatePropertyAll(
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                    Radius.circular(8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                              padding: MaterialStatePropertyAll(
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 8.0,
-                                                  vertical: 6.0,
-                                                ),
-                                              ),
-                                              backgroundColor:
-                                                  MaterialStatePropertyAll(
-                                                Color.fromRGBO(1, 98, 104, 1.0),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                participant['profile_image'] ==
-                                                        null
-                                                    ? ClipRRect(
-                                                        borderRadius:
-                                                            const BorderRadius
-                                                                .all(
-                                                                Radius.circular(
-                                                                    30.0)),
-                                                        child: Image.asset(
-                                                          'images/default_profile_image.jpg',
-                                                          height: 30.0,
-                                                          width: 30.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      )
-                                                    : ClipRRect(
-                                                        borderRadius:
-                                                            const BorderRadius
-                                                                .all(
-                                                                Radius.circular(
-                                                                    30.0)),
-                                                        child: Image.network(
-                                                          'https://modis.techcreator.my.id/${participant["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
-                                                          height: 30.0,
-                                                          width: 30.0,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    left: 10.0,
-                                                  ),
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width -
-                                                      130,
-                                                  child: Text(
-                                                    participant['name'],
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                const Icon(Ionicons.md_close)
-                                              ],
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  )
-                                : Container(),
-                          ],
+                                }
+                              }).catchError((error) {
+                                Navigator.pop(context);
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.35,
+                                  Colors.red,
+                                  'gagal terhubung ke server',
+                                  MediaQuery.of(context).size.height * 0.77,
+                                );
+                              });
+                            } else {
+                              Provider.of<Activity>(context, listen: false)
+                                  .updateActivity(
+                                int.parse(data[0]['id'].toString()),
+                                name.text,
+                                dateInput!,
+                                startTime.text,
+                                endTime.text,
+                                note.text,
+                                participantIdList,
+                              )
+                                  .then((response) {
+                                Navigator.pop(context);
+                                if (response['status'] == 'success') {
+                                  Navigator.pop(context, true);
+                                  snackbarMessenger(
+                                    context,
+                                    MediaQuery.of(context).size.width * 0.35,
+                                    const Color.fromARGB(255, 0, 120, 18),
+                                    'berhasil menyimpan kegiatan',
+                                    MediaQuery.of(context).size.height * 0.72,
+                                  );
+                                } else {
+                                  snackbarMessenger(
+                                    context,
+                                    MediaQuery.of(context).size.width * 0.35,
+                                    Colors.red,
+                                    response['message'],
+                                    MediaQuery.of(context).size.height * 0.77,
+                                  );
+                                }
+                              }).catchError((error) {
+                                Navigator.pop(context);
+                                snackbarMessenger(
+                                  context,
+                                  MediaQuery.of(context).size.width * 0.35,
+                                  Colors.red,
+                                  'gagal terhubung ke server',
+                                  MediaQuery.of(context).size.height * 0.77,
+                                );
+                              });
+                            }
+                          }
+                        },
+                        style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(
+                                Color.fromRGBO(1, 98, 104, 1.0))),
+                        child: Text(
+                          data == null ? 'Simpan' : 'Perbarui',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      )
-                    : Container(),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.08,
-                    vertical:
-                        Provider.of<User>(context, listen: false).userRole != 1
-                            ? 30.0
-                            : 0.0,
-                  ),
-                  child: FilledButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      String dateNow = DateTime.now().toString().split(' ')[0];
-                      if (name.text == '' ||
-                          dateInput == null ||
-                          date.text == '' ||
-                          startTime.text == '' ||
-                          endTime.text == '') {
-                        snackbarMessenger(
-                          context,
-                          MediaQuery.of(context).size.width * 0.35,
-                          Colors.red,
-                          'Terdapat data yang belum terisi!!!',
-                          MediaQuery.of(context).size.height * 0.75,
-                        );
-                      } else if (dateNow.contains(dateInput!) &&
-                          int.parse(startTime.text.split(':')[0]) <=
-                              TimeOfDay.now().hour) {
-                        snackbarMessenger(
-                          context,
-                          MediaQuery.of(context).size.width * 0.35,
-                          Colors.red,
-                          'Salah memilih tanggal dan waktu!!!',
-                          MediaQuery.of(context).size.height * 0.75,
-                        );
-                      } else if ((int.parse(startTime.text.split(':')[0]) >
-                              int.parse(endTime.text.split(':')[0]) ||
-                          ((int.parse(startTime.text.split(':')[0]) ==
-                                  int.parse(endTime.text.split(':')[0])) &&
-                              (int.parse(startTime.text.split(':')[1]) >
-                                  int.parse(endTime.text.split(':')[1]))))) {
-                        snackbarMessenger(
-                          context,
-                          MediaQuery.of(context).size.width * 0.35,
-                          Colors.red,
-                          'Waktu mulai harus sebelum waktu selesai!!!',
-                          MediaQuery.of(context).size.height * 0.75,
-                        );
-                      } else {
-                        loadingIndicator(context);
-                        if (data == null) {
-                          Provider.of<Activity>(context, listen: false)
-                              .saveActivity(
-                            name.text,
-                            dateInput!,
-                            startTime.text,
-                            endTime.text,
-                            note.text,
-                            participantIdList,
-                          )
-                              .then((response) {
-                            Navigator.pop(context);
-                            if (response['status'] == 'success') {
-                              Navigator.pop(context, true);
-                              snackbarMessenger(
-                                context,
-                                MediaQuery.of(context).size.width * 0.35,
-                                const Color.fromARGB(255, 0, 120, 18),
-                                'berhasil menyimpan kegiatan',
-                                MediaQuery.of(context).size.height * 0.6,
-                              );
-                            } else {
-                              snackbarMessenger(
-                                context,
-                                MediaQuery.of(context).size.width * 0.35,
-                                Colors.red,
-                                response['message'],
-                                MediaQuery.of(context).size.height * 0.77,
-                              );
-                            }
-                          }).catchError((error) {
-                            Navigator.pop(context);
-                            snackbarMessenger(
-                              context,
-                              MediaQuery.of(context).size.width * 0.35,
-                              Colors.red,
-                              'gagal terhubung ke server',
-                              MediaQuery.of(context).size.height * 0.77,
-                            );
-                          });
-                        } else {
-                          Provider.of<Activity>(context, listen: false)
-                              .updateActivity(
-                            int.parse(data[0]['id'].toString()),
-                            name.text,
-                            dateInput!,
-                            startTime.text,
-                            endTime.text,
-                            note.text,
-                            participantIdList,
-                          )
-                              .then((response) {
-                            Navigator.pop(context);
-                            if (response['status'] == 'success') {
-                              Navigator.pop(context, true);
-                              snackbarMessenger(
-                                context,
-                                MediaQuery.of(context).size.width * 0.35,
-                                const Color.fromARGB(255, 0, 120, 18),
-                                'berhasil menyimpan kegiatan',
-                                MediaQuery.of(context).size.height * 0.6,
-                              );
-                            } else {
-                              snackbarMessenger(
-                                context,
-                                MediaQuery.of(context).size.width * 0.35,
-                                Colors.red,
-                                response['message'],
-                                MediaQuery.of(context).size.height * 0.77,
-                              );
-                            }
-                          }).catchError((error) {
-                            Navigator.pop(context);
-                            snackbarMessenger(
-                              context,
-                              MediaQuery.of(context).size.width * 0.35,
-                              Colors.red,
-                              'gagal terhubung ke server',
-                              MediaQuery.of(context).size.height * 0.77,
-                            );
-                          });
-                        }
-                      }
-                    },
-                    style: const ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
-                            Color.fromRGBO(1, 98, 104, 1.0))),
-                    child: Text(
-                      data == null ? 'Simpan' : 'Perbarui',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
       backgroundColor: Colors.white,
     );
   }

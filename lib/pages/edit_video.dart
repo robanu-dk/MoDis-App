@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/providers/motivation.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,7 @@ class _EditVideoState extends State<EditVideo> {
   final TextEditingController title = TextEditingController(),
       description = TextEditingController();
   int? category;
-  bool updateThumbnail = false, updateVideo = false;
+  bool updateThumbnail = false, updateVideo = false, isError = false;
   File? thumbnail, video;
   late VideoPlayerController videoPlayerController;
   ChewieController? chewieController;
@@ -87,6 +88,10 @@ class _EditVideoState extends State<EditVideo> {
   }
 
   Future<void> loadVideo() async {
+    setState(() {
+      isError = false;
+    });
+
     try {
       videoPlayerController = updateVideo
           ? VideoPlayerController.file(video!)
@@ -108,13 +113,9 @@ class _EditVideoState extends State<EditVideo> {
         );
       });
     } catch (error) {
-      // snackbarMessenger(
-      //   context,
-      //   MediaQuery.of(context).size.width * 0.5,
-      //   Colors.red,
-      //   'Gagal memutar video',
-      //   MediaQuery.of(context).size.height * 0.6,
-      // );
+      setState(() {
+        isError = true;
+      });
     }
   }
 
@@ -383,20 +384,32 @@ class _EditVideoState extends State<EditVideo> {
                         height: MediaQuery.of(context).size.width * 9 / 16,
                         child: Chewie(controller: chewieController!),
                       )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: LoadingIndicator(
-                              indicatorType: Indicator.ballSpinFadeLoader,
-                            ),
+                    : isError
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ServerErrorWidget(
+                                  onPressed: () {
+                                    loadVideo();
+                                  },
+                                  label: 'Gagal memuat preview video!!!')
+                            ],
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: LoadingIndicator(
+                                  indicatorType: Indicator.ballSpinFadeLoader,
+                                ),
+                              ),
+                              Text('loading'),
+                            ],
                           ),
-                          Text('loading'),
-                        ],
-                      ),
               ],
             ),
           ),

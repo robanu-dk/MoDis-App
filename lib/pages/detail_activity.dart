@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/helper/helper_database.dart';
 import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/user.dart';
@@ -70,7 +71,7 @@ class DetailActivity extends StatefulWidget {
 }
 
 class _DetailActivityState extends State<DetailActivity> {
-  bool start = false, getData = true;
+  bool start = false, getData = true, isError = false;
   Timer? duration;
   MapController mapController = MapController();
   LatLng currentPosition = const LatLng(-6.175392, 106.827183);
@@ -118,6 +119,10 @@ class _DetailActivityState extends State<DetailActivity> {
   }
 
   getActivityData() {
+    setState(() {
+      isError = false;
+    });
+
     Provider.of<Activity>(context, listen: false)
         .getDetailActivities(widget.activityId)
         .then((response) {
@@ -136,8 +141,12 @@ class _DetailActivityState extends State<DetailActivity> {
           MediaQuery.of(context).size.width * 0.35,
           Colors.red,
           response['message'],
-          MediaQuery.of(context).size.height * 0.6,
+          MediaQuery.of(context).size.height * 0.7,
         );
+
+        setState(() {
+          isError = true;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(
@@ -145,8 +154,12 @@ class _DetailActivityState extends State<DetailActivity> {
         MediaQuery.of(context).size.width * 0.35,
         Colors.red,
         'gagal terhubung ke server',
-        MediaQuery.of(context).size.height * 0.6,
+        MediaQuery.of(context).size.height * 0.7,
       );
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
@@ -194,7 +207,7 @@ class _DetailActivityState extends State<DetailActivity> {
             MediaQuery.of(context).size.width * 0.35,
             Colors.red,
             'gagal memberikan izin mengakses lokasi',
-            MediaQuery.of(context).size.height * 0.6,
+            MediaQuery.of(context).size.height * 0.7,
           );
           Navigator.pop(context);
         }
@@ -399,6 +412,7 @@ class _DetailActivityState extends State<DetailActivity> {
             IconButton(
               onPressed: () {
                 if (!start) {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   Navigator.pop(context);
                 }
               },
@@ -420,204 +434,337 @@ class _DetailActivityState extends State<DetailActivity> {
         ),
         paddingHeader: 1.5,
       ),
-      body: getData
-          ? const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+      body: isError
+          ? ListView(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: LoadingIndicator(
-                        indicatorType: Indicator.ballSpinFadeLoader,
-                      ),
-                    ),
-                    Text('loading')
-                  ],
+                ServerErrorWidget(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                    getActivityData();
+                  },
+                  paddingTop: MediaQuery.of(context).size.height * 0.25,
+                  label: 'Gagal memuat halaman!!!',
                 )
               ],
             )
-          : PopScope(
-              canPop: !start,
-              child: ListView(
-                children: [
-                  data.length > 1 &&
-                          Provider.of<User>(context, listen: false).userRole ==
-                              1 &&
-                          (DateTime.now()
-                                  .add(const Duration(minutes: 30))
-                                  .isAfter(DateTime.parse(
-                                      '${data[0]["date"]} ${data[0]["end_time"]}')) ||
-                              checkIfDataDone(data))
-                      ? Container(
-                          margin: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.05),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              OutlinedButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      surfaceTintColor: Colors.white,
-                                      backgroundColor: Colors.white,
-                                      titlePadding: const EdgeInsets.only(
-                                          left: 20.0, right: 18.0, top: 10.0),
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            'Pilih Akun',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16.0,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            icon: const Icon(Ionicons.md_close),
-                                          ),
-                                        ],
-                                      ),
-                                      content: SizedBox(
-                                        height: data.length * 50 > 300
-                                            ? 300
-                                            : (data.isEmpty
-                                                ? 100
-                                                : double.parse(
-                                                    (data.length * 50)
-                                                        .toString())),
-                                        child: ListView(
-                                          children: data
-                                              .map<Widget>(
-                                                (data) => OutlinedButton(
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      emailFilter =
-                                                          data['email'];
-                                                      Navigator.pop(context);
-                                                    });
-                                                  },
-                                                  style: const ButtonStyle(
-                                                    shape:
-                                                        MaterialStatePropertyAll(
-                                                      RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                          Radius.circular(8.0),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    padding:
-                                                        MaterialStatePropertyAll(
-                                                      EdgeInsets.symmetric(
-                                                          horizontal: 10.0),
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        data['user_name'],
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                style: const ButtonStyle(
-                                  shape: MaterialStatePropertyAll(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                    ),
-                                  ),
-                                  padding: MaterialStatePropertyAll(
-                                      EdgeInsets.symmetric(
-                                          horizontal: 10.0, vertical: 3.0)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.filter_list_outlined,
-                                      color: Colors.black,
-                                    ),
-                                    Text(
-                                      filter(data, emailFilter)['user_name'],
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
+          : getData
+              ? const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: LoadingIndicator(
+                            indicatorType: Indicator.ballSpinFadeLoader,
                           ),
-                        )
-                      : Container(),
-                  rowInformation(
-                    context,
-                    'Nama Aktivitas',
-                    data[0]['name'].toString(),
-                    25.0,
-                  ),
-                  rowInformation(
-                    context,
-                    'Waktu Pelaksanaan',
-                    '${convertDateToString(data[0]["date"].toString())} (${handleTime(data[0]["start_time"].toString())} - ${handleTime(data[0]["end_time"].toString())})',
-                    15.0,
-                  ),
-                  rowInformation(
-                    context,
-                    'Keterangan',
-                    data[0]['note'] ?? '-',
-                    15.0,
-                  ),
-                  data.length > 1 &&
-                          !(DateTime.parse(
-                                      '${data[0]["date"]} ${data[0]["end_time"]}')
-                                  .isBefore(DateTime.now()) ||
-                              checkIfDataDone(data))
-                      ? Column(
-                          children: [
-                            rowInformation(
-                              context,
-                              'Daftar Peserta',
-                              ' ',
-                              15.0,
-                            ),
-                            Container(
-                              height: data.length * 30.0 > 200.0
-                                  ? 200.0
-                                  : data.length * 30.0,
+                        ),
+                        Text('loading')
+                      ],
+                    )
+                  ],
+                )
+              : PopScope(
+                  canPop: !start,
+                  child: ListView(
+                    children: [
+                      data.length > 1 &&
+                              Provider.of<User>(context, listen: false)
+                                      .userRole ==
+                                  1 &&
+                              (DateTime.now()
+                                      .add(const Duration(minutes: 30))
+                                      .isAfter(DateTime.parse(
+                                          '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                                  checkIfDataDone(data))
+                          ? Container(
                               margin: EdgeInsets.symmetric(
                                   horizontal:
                                       MediaQuery.of(context).size.width * 0.05),
-                              child: ListView(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Column(
-                                    children: data
-                                        .where((element) =>
-                                            element['email'] != emailFilter)
-                                        .toList()
+                                  OutlinedButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          surfaceTintColor: Colors.white,
+                                          backgroundColor: Colors.white,
+                                          titlePadding: const EdgeInsets.only(
+                                              left: 20.0,
+                                              right: 18.0,
+                                              top: 10.0),
+                                          title: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                'Pilih Akun',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                icon: const Icon(
+                                                    Ionicons.md_close),
+                                              ),
+                                            ],
+                                          ),
+                                          content: SizedBox(
+                                            height: data.length * 50 > 300
+                                                ? 300
+                                                : (data.isEmpty
+                                                    ? 100
+                                                    : double.parse(
+                                                        (data.length * 50)
+                                                            .toString())),
+                                            child: ListView(
+                                              children: data
+                                                  .map<Widget>(
+                                                    (data) => OutlinedButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          emailFilter =
+                                                              data['email'];
+                                                          Navigator.pop(
+                                                              context);
+                                                        });
+                                                      },
+                                                      style: const ButtonStyle(
+                                                        shape:
+                                                            MaterialStatePropertyAll(
+                                                          RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(
+                                                              Radius.circular(
+                                                                  8.0),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        padding:
+                                                            MaterialStatePropertyAll(
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 10.0),
+                                                        ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Text(
+                                                            data['user_name'],
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                            ),
+                                                            textAlign:
+                                                                TextAlign.left,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: const ButtonStyle(
+                                      shape: MaterialStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                      padding: MaterialStatePropertyAll(
+                                          EdgeInsets.symmetric(
+                                              horizontal: 10.0, vertical: 3.0)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.filter_list_outlined,
+                                          color: Colors.black,
+                                        ),
+                                        Text(
+                                          filter(
+                                              data, emailFilter)['user_name'],
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(),
+                      rowInformation(
+                        context,
+                        'Nama Aktivitas',
+                        data[0]['name'].toString(),
+                        25.0,
+                      ),
+                      rowInformation(
+                        context,
+                        'Waktu Pelaksanaan',
+                        '${convertDateToString(data[0]["date"].toString())} (${handleTime(data[0]["start_time"].toString())} - ${handleTime(data[0]["end_time"].toString())})',
+                        15.0,
+                      ),
+                      rowInformation(
+                        context,
+                        'Keterangan',
+                        data[0]['note'] ?? '-',
+                        15.0,
+                      ),
+                      data.length > 1 &&
+                              !(DateTime.parse(
+                                          '${data[0]["date"]} ${data[0]["end_time"]}')
+                                      .isBefore(DateTime.now()) ||
+                                  checkIfDataDone(data))
+                          ? Column(
+                              children: [
+                                rowInformation(
+                                  context,
+                                  'Daftar Peserta',
+                                  ' ',
+                                  15.0,
+                                ),
+                                Container(
+                                  height: data.length * 30.0 > 200.0
+                                      ? 200.0
+                                      : data.length * 30.0,
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.05),
+                                  child: ListView(
+                                    children: [
+                                      Column(
+                                        children: data
+                                            .where((element) =>
+                                                element['email'] != emailFilter)
+                                            .toList()
+                                            .map<Widget>(
+                                              (data) => Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0,
+                                                        vertical: 6.0),
+                                                margin: const EdgeInsets.only(
+                                                    top: 8.0),
+                                                alignment: Alignment.centerLeft,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.black),
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                    Radius.circular(8.0),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  data['user_name'],
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Container(),
+                      rowInformation(
+                        context,
+                        'Waktu Mulai',
+                        DateTime.now().add(const Duration(minutes: 30)).isAfter(
+                                    DateTime.parse(
+                                        '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                                checkIfDataDone(data)
+                            ? (filter(
+                                    data, emailFilter)['start_activity_time'] ??
+                                '-')
+                            : (startTime == '' ? '-' : startTime),
+                        15.0,
+                      ),
+                      rowInformation(
+                        context,
+                        'Waktu Selesai',
+                        DateTime.now().add(const Duration(minutes: 30)).isAfter(
+                                    DateTime.parse(
+                                        '${data[0]["date"]} ${data[0]["end_time"]}')) ||
+                                checkIfDataDone(data)
+                            ? filter(data, emailFilter)[
+                                    'finishing_activity_time'] ??
+                                '-'
+                            : (endTime == '' ? '-' : endTime),
+                        15.0,
+                      ),
+                      Consumer<Activity>(
+                        builder: (context, activity, child) => rowInformation(
+                          context,
+                          'Durasi',
+                          DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
+                                      .isBefore(DateTime.now()) ||
+                                  checkIfDataDone(data)
+                              ? (filter(data, emailFilter)[
+                                          'finishing_activity_time'] !=
+                                      null
+                                  ? timeSubstract(
+                                      filter(data, emailFilter)['date'],
+                                      filter(data, emailFilter)[
+                                          'start_activity_time'],
+                                      filter(data, emailFilter)[
+                                          'finishing_activity_time'])
+                                  : '-')
+                              : '${activity.hours.toString().length == 1 ? "0${activity.hours}" : activity.hours}:${activity.minutes.toString().length == 1 ? "0${activity.minutes}" : activity.minutes}:${activity.seconds.toString().length == 1 ? "0${activity.seconds}" : activity.seconds}',
+                          15.0,
+                        ),
+                      ),
+                      data.length > 1 &&
+                              (DateTime.parse(
+                                          '${data[0]["date"]} ${data[0]["end_time"]}')
+                                      .isBefore(DateTime.now()) ||
+                                  checkIfDataDone(data)) &&
+                              emailFilter ==
+                                  Provider.of<User>(context, listen: false)
+                                      .userEmail
+                          ? Column(
+                              children: [
+                                rowInformation(
+                                  context,
+                                  'Daftar Peserta yang menyelesaikan',
+                                  '',
+                                  15.0,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.05),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: filterParticipantStatus(
+                                            data, true)
                                         .map<Widget>(
                                           (data) => Container(
                                             padding: const EdgeInsets.symmetric(
@@ -625,155 +772,118 @@ class _DetailActivityState extends State<DetailActivity> {
                                             margin:
                                                 const EdgeInsets.only(top: 8.0),
                                             alignment: Alignment.centerLeft,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.black),
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  const BorderRadius.all(
+                                            decoration: const BoxDecoration(
+                                              color: Color.fromRGBO(
+                                                  1, 98, 104, 1.0),
+                                              borderRadius: BorderRadius.all(
                                                 Radius.circular(8.0),
                                               ),
                                             ),
                                             child: Text(
                                               data['user_name'],
                                               style: const TextStyle(
-                                                color: Colors.black,
+                                                color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ),
                                         )
                                         .toList(),
-                                  )
+                                  ),
+                                ),
+                                rowInformation(
+                                  context,
+                                  'Daftar Peserta yang tidak menyelesaikan',
+                                  '',
+                                  15.0,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.05),
+                                  child: Column(
+                                    children: filterParticipantStatus(
+                                            data, false)
+                                        .map<Widget>(
+                                          (data) => Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5.0, vertical: 6.0),
+                                            margin:
+                                                const EdgeInsets.only(top: 8.0),
+                                            alignment: Alignment.centerLeft,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              data['user_name'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Container(),
+                      rowInformation(
+                        context,
+                        'Pergerakan',
+                        ' ',
+                        15.0,
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(
+                          bottom: 40.0,
+                          top: 8.0,
+                          left: MediaQuery.of(context).size.width * 0.05,
+                          right: MediaQuery.of(context).size.width * 0.05,
+                        ),
+                        height: 400,
+                        child: FlutterMap(
+                          mapController: mapController,
+                          options: MapOptions(
+                            initialCenter: currentPosition,
+                            initialZoom: 10.0,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            ),
+                            Consumer<Activity>(
+                              builder: (context, activity, child) =>
+                                  PolylineLayer(
+                                polylines: [
+                                  Polyline(
+                                    points: activity.coordinates,
+                                    color:
+                                        const Color.fromARGB(255, 67, 170, 255),
+                                    strokeWidth: 6.0,
+                                  ),
                                 ],
                               ),
                             ),
-                          ],
-                        )
-                      : Container(),
-                  rowInformation(
-                    context,
-                    'Waktu Mulai',
-                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
-                                DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
-                            checkIfDataDone(data)
-                        ? (filter(data, emailFilter)['start_activity_time'] ??
-                            '-')
-                        : (startTime == '' ? '-' : startTime),
-                    15.0,
-                  ),
-                  rowInformation(
-                    context,
-                    'Waktu Selesai',
-                    DateTime.now().add(const Duration(minutes: 30)).isAfter(
-                                DateTime.parse(
-                                    '${data[0]["date"]} ${data[0]["end_time"]}')) ||
-                            checkIfDataDone(data)
-                        ? filter(
-                                data, emailFilter)['finishing_activity_time'] ??
-                            '-'
-                        : (endTime == '' ? '-' : endTime),
-                    15.0,
-                  ),
-                  Consumer<Activity>(
-                    builder: (context, activity, child) => rowInformation(
-                      context,
-                      'Durasi',
-                      DateTime.parse('${data[0]["date"]} ${data[0]["end_time"]}')
-                                  .isBefore(DateTime.now()) ||
-                              checkIfDataDone(data)
-                          ? (filter(data, emailFilter)[
-                                      'finishing_activity_time'] !=
-                                  null
-                              ? timeSubstract(
-                                  filter(data, emailFilter)['date'],
-                                  filter(
-                                      data, emailFilter)['start_activity_time'],
-                                  filter(data, emailFilter)[
-                                      'finishing_activity_time'])
-                              : '-')
-                          : '${activity.hours.toString().length == 1 ? "0${activity.hours}" : activity.hours}:${activity.minutes.toString().length == 1 ? "0${activity.minutes}" : activity.minutes}:${activity.seconds.toString().length == 1 ? "0${activity.seconds}" : activity.seconds}',
-                      15.0,
-                    ),
-                  ),
-                  data.length > 1 &&
-                          (DateTime.parse(
-                                      '${data[0]["date"]} ${data[0]["end_time"]}')
-                                  .isBefore(DateTime.now()) ||
-                              checkIfDataDone(data)) &&
-                          emailFilter ==
-                              Provider.of<User>(context, listen: false)
-                                  .userEmail
-                      ? Column(
-                          children: [
-                            rowInformation(
-                              context,
-                              'Daftar Peserta yang menyelesaikan',
-                              '',
-                              15.0,
-                            ),
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width * 0.05),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: filterParticipantStatus(data, true)
-                                    .map<Widget>(
-                                      (data) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 5.0, vertical: 6.0),
-                                        margin: const EdgeInsets.only(top: 8.0),
-                                        alignment: Alignment.centerLeft,
-                                        decoration: const BoxDecoration(
-                                          color:
-                                              Color.fromRGBO(1, 98, 104, 1.0),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          data['user_name'],
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                            rowInformation(
-                              context,
-                              'Daftar Peserta yang tidak menyelesaikan',
-                              '',
-                              15.0,
-                            ),
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal:
-                                      MediaQuery.of(context).size.width * 0.05),
-                              child: Column(
-                                children: filterParticipantStatus(data, false)
-                                    .map<Widget>(
-                                      (data) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 5.0, vertical: 6.0),
-                                        margin: const EdgeInsets.only(top: 8.0),
-                                        alignment: Alignment.centerLeft,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          data['user_name'],
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
+                            Consumer<Activity>(
+                              builder: (context, activity, child) =>
+                                  MarkerLayer(
+                                markers: activity.coordinates
+                                    .map<Marker>(
+                                      (coordinate) => Marker(
+                                        point: coordinate,
+                                        width: 12,
+                                        height: 12,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.blue,
+                                            shape: BoxShape.circle,
                                           ),
                                         ),
                                       ),
@@ -782,367 +892,310 @@ class _DetailActivityState extends State<DetailActivity> {
                               ),
                             ),
                           ],
-                        )
-                      : Container(),
-                  rowInformation(
-                    context,
-                    'Pergerakan',
-                    ' ',
-                    15.0,
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                      bottom: 40.0,
-                      top: 8.0,
-                      left: MediaQuery.of(context).size.width * 0.05,
-                      right: MediaQuery.of(context).size.width * 0.05,
-                    ),
-                    height: 400,
-                    child: FlutterMap(
-                      mapController: mapController,
-                      options: MapOptions(
-                        initialCenter: currentPosition,
-                        initialZoom: 10.0,
+                        ),
                       ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        ),
-                        Consumer<Activity>(
-                          builder: (context, activity, child) => PolylineLayer(
-                            polylines: [
-                              Polyline(
-                                points: activity.coordinates,
-                                color: const Color.fromARGB(255, 67, 170, 255),
-                                strokeWidth: 6.0,
+                      !checkIfDataDone(data) &&
+                              DateTime.parse(
+                                      '${data[0]["date"]} ${data[0]["end_time"]}')
+                                  .isAfter(DateTime.now())
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                left: MediaQuery.of(context).size.width * 0.1,
+                                right: MediaQuery.of(context).size.width * 0.1,
+                                bottom: 30.0,
                               ),
-                            ],
-                          ),
-                        ),
-                        Consumer<Activity>(
-                          builder: (context, activity, child) => MarkerLayer(
-                            markers: activity.coordinates
-                                .map<Marker>(
-                                  (coordinate) => Marker(
-                                    point: coordinate,
-                                    width: 12,
-                                    height: 12,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.blue,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  !checkIfDataDone(data) &&
-                          DateTime.parse(
-                                  '${data[0]["date"]} ${data[0]["end_time"]}')
-                              .isAfter(DateTime.now())
-                      ? Container(
-                          margin: EdgeInsets.only(
-                            left: MediaQuery.of(context).size.width * 0.1,
-                            right: MediaQuery.of(context).size.width * 0.1,
-                            bottom: 30.0,
-                          ),
-                          child: FilledButton(
-                            onPressed: () async {
-                              LocationPermission geolocatorPermission =
-                                  await Geolocator.checkPermission();
-                              if (geolocatorPermission !=
-                                      LocationPermission.always &&
-                                  geolocatorPermission !=
-                                      LocationPermission.whileInUse) {
-                                await Geolocator.requestPermission();
-                              } else {
-                                if (start) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      surfaceTintColor: Colors.white,
-                                      backgroundColor: Colors.white,
-                                      titlePadding: const EdgeInsets.only(
-                                        left: 20.0,
-                                        right: 17.0,
-                                        top: 4.0,
-                                      ),
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            'Peringatan',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14.0,
-                                            ),
+                              child: FilledButton(
+                                onPressed: () async {
+                                  LocationPermission geolocatorPermission =
+                                      await Geolocator.checkPermission();
+                                  if (geolocatorPermission !=
+                                          LocationPermission.always &&
+                                      geolocatorPermission !=
+                                          LocationPermission.whileInUse) {
+                                    await Geolocator.requestPermission();
+                                  } else {
+                                    if (start) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          surfaceTintColor: Colors.white,
+                                          backgroundColor: Colors.white,
+                                          titlePadding: const EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 17.0,
+                                            top: 4.0,
                                           ),
-                                          IconButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            icon: const Icon(Ionicons.md_close),
-                                          )
-                                        ],
-                                      ),
-                                      content: const Text(
-                                        'Apakah anda yakin menyelesaikan aktivitas?',
-                                      ),
-                                      actions: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  right: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.04),
-                                              child: FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        248, 198, 48, 1),
-                                                  ),
-                                                  shape:
-                                                      MaterialStatePropertyAll(
-                                                    RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                        Radius.circular(8.0),
-                                                      ),
-                                                    ),
-                                                  ),
+                                          title: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                'Peringatan',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14.0,
                                                 ),
+                                              ),
+                                              IconButton(
                                                 onPressed: () {
                                                   Navigator.pop(context);
                                                 },
-                                                child: const Text(
-                                                  'Batal',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  left: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.04),
-                                              child: FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        1, 98, 104, 1.0),
-                                                  ),
-                                                  shape:
-                                                      MaterialStatePropertyAll(
-                                                    RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                        Radius.circular(8.0),
+                                                icon: const Icon(
+                                                    Ionicons.md_close),
+                                              )
+                                            ],
+                                          ),
+                                          content: const Text(
+                                            'Apakah anda yakin menyelesaikan aktivitas?',
+                                          ),
+                                          actions: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      right:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.04),
+                                                  child: FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            248, 198, 48, 1),
+                                                      ),
+                                                      shape:
+                                                          MaterialStatePropertyAll(
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(
+                                                                8.0),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      'Batal',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                                onPressed: () {
-                                                  DateTime now = DateTime.now();
-                                                  setState(() {
-                                                    endTime =
-                                                        '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
-                                                  });
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.04),
+                                                  child: FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            1, 98, 104, 1.0),
+                                                      ),
+                                                      shape:
+                                                          MaterialStatePropertyAll(
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(
+                                                                8.0),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      DateTime now =
+                                                          DateTime.now();
+                                                      setState(() {
+                                                        endTime =
+                                                            '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
+                                                      });
 
-                                                  duration!.cancel();
+                                                      duration!.cancel();
 
-                                                  if (data.length > 1) {
-                                                    Navigator.pop(context);
+                                                      if (data.length > 1) {
+                                                        Navigator.pop(context);
 
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          StatefulBuilder(
-                                                              builder: (context,
-                                                                  setState) {
-                                                        return PopScope(
-                                                          canPop: false,
-                                                          child: AlertDialog(
-                                                            surfaceTintColor:
-                                                                Colors.white,
-                                                            backgroundColor:
-                                                                Colors.white,
-                                                            titlePadding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                              left: 20.0,
-                                                              right: 20.0,
-                                                              top: 15.0,
-                                                            ),
-                                                            scrollable: true,
-                                                            title: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                SizedBox(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.5,
-                                                                  child:
-                                                                      const Text(
-                                                                    'Peserta kegiatan yang hadir',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontSize:
-                                                                          14,
-                                                                    ),
-                                                                  ),
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) =>
+                                                              StatefulBuilder(
+                                                                  builder: (context,
+                                                                      setState) {
+                                                            return PopScope(
+                                                              canPop: false,
+                                                              child:
+                                                                  AlertDialog(
+                                                                surfaceTintColor:
+                                                                    Colors
+                                                                        .white,
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                titlePadding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                  left: 20.0,
+                                                                  right: 20.0,
+                                                                  top: 15.0,
                                                                 ),
-                                                                IconButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    setState(
-                                                                        () {
-                                                                      endTime =
-                                                                          '';
-                                                                    });
-
-                                                                    countingDuration();
-
-                                                                    Navigator.pop(
-                                                                        context);
-                                                                  },
-                                                                  icon:
-                                                                      const Icon(
-                                                                    Ionicons
-                                                                        .md_close,
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                            content: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                const Text(
-                                                                  'Daftar peserta:',
-                                                                ),
-                                                                Container(
-                                                                  height: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      0.3,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border: Border
-                                                                        .all(),
-                                                                    borderRadius:
-                                                                        const BorderRadius
-                                                                            .all(
-                                                                      Radius.circular(
-                                                                          8.0),
+                                                                scrollable:
+                                                                    true,
+                                                                title: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          0.5,
+                                                                      child:
+                                                                          const Text(
+                                                                        'Peserta kegiatan yang hadir',
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                          color:
+                                                                              Colors.black,
+                                                                          fontSize:
+                                                                              14,
+                                                                        ),
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  child:
-                                                                      ListView(
-                                                                    children: participants
-                                                                        .where((element) => element['email'] != Provider.of<User>(context, listen: false).userEmail)
-                                                                        .toList()
-                                                                        .map(
-                                                                          (element) =>
-                                                                              Container(
-                                                                            margin:
-                                                                                const EdgeInsets.only(
-                                                                              left: 5.0,
-                                                                              right: 5.0,
-                                                                              top: 3.0,
-                                                                            ),
-                                                                            child:
-                                                                                FilledButton(
-                                                                              onPressed: () {
-                                                                                setState(() {
-                                                                                  presentParticipants.add(element);
-                                                                                  participants.remove(element);
-                                                                                });
-                                                                              },
-                                                                              style: const ButtonStyle(
-                                                                                shape: MaterialStatePropertyAll(
-                                                                                  RoundedRectangleBorder(
-                                                                                    borderRadius: BorderRadius.all(
-                                                                                      Radius.circular(8.0),
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        setState(
+                                                                            () {
+                                                                          endTime =
+                                                                              '';
+                                                                        });
+
+                                                                        countingDuration();
+
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                      },
+                                                                      icon:
+                                                                          const Icon(
+                                                                        Ionicons
+                                                                            .md_close,
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                content: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    const Text(
+                                                                      'Daftar peserta:',
+                                                                    ),
+                                                                    Container(
+                                                                      height: MediaQuery.of(context)
+                                                                              .size
+                                                                              .height *
+                                                                          0.3,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        border:
+                                                                            Border.all(),
+                                                                        borderRadius:
+                                                                            const BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              8.0),
+                                                                        ),
+                                                                      ),
+                                                                      child:
+                                                                          ListView(
+                                                                        children: participants
+                                                                            .where((element) => element['email'] != Provider.of<User>(context, listen: false).userEmail)
+                                                                            .toList()
+                                                                            .map(
+                                                                              (element) => Container(
+                                                                                margin: const EdgeInsets.only(
+                                                                                  left: 5.0,
+                                                                                  right: 5.0,
+                                                                                  top: 3.0,
+                                                                                ),
+                                                                                child: FilledButton(
+                                                                                  onPressed: () {
+                                                                                    setState(() {
+                                                                                      presentParticipants.add(element);
+                                                                                      participants.remove(element);
+                                                                                    });
+                                                                                  },
+                                                                                  style: const ButtonStyle(
+                                                                                    shape: MaterialStatePropertyAll(
+                                                                                      RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.all(
+                                                                                          Radius.circular(8.0),
+                                                                                        ),
+                                                                                        side: BorderSide(),
+                                                                                      ),
                                                                                     ),
-                                                                                    side: BorderSide(),
+                                                                                    backgroundColor: MaterialStatePropertyAll(Colors.white),
+                                                                                    padding: MaterialStatePropertyAll(
+                                                                                      EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
+                                                                                    ),
+                                                                                    alignment: Alignment.centerLeft,
+                                                                                  ),
+                                                                                  child: Text(
+                                                                                    element['user_name'],
+                                                                                    style: const TextStyle(
+                                                                                      color: Colors.black,
+                                                                                    ),
                                                                                   ),
                                                                                 ),
-                                                                                backgroundColor: MaterialStatePropertyAll(Colors.white),
-                                                                                padding: MaterialStatePropertyAll(
-                                                                                  EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
-                                                                                ),
-                                                                                alignment: Alignment.centerLeft,
                                                                               ),
-                                                                              child: Text(
-                                                                                element['user_name'],
-                                                                                style: const TextStyle(
-                                                                                  color: Colors.black,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        )
-                                                                        .toList(),
-                                                                  ),
-                                                                ),
-                                                                const Padding(
-                                                                  padding:
-                                                                      EdgeInsets
+                                                                            )
+                                                                            .toList(),
+                                                                      ),
+                                                                    ),
+                                                                    const Padding(
+                                                                      padding: EdgeInsets
                                                                           .only(
                                                                               top: 8.0),
-                                                                  child: Text(
-                                                                    'Daftar peserta hadir:',
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  height: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      0.3,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border: Border
-                                                                        .all(),
-                                                                    borderRadius:
-                                                                        const BorderRadius
-                                                                            .all(
-                                                                      Radius.circular(
-                                                                          8.0),
+                                                                      child:
+                                                                          Text(
+                                                                        'Daftar peserta hadir:',
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  child:
-                                                                      ListView(
-                                                                    children:
-                                                                        presentParticipants
+                                                                    Container(
+                                                                      height: MediaQuery.of(context)
+                                                                              .size
+                                                                              .height *
+                                                                          0.3,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        border:
+                                                                            Border.all(),
+                                                                        borderRadius:
+                                                                            const BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              8.0),
+                                                                        ),
+                                                                      ),
+                                                                      child:
+                                                                          ListView(
+                                                                        children: presentParticipants
                                                                             .map(
                                                                               (element) => Container(
                                                                                 margin: const EdgeInsets.only(
@@ -1182,411 +1235,407 @@ class _DetailActivityState extends State<DetailActivity> {
                                                                               ),
                                                                             )
                                                                             .toList(),
-                                                                  ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
                                                                 ),
-                                                              ],
-                                                            ),
-                                                            actions: [
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  Container(
-                                                                    margin: EdgeInsets.only(
-                                                                        right: MediaQuery.of(context).size.width *
-                                                                            0.04),
-                                                                    child:
-                                                                        FilledButton(
-                                                                      style:
-                                                                          const ButtonStyle(
-                                                                        backgroundColor:
-                                                                            MaterialStatePropertyAll(
-                                                                          Color.fromRGBO(
-                                                                              248,
-                                                                              198,
-                                                                              48,
-                                                                              1),
-                                                                        ),
-                                                                        shape:
-                                                                            MaterialStatePropertyAll(
-                                                                          RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.all(
-                                                                              Radius.circular(8.0),
+                                                                actions: [
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      Container(
+                                                                        margin: EdgeInsets.only(
+                                                                            right:
+                                                                                MediaQuery.of(context).size.width * 0.04),
+                                                                        child:
+                                                                            FilledButton(
+                                                                          style:
+                                                                              const ButtonStyle(
+                                                                            backgroundColor:
+                                                                                MaterialStatePropertyAll(
+                                                                              Color.fromRGBO(248, 198, 48, 1),
+                                                                            ),
+                                                                            shape:
+                                                                                MaterialStatePropertyAll(
+                                                                              RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.all(
+                                                                                  Radius.circular(8.0),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            setState(() {
+                                                                              endTime = '';
+                                                                            });
+
+                                                                            countingDuration();
+
+                                                                            Navigator.pop(context);
+                                                                          },
+                                                                          child:
+                                                                              const Text(
+                                                                            'Batal',
+                                                                            style:
+                                                                                TextStyle(
+                                                                              fontWeight: FontWeight.bold,
                                                                             ),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                      onPressed:
-                                                                          () {
-                                                                        setState(
-                                                                            () {
-                                                                          endTime =
-                                                                              '';
-                                                                        });
+                                                                      Container(
+                                                                        margin: EdgeInsets.only(
+                                                                            left:
+                                                                                MediaQuery.of(context).size.width * 0.04),
+                                                                        child:
+                                                                            FilledButton(
+                                                                          style:
+                                                                              const ButtonStyle(
+                                                                            backgroundColor:
+                                                                                MaterialStatePropertyAll(
+                                                                              Color.fromRGBO(1, 98, 104, 1.0),
+                                                                            ),
+                                                                            shape:
+                                                                                MaterialStatePropertyAll(
+                                                                              RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.all(
+                                                                                  Radius.circular(8.0),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            duration!.cancel();
 
-                                                                        countingDuration();
+                                                                            loadingIndicator(context);
 
-                                                                        Navigator.pop(
-                                                                            context);
-                                                                      },
-                                                                      child:
-                                                                          const Text(
-                                                                        'Batal',
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  Container(
-                                                                    margin: EdgeInsets.only(
-                                                                        left: MediaQuery.of(context).size.width *
-                                                                            0.04),
-                                                                    child:
-                                                                        FilledButton(
-                                                                      style:
-                                                                          const ButtonStyle(
-                                                                        backgroundColor:
-                                                                            MaterialStatePropertyAll(
-                                                                          Color.fromRGBO(
-                                                                              1,
-                                                                              98,
-                                                                              104,
-                                                                              1.0),
-                                                                        ),
-                                                                        shape:
-                                                                            MaterialStatePropertyAll(
-                                                                          RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.all(
-                                                                              Radius.circular(8.0),
+                                                                            Provider.of<Activity>(context, listen: false)
+                                                                                .finishActivity(
+                                                                              data[0]['id'].toString(),
+                                                                              startTime,
+                                                                              endTime,
+                                                                              Provider.of<Activity>(context, listen: false).coordinates,
+                                                                              presentParticipants,
+                                                                            )
+                                                                                .then((response) {
+                                                                              Navigator.pop(context);
+                                                                              Navigator.pop(context);
+
+                                                                              if (response['status'] == 'success') {
+                                                                                Navigator.pop(context, true);
+
+                                                                                snackbarMessenger(
+                                                                                  context,
+                                                                                  MediaQuery.of(context).size.width * 0.35,
+                                                                                  const Color.fromARGB(255, 0, 120, 18),
+                                                                                  'berhasil menyelesaikan kegiatan',
+                                                                                  MediaQuery.of(context).size.height * 0.7,
+                                                                                );
+                                                                              } else {
+                                                                                snackbarMessenger(
+                                                                                  context,
+                                                                                  MediaQuery.of(context).size.width * 0.35,
+                                                                                  Colors.red,
+                                                                                  response['message'],
+                                                                                  MediaQuery.of(context).size.height * 0.7,
+                                                                                );
+                                                                              }
+                                                                            }).catchError((error) {
+                                                                              Navigator.pop(context);
+                                                                              Navigator.pop(context);
+
+                                                                              snackbarMessenger(
+                                                                                context,
+                                                                                MediaQuery.of(context).size.width * 0.35,
+                                                                                Colors.red,
+                                                                                'gagal terhubung ke server',
+                                                                                MediaQuery.of(context).size.height * 0.7,
+                                                                              );
+                                                                            });
+                                                                          },
+                                                                          child:
+                                                                              const Text(
+                                                                            'Iya',
+                                                                            style:
+                                                                                TextStyle(
+                                                                              fontWeight: FontWeight.bold,
                                                                             ),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                      onPressed:
-                                                                          () {
-                                                                        duration!
-                                                                            .cancel();
-
-                                                                        loadingIndicator(
-                                                                            context);
-
-                                                                        Provider.of<Activity>(context,
-                                                                                listen: false)
-                                                                            .finishActivity(
-                                                                          data[0]['id']
-                                                                              .toString(),
-                                                                          startTime,
-                                                                          endTime,
-                                                                          Provider.of<Activity>(context, listen: false)
-                                                                              .coordinates,
-                                                                          presentParticipants,
-                                                                        )
-                                                                            .then((response) {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          Navigator.pop(
-                                                                              context);
-
-                                                                          if (response['status'] ==
-                                                                              'success') {
-                                                                            Navigator.pop(context,
-                                                                                true);
-
-                                                                            snackbarMessenger(
-                                                                              context,
-                                                                              MediaQuery.of(context).size.width * 0.35,
-                                                                              const Color.fromARGB(255, 0, 120, 18),
-                                                                              'berhasil menyelesaikan kegiatan',
-                                                                              MediaQuery.of(context).size.height * 0.6,
-                                                                            );
-                                                                          } else {
-                                                                            snackbarMessenger(
-                                                                              context,
-                                                                              MediaQuery.of(context).size.width * 0.35,
-                                                                              Colors.red,
-                                                                              response['message'],
-                                                                              MediaQuery.of(context).size.height * 0.6,
-                                                                            );
-                                                                          }
-                                                                        }).catchError((error) {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          Navigator.pop(
-                                                                              context);
-
-                                                                          snackbarMessenger(
-                                                                            context,
-                                                                            MediaQuery.of(context).size.width *
-                                                                                0.35,
-                                                                            Colors.red,
-                                                                            'gagal terhubung ke server',
-                                                                            MediaQuery.of(context).size.height *
-                                                                                0.6,
-                                                                          );
-                                                                        });
-                                                                      },
-                                                                      child:
-                                                                          const Text(
-                                                                        'Iya',
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                    ),
+                                                                    ],
                                                                   ),
                                                                 ],
                                                               ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      }),
-                                                    ).then((value) {
-                                                      setState(() {});
-                                                    });
-                                                  } else {
-                                                    loadingIndicator(context);
-
-                                                    Provider.of<Activity>(
-                                                            context,
-                                                            listen: false)
-                                                        .finishActivity(
-                                                      data[0]['id'].toString(),
-                                                      startTime,
-                                                      endTime,
-                                                      Provider.of<Activity>(
-                                                              context,
-                                                              listen: false)
-                                                          .coordinates,
-                                                      presentParticipants,
-                                                    )
-                                                        .then((response) {
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
-
-                                                      if (response['status'] ==
-                                                          'success') {
-                                                        Navigator.pop(
-                                                            context, true);
-
-                                                        snackbarMessenger(
-                                                          context,
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.35,
-                                                          const Color.fromARGB(
-                                                              255, 0, 120, 18),
-                                                          'berhasil menyelesaikan kegiatan',
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height *
-                                                              0.6,
-                                                        );
+                                                            );
+                                                          }),
+                                                        ).then((value) {
+                                                          setState(() {});
+                                                        });
                                                       } else {
-                                                        snackbarMessenger(
-                                                          context,
+                                                        loadingIndicator(
+                                                            context);
+
+                                                        Provider.of<Activity>(
+                                                                context,
+                                                                listen: false)
+                                                            .finishActivity(
+                                                          data[0]['id']
+                                                              .toString(),
+                                                          startTime,
+                                                          endTime,
+                                                          Provider.of<Activity>(
+                                                                  context,
+                                                                  listen: false)
+                                                              .coordinates,
+                                                          presentParticipants,
+                                                        )
+                                                            .then((response) {
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+
+                                                          if (response[
+                                                                  'status'] ==
+                                                              'success') {
+                                                            Navigator.pop(
+                                                                context, true);
+
+                                                            snackbarMessenger(
+                                                              context,
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.35,
+                                                              const Color
+                                                                  .fromARGB(255,
+                                                                  0, 120, 18),
+                                                              'berhasil menyelesaikan kegiatan',
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  0.6,
+                                                            );
+                                                          } else {
+                                                            snackbarMessenger(
+                                                              context,
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.35,
+                                                              Colors.red,
+                                                              response[
+                                                                  'message'],
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  0.6,
+                                                            );
+                                                          }
+                                                        }).catchError((error) {
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+
+                                                          snackbarMessenger(
+                                                            context,
+                                                            MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.35,
+                                                            Colors.red,
+                                                            'gagal terhubung ke server',
+                                                            MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                0.6,
+                                                          );
+                                                        });
+                                                      }
+                                                    },
+                                                    child: const Text(
+                                                      'Iya',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          surfaceTintColor: Colors.white,
+                                          backgroundColor: Colors.white,
+                                          titlePadding: const EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 17.0,
+                                            top: 4.0,
+                                          ),
+                                          title: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                'Peringatan',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                icon: const Icon(
+                                                    Ionicons.md_close),
+                                              )
+                                            ],
+                                          ),
+                                          content: const Text(
+                                            'Apakah anda yakin akan memulai aktivitas?',
+                                          ),
+                                          actions: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      right:
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.35,
-                                                          Colors.red,
-                                                          response['message'],
+                                                              0.04),
+                                                  child: FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            248, 198, 48, 1),
+                                                      ),
+                                                      shape:
+                                                          MaterialStatePropertyAll(
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(
+                                                                8.0),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      'Batal',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left:
                                                           MediaQuery.of(context)
                                                                   .size
-                                                                  .height *
-                                                              0.6,
-                                                        );
-                                                      }
-                                                    }).catchError((error) {
-                                                      Navigator.pop(context);
-                                                      Navigator.pop(context);
+                                                                  .width *
+                                                              0.04),
+                                                  child: FilledButton(
+                                                    style: const ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStatePropertyAll(
+                                                        Color.fromRGBO(
+                                                            1, 98, 104, 1.0),
+                                                      ),
+                                                      shape:
+                                                          MaterialStatePropertyAll(
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(
+                                                                8.0),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      DateTime now =
+                                                          DateTime.now();
+                                                      setState(() {
+                                                        start = true;
+                                                        startTime =
+                                                            '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
+                                                      });
 
-                                                      snackbarMessenger(
-                                                        context,
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.35,
-                                                        Colors.red,
-                                                        'gagal terhubung ke server',
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            0.6,
-                                                      );
-                                                    });
-                                                  }
-                                                },
-                                                child: const Text(
-                                                  'Iya',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                } else {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      surfaceTintColor: Colors.white,
-                                      backgroundColor: Colors.white,
-                                      titlePadding: const EdgeInsets.only(
-                                        left: 20.0,
-                                        right: 17.0,
-                                        top: 4.0,
-                                      ),
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            'Peringatan',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14.0,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            icon: const Icon(Ionicons.md_close),
-                                          )
-                                        ],
-                                      ),
-                                      content: const Text(
-                                        'Apakah anda yakin akan memulai aktivitas?',
-                                      ),
-                                      actions: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  right: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.04),
-                                              child: FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        248, 198, 48, 1),
-                                                  ),
-                                                  shape:
-                                                      MaterialStatePropertyAll(
-                                                    RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                        Radius.circular(8.0),
+                                                      countingDuration();
+
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      'Iya',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text(
-                                                  'Batal',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  left: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.04),
-                                              child: FilledButton(
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        1, 98, 104, 1.0),
-                                                  ),
-                                                  shape:
-                                                      MaterialStatePropertyAll(
-                                                    RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                        Radius.circular(8.0),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  DateTime now = DateTime.now();
-                                                  setState(() {
-                                                    start = true;
-                                                    startTime =
-                                                        '${now.hour.toString().length == 1 ? "0${now.hour}" : now.hour}:${now.minute.toString().length == 1 ? "0${now.minute}" : now.minute}:${now.second.toString().length == 1 ? "0${now.second}" : now.second}';
-                                                  });
-
-                                                  countingDuration();
-
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text(
-                                                  'Iya',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
+                                              ],
                                             ),
                                           ],
                                         ),
-                                      ],
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  shape: const MaterialStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8.0),
+                                      ),
                                     ),
-                                  );
-                                }
-                              }
-                            },
-                            style: ButtonStyle(
-                              shape: const MaterialStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8.0),
+                                  ),
+                                  backgroundColor: MaterialStatePropertyAll(
+                                    start
+                                        ? const Color.fromRGBO(248, 198, 48, 1)
+                                        : const Color.fromRGBO(1, 98, 104, 1.0),
                                   ),
                                 ),
+                                child: Text(
+                                  start ? 'Selesaikan' : 'Mulai',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              backgroundColor: MaterialStatePropertyAll(
-                                start
-                                    ? const Color.fromRGBO(248, 198, 48, 1)
-                                    : const Color.fromRGBO(1, 98, 104, 1.0),
-                              ),
-                            ),
-                            child: Text(
-                              start ? 'Selesaikan' : 'Mulai',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
-            ),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                ),
     );
   }
 }

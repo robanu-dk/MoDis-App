@@ -4,6 +4,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/pages/bmi_calculator.dart';
@@ -59,9 +60,9 @@ class _BerandaState extends State<Beranda> {
     return '${splitDate[2]} ${month[splitDate[1]]} ${splitDate[0]}';
   }
 
-  getAllActivity() {
+  getAllActivity({bool refresh = false}) {
     Provider.of<Activity>(context, listen: false)
-        .getListActivities()
+        .getListActivities(refresh: refresh)
         .then((response) {
       if (response['status'] == 'error') {
         snackbarMessenger(
@@ -355,7 +356,9 @@ class _BerandaState extends State<Beranda> {
                               );
                             },
                           ),
-                        );
+                        ).then((value) {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        });
                       },
                     ),
                     CircleButtonModis(
@@ -388,7 +391,9 @@ class _BerandaState extends State<Beranda> {
                               );
                             },
                           ),
-                        );
+                        ).then((value) {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        });
                       },
                     ),
                   ],
@@ -653,55 +658,64 @@ class _BerandaState extends State<Beranda> {
             ),
           ),
           Consumer<Activity>(
-            builder: (context, activity, child) => activity.loadingGetData
-                ? Padding(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.2),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: LoadingIndicator(
-                            indicatorType: Indicator.ballSpinFadeLoader,
-                          ),
-                        ),
-                        Text('loading'),
-                      ],
-                    ),
+            builder: (context, activity, child) => activity.isError
+                ? ServerErrorWidget(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                      getAllActivity(refresh: true);
+                    },
+                    label: 'Gagal memuat daftar kegiatan!!!',
                   )
-                : filterDate(listDate: activity.dateActivities).isNotEmpty
+                : (activity.loadingGetData
                     ? Padding(
-                        padding: const EdgeInsets.only(bottom: 80.0),
-                        child: Column(
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.2),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            filterStartDate == '' && filterEndDate == ''
-                                ? ButtonDropdownActivities(
-                                    date: 'Hari ini', activity: activity)
-                                : Container(),
-                            Column(
-                              children:
-                                  filterDate(listDate: activity.dateActivities)
+                            SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: LoadingIndicator(
+                                indicatorType: Indicator.ballSpinFadeLoader,
+                              ),
+                            ),
+                            Text('loading'),
+                          ],
+                        ),
+                      )
+                    : (filterDate(listDate: activity.dateActivities).isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 80.0),
+                            child: Column(
+                              children: [
+                                filterStartDate == '' && filterEndDate == ''
+                                    ? ButtonDropdownActivities(
+                                        date: 'Hari ini', activity: activity)
+                                    : Container(),
+                                Column(
+                                  children: filterDate(
+                                          listDate: activity.dateActivities)
                                       .map<Widget>(
                                         (date) => ButtonDropdownActivities(
                                             date: date, activity: activity),
                                       )
                                       .toList(),
-                            )
-                          ],
-                        ),
-                      )
-                    : Padding(
-                        padding: EdgeInsets.only(
-                            top: MediaQuery.of(context).size.height * 0.25),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [Text('Tidak ada kegiatan')],
-                        ),
-                      ),
+                                )
+                              ],
+                            ),
+                          )
+                        : Padding(
+                            padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.height * 0.25),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [Text('Tidak ada kegiatan')],
+                            ),
+                          ))),
           ),
         ],
       ),

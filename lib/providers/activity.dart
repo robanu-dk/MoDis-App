@@ -11,7 +11,7 @@ class Activity extends ChangeNotifier {
       apiDomain = 'https://modis.techcreator.my.id/api/activity';
   dynamic listTodayActivity, listMyActivities, userCoordinates;
   List<String> dateActivities = [];
-  bool loadingGetData = true;
+  bool loadingGetData = true, isError = false;
   int seconds = 0, minutes = 0, hours = 0;
   List<LatLng> coordinates = [];
   Position? lastPosition;
@@ -120,9 +120,14 @@ class Activity extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> getListActivities() async {
+  Future<dynamic> getListActivities({bool refresh = false}) async {
     try {
       loadingGetData = true;
+      isError = false;
+      if (refresh) {
+        notifyListeners();
+      }
+
       dateActivities = [];
 
       Uri url = Uri.parse('$apiDomain/get-all-my-activities');
@@ -149,10 +154,15 @@ class Activity extends ChangeNotifier {
         }
         loadingGetData = false;
         notifyListeners();
+      } else {
+        isError = true;
+        notifyListeners();
       }
 
       return response;
     } catch (error) {
+      isError = true;
+      notifyListeners();
       throw error.toString();
     }
   }

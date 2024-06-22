@@ -3,6 +3,7 @@ import 'package:icons_flutter/icons_flutter.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/flex_row_information.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/search_input.dart';
@@ -21,7 +22,7 @@ class AddChildAccount extends StatefulWidget {
 class _AddChildAccountState extends State<AddChildAccount> {
   String _searchAvailableChild = '';
   final FocusNode _fSearchAvailableChild = FocusNode();
-  bool _listAccount = true, isLoad = true;
+  bool _listAccount = true, isLoad = true, isError = false;
 
   void snackbarMessenger(BuildContext context, double leftPadding,
       Color backgroundColor, String message) {
@@ -45,12 +46,18 @@ class _AddChildAccountState extends State<AddChildAccount> {
   @override
   void initState() {
     super.initState();
+    getAllData();
+  }
+
+  getAllData() {
+    setState(() {
+      isLoad = true;
+      isError = false;
+    });
+
     Provider.of<Child>(context, listen: false)
         .getListAvailableChild()
         .then((response) {
-      setState(() {
-        isLoad = false;
-      });
       if (response['status'] == 'error') {
         snackbarMessenger(
           context,
@@ -58,6 +65,14 @@ class _AddChildAccountState extends State<AddChildAccount> {
           Colors.red,
           'Gagal terhubung server',
         );
+
+        setState(() {
+          isError = true;
+        });
+      } else {
+        setState(() {
+          isLoad = false;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(
@@ -66,6 +81,10 @@ class _AddChildAccountState extends State<AddChildAccount> {
         Colors.red,
         'Gagal terhubung server',
       );
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
@@ -87,6 +106,7 @@ class _AddChildAccountState extends State<AddChildAccount> {
           children: [
             IconButton(
               onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 Navigator.pop(context);
               },
               icon: const Icon(
@@ -116,6 +136,8 @@ class _AddChildAccountState extends State<AddChildAccount> {
                         TabButton(
                           isActive: _listAccount,
                           onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .removeCurrentSnackBar();
                             setState(() {
                               _listAccount = true;
                               _searchAvailableChild = '';
@@ -126,6 +148,8 @@ class _AddChildAccountState extends State<AddChildAccount> {
                         TabButton(
                           isActive: !_listAccount,
                           onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .removeCurrentSnackBar();
                             setState(() {
                               _listAccount = false;
                             });
@@ -183,28 +207,38 @@ class _AddChildAccountState extends State<AddChildAccount> {
       body: ListView(
         children: [
           _listAccount
-              ? (isLoad
-                  ? Padding(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * 0.3),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: LoadingIndicator(
-                              indicatorType: Indicator.ballSpinFadeLoader,
-                            ),
-                          ),
-                          Text('loading'),
-                        ],
-                      ),
+              ? (isError
+                  ? ServerErrorWidget(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                        getAllData();
+                      },
+                      paddingTop: MediaQuery.of(context).size.height * 0.2,
+                      label: 'Gagal memuat daftar akun!!!',
                     )
-                  : ListAvailableChild(
-                      searchAvailableChild: _searchAvailableChild,
-                    ))
+                  : (isLoad
+                      ? Padding(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.3),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: LoadingIndicator(
+                                  indicatorType: Indicator.ballSpinFadeLoader,
+                                ),
+                              ),
+                              Text('loading'),
+                            ],
+                          ),
+                        )
+                      : ListAvailableChild(
+                          searchAvailableChild: _searchAvailableChild,
+                        )))
               : const FormCreateAccount(),
         ],
       ),

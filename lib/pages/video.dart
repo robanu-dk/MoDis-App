@@ -5,6 +5,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/circle_button.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
@@ -29,7 +30,7 @@ class _VideoState extends State<Video> {
   String keyword = '';
   final TextEditingController searchController = TextEditingController();
   final FocusNode fSearchController = FocusNode();
-  bool _allVideo = true;
+  bool _allVideo = true, isError = false;
   int limit = 10, start = 0, a = 0;
   dynamic categoryId = '';
 
@@ -56,20 +57,36 @@ class _VideoState extends State<Video> {
   }
 
   getAllVideo() {
+    setState(() {
+      isError = false;
+    });
+
     Provider.of<MotivationVideo>(context, listen: false)
         .getAllVideo(limit, start, categoryId, keyword)
         .then((response) {
       if (response['status'] == 'error') {
         snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
             Colors.red, 'Gagal terhubung ke server', null);
+
+        setState(() {
+          isError = true;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(context, MediaQuery.of(context).size.width * 0.4,
           Colors.red, 'Gagal terhubung ke server', null);
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
   getVideoBasedGuide() {
+    setState(() {
+      isError = false;
+    });
+
     Provider.of<MotivationVideo>(context, listen: false)
         .getVideoBasedGuide(limit, start, categoryId, keyword)
         .then((response) {
@@ -80,6 +97,10 @@ class _VideoState extends State<Video> {
             Colors.red,
             'Gagal terhubung ke server',
             MediaQuery.of(context).size.height * 0.6);
+
+        setState(() {
+          isError = true;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(
@@ -88,6 +109,10 @@ class _VideoState extends State<Video> {
           Colors.red,
           'Gagal terhubung ke server',
           MediaQuery.of(context).size.height * 0.6);
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
@@ -167,9 +192,9 @@ class _VideoState extends State<Video> {
                             });
                             searchController.text = '';
                             fSearchController.unfocus();
-                            _scrollController.jumpTo(0.0);
                             getAllVideo();
                             Timer(const Duration(milliseconds: 20), () {
+                              _scrollController.jumpTo(0.0);
                               _scrollSingleController.jumpTo(0.0);
                             });
                           },
@@ -188,9 +213,9 @@ class _VideoState extends State<Video> {
                             });
                             searchController.text = '';
                             fSearchController.unfocus();
-                            _scrollController.jumpTo(0.0);
                             getVideoBasedGuide();
                             Timer(const Duration(milliseconds: 20), () {
+                              _scrollController.jumpTo(0.0);
                               _scrollSingleController.jumpTo(0.0);
                             });
                           },
@@ -265,42 +290,63 @@ class _VideoState extends State<Video> {
                 ),
               ),
             ),
-      body: Consumer<MotivationVideo>(
-        builder: (context, motivation, child) => ListView(
-          controller: _scrollController,
-          children: motivation.canScroll
-              ? motivation.listVideo != null && motivation.listVideo.length != 0
-                  ? [
-                      motivation.videoCategories != null &&
-                              motivation.videoCategories.length != 0
-                          ? videoCategory(motivation)
-                          : const Text(''),
-                      listVideo(motivation),
-                      motivation.lengthResponseData >= 10
-                          ? loadingContent(0.0)
-                          : const Text(''),
-                    ]
-                  : [
-                      motivation.videoCategories != null &&
-                              motivation.videoCategories.length != 0
-                          ? videoCategory(motivation)
-                          : const Text(''),
-                      loadingContent(MediaQuery.of(context).size.height * 0.25),
-                    ]
-              : [
-                  videoCategory(motivation),
-                  motivation.listVideo.length != 0
-                      ? listVideo(motivation)
-                      : Padding(
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).size.height * 0.25),
-                          child: const Center(
-                            child: Text('Tidak Ada Video'),
-                          ),
-                        ),
-                ],
-        ),
-      ),
+      body: isError
+          ? ListView(
+              children: [
+                ServerErrorWidget(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                    setState(() {
+                      start = 0;
+                    });
+
+                    if (_allVideo) {
+                      getAllVideo();
+                    } else {
+                      getVideoBasedGuide();
+                    }
+                  },
+                  paddingTop: MediaQuery.of(context).size.height * 0.15,
+                  label: 'Gagal memuat daftar video!!!',
+                )
+              ],
+            )
+          : Consumer<MotivationVideo>(
+              builder: (context, motivation, child) => ListView(
+                controller: _scrollController,
+                children: motivation.canScroll
+                    ? motivation.listVideo != null &&
+                            motivation.listVideo.length != 0
+                        ? [
+                            motivation.videoCategories != null &&
+                                    motivation.videoCategories.length != 0
+                                ? videoCategory(motivation)
+                                : const Text(''),
+                            listVideo(motivation),
+                            motivation.lengthResponseData >= 10
+                                ? loadingContent(0.0)
+                                : const Text(''),
+                          ]
+                        : [
+                            loadingContent(
+                                MediaQuery.of(context).size.height * 0.25),
+                          ]
+                    : [
+                        videoCategory(motivation),
+                        motivation.listVideo.length != 0
+                            ? listVideo(motivation)
+                            : Padding(
+                                padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height *
+                                        0.25),
+                                child: const Center(
+                                  child: Text('Tidak Ada Video'),
+                                ),
+                              ),
+                      ],
+              ),
+            ),
       backgroundColor: Colors.white,
       floatingActionButton: _allVideo
           ? null

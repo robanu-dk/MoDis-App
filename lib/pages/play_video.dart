@@ -2,6 +2,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
+import 'package:modis/components/error.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerPage extends StatefulWidget {
@@ -16,7 +17,7 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late VideoPlayerController videoPlayerController;
   ChewieController? chewieController;
-  bool isLoad = true;
+  bool isLoad = true, isError = false;
 
   void snackbarMessenger(BuildContext context, double leftPadding,
       Color backgroundColor, String message, double? bottomPadding) {
@@ -38,6 +39,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   Future<void> loadVideo() async {
+    setState(() {
+      isError = false;
+    });
+
     try {
       videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(
@@ -59,11 +64,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     } catch (error) {
       snackbarMessenger(
         context,
-        MediaQuery.of(context).size.width * 0.5,
+        MediaQuery.of(context).size.width * 0.4,
         Colors.red,
-        'Gagal memutar video',
-        MediaQuery.of(context).size.height * 0.6,
+        'Gagal memuat halaman!!!',
+        MediaQuery.of(context).size.height * 0.8,
       );
+
+      setState(() {
+        isError = true;
+      });
     }
   }
 
@@ -119,57 +128,70 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         noFreeSpace: true,
       ),
       body: ListView(
-        children: [
-          chewieController != null &&
-                  chewieController!.videoPlayerController.value.isInitialized
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width * 9 / 16,
-                      child: Chewie(controller: chewieController!),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.only(
-                          left: 8.0, right: 8.0, top: 8.0),
-                      child: Text(
-                        widget.dataVideo['title'],
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                    widget.dataVideo['description'] != null
-                        ? Container(
+        children: isError
+            ? [
+                ServerErrorWidget(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                    loadVideo();
+                  },
+                  paddingTop: MediaQuery.of(context).size.height * 0.25,
+                  label: 'Gagal memuat halaman!!!',
+                )
+              ]
+            : [
+                chewieController != null &&
+                        chewieController!
+                            .videoPlayerController.value.isInitialized
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.width * 9 / 16,
+                            child: Chewie(controller: chewieController!),
+                          ),
+                          Container(
                             width: MediaQuery.of(context).size.width,
                             padding: const EdgeInsets.only(
-                                left: 8.0, right: 8.0, top: 10.0),
-                            child: Text(widget.dataVideo['description']),
-                          )
-                        : Container(),
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * 0.4),
-                      height: 30,
-                      width: 30,
-                      child: const LoadingIndicator(
-                        indicatorType: Indicator.ballSpinFadeLoader,
+                                left: 8.0, right: 8.0, top: 8.0),
+                            child: Text(
+                              widget.dataVideo['title'],
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          widget.dataVideo['description'] != null
+                              ? Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8.0, top: 10.0),
+                                  child: Text(widget.dataVideo['description']),
+                                )
+                              : Container(),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.height * 0.4),
+                            height: 30,
+                            width: 30,
+                            child: const LoadingIndicator(
+                              indicatorType: Indicator.ballSpinFadeLoader,
+                            ),
+                          ),
+                          const Text('loading'),
+                        ],
                       ),
-                    ),
-                    const Text('loading'),
-                  ],
-                ),
-        ],
+              ],
       ),
       backgroundColor: Colors.white,
     );

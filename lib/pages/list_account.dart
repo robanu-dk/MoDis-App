@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/custom_navigation_bar.dart';
+import 'package:modis/components/error.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/logo.dart';
 import 'package:modis/components/search_input.dart';
@@ -23,7 +24,7 @@ class ListAccount extends StatefulWidget {
 class _ListAccountState extends State<ListAccount> {
   String _searchChildBasedAccount = '';
   final FocusNode _fSearchChildBasedAccount = FocusNode();
-  bool isLoad = true;
+  bool isLoad = true, isError = false;
 
   void snackbarMessenger(BuildContext context, double leftPadding,
       Color backgroundColor, String message) {
@@ -47,10 +48,16 @@ class _ListAccountState extends State<ListAccount> {
   @override
   void initState() {
     super.initState();
+    getAllData();
+  }
+
+  getAllData() {
+    setState(() {
+      isLoad = true;
+      isError = false;
+    });
+
     Provider.of<Child>(context, listen: false).getListData().then((response) {
-      setState(() {
-        isLoad = false;
-      });
       if (response['status'] == 'error') {
         snackbarMessenger(
           context,
@@ -58,6 +65,14 @@ class _ListAccountState extends State<ListAccount> {
           Colors.red,
           'Gagal terhubung server',
         );
+
+        setState(() {
+          isError = true;
+        });
+      } else {
+        setState(() {
+          isLoad = false;
+        });
       }
     }).catchError((error) {
       snackbarMessenger(
@@ -66,6 +81,10 @@ class _ListAccountState extends State<ListAccount> {
         Colors.red,
         'Gagal terhubung server',
       );
+
+      setState(() {
+        isError = true;
+      });
     });
   }
 
@@ -112,36 +131,49 @@ class _ListAccountState extends State<ListAccount> {
           ),
         ),
       ),
-      body: isLoad
-          ? Padding(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.3),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: LoadingIndicator(
-                      indicatorType: Indicator.ballSpinFadeLoader,
-                    ),
-                  ),
-                  Text('loading'),
-                ],
-              ),
+      body: isError
+          ? ListView(
+              children: [
+                ServerErrorWidget(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                    getAllData();
+                  },
+                  paddingTop: MediaQuery.of(context).size.height * 0.15,
+                  label: 'Gagal memuat daftar akun terhubung!!!',
+                )
+              ],
             )
-          : Consumer<Child>(
-              builder: (context, provider, child) => provider.search(
-                              data: provider.listChild,
-                              filter: _searchChildBasedAccount) !=
-                          null &&
-                      provider.listChild.length != 0
-                  ? accountButton(provider: provider)
-                  : const Center(
-                      child: Text('Tidak ada data'),
-                    ),
-            ),
+          : (isLoad
+              ? Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.3),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: LoadingIndicator(
+                          indicatorType: Indicator.ballSpinFadeLoader,
+                        ),
+                      ),
+                      Text('loading'),
+                    ],
+                  ),
+                )
+              : Consumer<Child>(
+                  builder: (context, provider, child) => provider.search(
+                                  data: provider.listChild,
+                                  filter: _searchChildBasedAccount) !=
+                              null &&
+                          provider.listChild.length != 0
+                      ? accountButton(provider: provider)
+                      : const Center(
+                          child: Text('Tidak ada data'),
+                        ),
+                )),
       floatingActionButton: FloatingActionButtonModis(
         onPressed: () {
           ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -164,7 +196,9 @@ class _ListAccountState extends State<ListAccount> {
                 );
               },
             ),
-          );
+          ).then((value) {
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+          });
         },
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
