@@ -329,6 +329,10 @@ class _VideoState extends State<Video> {
                                 : const Text(''),
                           ]
                         : [
+                            motivation.videoCategories != null &&
+                                    motivation.videoCategories.length != 0
+                                ? videoCategory(motivation)
+                                : const Text(''),
                             loadingContent(
                                 MediaQuery.of(context).size.height * 0.25),
                           ]
