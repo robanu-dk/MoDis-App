@@ -831,7 +831,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                                     MediaQuery.of(context).size.width * 0.35,
                                     const Color.fromARGB(255, 0, 120, 18),
                                     'berhasil menyimpan kegiatan',
-                                    MediaQuery.of(context).size.height * 0.72,
+                                    MediaQuery.of(context).size.height * 0.6,
                                   );
                                 } else {
                                   snackbarMessenger(
@@ -871,8 +871,8 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                                     context,
                                     MediaQuery.of(context).size.width * 0.35,
                                     const Color.fromARGB(255, 0, 120, 18),
-                                    'berhasil menyimpan kegiatan',
-                                    MediaQuery.of(context).size.height * 0.72,
+                                    'berhasil memperbarui kegiatan',
+                                    MediaQuery.of(context).size.height * 0.6,
                                   );
                                 } else {
                                   snackbarMessenger(
