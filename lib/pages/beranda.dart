@@ -1064,8 +1064,14 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                   style: const TextStyle(color: Colors.black),
                 ),
                 open
-                    ? const Icon(Icons.keyboard_arrow_down)
-                    : const Icon(Icons.keyboard_arrow_left),
+                    ? const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.black,
+                      )
+                    : const Icon(
+                        Icons.keyboard_arrow_left,
+                        color: Colors.black,
+                      ),
               ],
             ),
           ),
@@ -1146,17 +1152,41 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                         ? Colors.red
                                         : Colors.white))),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  element['name'],
-                                  style: TextStyle(
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.6,
+                                  child: Text(
+                                    element['name'],
+                                    style: TextStyle(
                                       color: int.parse(element['done']
                                                       .toString()) ==
                                                   1 ||
                                               DateTime.now().isAfter(DateTime.parse(
                                                   '${element["date"]} ${element["end_time"]}'))
                                           ? Colors.white
-                                          : Colors.black),
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: Text(
+                                    '${element["start_time"].split(":").toList()[0]}:${element["start_time"].split(":").toList()[1]} - ${element["end_time"].split(":").toList()[0]}:${element["end_time"].split(":").toList()[1]}',
+                                    style: TextStyle(
+                                      color: int.parse(element['done']
+                                                      .toString()) ==
+                                                  1 ||
+                                              DateTime.now().isAfter(DateTime.parse(
+                                                  '${element["date"]} ${element["end_time"]}'))
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
+                                    textAlign: TextAlign.end,
+                                  ),
                                 ),
                               ],
                             ),
