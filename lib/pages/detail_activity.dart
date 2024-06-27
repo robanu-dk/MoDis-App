@@ -1359,7 +1359,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                                                           },
                                                                           child:
                                                                               const Text(
-                                                                            'Iya',
+                                                                            'Simpan',
                                                                             style:
                                                                                 TextStyle(
                                                                               fontWeight: FontWeight.bold,
