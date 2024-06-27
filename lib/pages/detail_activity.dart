@@ -1333,7 +1333,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                                                                   MediaQuery.of(context).size.width * 0.35,
                                                                                   const Color.fromARGB(255, 0, 120, 18),
                                                                                   'berhasil menyelesaikan kegiatan',
-                                                                                  MediaQuery.of(context).size.height * 0.7,
+                                                                                  MediaQuery.of(context).size.height * 0.6,
                                                                                 );
                                                                               } else {
                                                                                 snackbarMessenger(
