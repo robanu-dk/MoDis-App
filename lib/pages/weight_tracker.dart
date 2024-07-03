@@ -1020,10 +1020,6 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             'berhasil memperbarui berat badan',
                                                                           );
                                                                         } else {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          Navigator.pop(
-                                                                              context);
                                                                           snackbarMessenger(
                                                                             context,
                                                                             MediaQuery.of(context).size.width *
@@ -1031,15 +1027,13 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             Colors.red,
                                                                             response['message'],
                                                                           );
-
-                                                                          setState(
-                                                                              () {
-                                                                            isError =
-                                                                                true;
-                                                                          });
                                                                         }
                                                                       }).catchError(
                                                                               (error) {
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                        Navigator.pop(
+                                                                            context);
                                                                         snackbarMessenger(
                                                                           context,
                                                                           MediaQuery.of(context).size.width *
@@ -1048,6 +1042,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                               .red,
                                                                           'Gagal terhubung ke server',
                                                                         );
+
+                                                                        setState(
+                                                                            () {
+                                                                          isError =
+                                                                              true;
+                                                                        });
                                                                       });
                                                                     } else {
                                                                       snackbarMessenger(
@@ -1213,6 +1213,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             .red,
                                                                         'Gagal terhubung ke server',
                                                                       );
+
+                                                                      setState(
+                                                                          () {
+                                                                        isError =
+                                                                            true;
+                                                                      });
                                                                     });
                                                                   },
                                                                   child: const Text(
@@ -1438,12 +1444,18 @@ class _WeightTrackerState extends State<WeightTracker> {
                         );
                       }
                     }).catchError((error) {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                       snackbarMessenger(
                         context,
                         MediaQuery.of(context).size.width * 0.5,
                         Colors.red,
                         'Gagal terhubung ke server',
                       );
+
+                      setState(() {
+                        isError = true;
+                      });
                     });
                   } else {
                     snackbarMessenger(

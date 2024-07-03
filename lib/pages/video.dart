@@ -595,6 +595,8 @@ class _VideoState extends State<Video> {
                                                 );
                                               },
                                             ).catchError((error) {
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
                                               snackbarMessenger(
                                                 context,
                                                 MediaQuery.of(context)
@@ -608,6 +610,10 @@ class _VideoState extends State<Video> {
                                                         .height *
                                                     0.6,
                                               );
+
+                                              setState(() {
+                                                isError = true;
+                                              });
                                             });
                                           },
                                           child: const Text('Hapus'),

@@ -339,6 +339,8 @@ class ChildAccountInformation extends StatelessWidget {
                                       );
                                     }
                                   }).catchError((error) {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
                                     snackbarMessenger(
                                       context,
                                       MediaQuery.of(context).size.width * 0.4,

@@ -977,6 +977,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                 );
                               }
                             }).catchError((error) {
+                              Navigator.pop(context);
                               snackbarMessenger(
                                 context,
                                 MediaQuery.of(context).size.width * 0.35,
