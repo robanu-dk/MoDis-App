@@ -735,6 +735,9 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                 child: SizedBox(
                                                   height: 120,
                                                   child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       CircleButtonModis(
                                                         icon: Icons.edit,
@@ -749,7 +752,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                             .only(
                                                           top: 8.0,
                                                           bottom: 8.0,
-                                                          left: 20.0,
+                                                          right: 8.0,
                                                         ),
                                                         onPressed: () {
                                                           Navigator.pop(
@@ -1083,6 +1086,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                             .only(
                                                           top: 8.0,
                                                           bottom: 8.0,
+                                                          left: 8.0,
                                                         ),
                                                         onPressed: () {
                                                           Navigator.pop(
