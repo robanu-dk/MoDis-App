@@ -723,6 +723,11 @@ class _FormCreateAccountState extends State<FormCreateAccount> {
           child: OutlinedButton(
             onPressed: () {
               ScaffoldMessenger.of(context).removeCurrentSnackBar();
+              _fName.unfocus();
+              _fUsername.unfocus();
+              _fPassword.unfocus();
+              _fConfirmPassword.unfocus();
+              _fEmail.unfocus();
               showDialog(
                 barrierDismissible: false,
                 context: context,
