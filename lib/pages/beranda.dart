@@ -802,6 +802,24 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
     }).catchError((error) {});
   }
 
+  void loadingIndicator(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(154, 0, 0, 0),
+          insetPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.3),
+          content: const LoadingIndicator(
+            indicatorType: Indicator.ballSpinFadeLoader,
+            colors: [Colors.white],
+          ),
+        ),
+      ),
+    );
+  }
+
   showAction(element) {
     showDialog(
       context: context,
@@ -954,9 +972,11 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                             ),
                           ),
                           onPressed: () {
+                            loadingIndicator(context);
                             Provider.of<Activity>(context, listen: false)
                                 .deleteActivity(element['id'].toString())
                                 .then((response) {
+                              Navigator.pop(context);
                               Navigator.pop(context);
                               if (response['status'] == 'success') {
                                 snackbarMessenger(
@@ -978,6 +998,7 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                               }
                             }).catchError((error) {
                               Navigator.pop(context);
+                              Navigator.pop(context);
                               snackbarMessenger(
                                 context,
                                 MediaQuery.of(context).size.width * 0.35,
@@ -985,6 +1006,8 @@ class _ButtonDropdownActivitiesState extends State<ButtonDropdownActivities> {
                                 'gagal terhubung ke server',
                                 MediaQuery.of(context).size.height * 0.6,
                               );
+
+                              getAllActivity();
                             });
                           },
                           child: const Text('Hapus'),

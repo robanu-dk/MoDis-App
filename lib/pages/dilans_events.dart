@@ -475,6 +475,8 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                   ),
                                                                   onPressed:
                                                                       () {
+                                                                    loadingIndicator(
+                                                                        context);
                                                                     Provider.of<EventsForDilans>(
                                                                             context,
                                                                             listen:
@@ -483,6 +485,8 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                             'id'])
                                                                         .then(
                                                                             (response) {
+                                                                      Navigator.pop(
+                                                                          context);
                                                                       Navigator.pop(
                                                                           context);
                                                                       if (response[
@@ -524,6 +528,8 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                             (error) {
                                                                       Navigator.pop(
                                                                           context);
+                                                                      Navigator.pop(
+                                                                          context);
                                                                       snackbarMessenger(
                                                                         context,
                                                                         MediaQuery.of(context).size.width *
@@ -534,6 +540,12 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                         MediaQuery.of(context).size.height *
                                                                             0.6,
                                                                       );
+
+                                                                      setState(
+                                                                          () {
+                                                                        isError =
+                                                                            true;
+                                                                      });
                                                                     });
                                                                   },
                                                                   child: const Text(
