@@ -316,6 +316,8 @@ class ListAvailableChild extends StatelessWidget {
                           paddingLeft: 15.0,
                           paddingRight: 15.0,
                           onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .removeCurrentSnackBar();
                             showDialog(
                               context: context,
                               builder: (context) => AlertInput(
@@ -720,6 +722,7 @@ class _FormCreateAccountState extends State<FormCreateAccount> {
           width: MediaQuery.of(context).size.width * 0.6,
           child: OutlinedButton(
             onPressed: () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               showDialog(
                 barrierDismissible: false,
                 context: context,
@@ -742,7 +745,6 @@ class _FormCreateAccountState extends State<FormCreateAccount> {
                   _email.text == '' ||
                   _password.text == '') {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 snackbarMessenger(
                   context,
                   MediaQuery.of(context).size.width * 0.4,

@@ -153,6 +153,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
           children: [
             IconButton(
               onPressed: () {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 Navigator.pop(context);
               },
               icon: const Icon(
