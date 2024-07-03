@@ -243,7 +243,7 @@ class _WeightTrackerState extends State<WeightTracker> {
         ),
         paddingHeader: 1.5,
       ),
-      body: isError
+      body: isError && !widget.isGuide
           ? ListView(
               children: [
                 ServerErrorWidget(
