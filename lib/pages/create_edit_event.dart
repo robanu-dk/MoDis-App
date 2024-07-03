@@ -161,9 +161,9 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                 size: 30,
               ),
             ),
-            const Text(
-              'Buat Event Baru',
-              style: TextStyle(
+            Text(
+              widget.data == null ? 'Buat Event Baru' : 'Edit Event',
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.white,
                 fontWeight: FontWeight.w500,

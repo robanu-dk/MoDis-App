@@ -380,9 +380,11 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                 size: 30,
               ),
             ),
-            const Text(
-              'Buat Aktivitas Baru',
-              style: TextStyle(
+            Text(
+              widget.activityId == null
+                  ? 'Buat Kegiatan Baru'
+                  : 'Edit Kegiatan',
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.white,
                 fontWeight: FontWeight.w500,

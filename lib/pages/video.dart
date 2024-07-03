@@ -452,6 +452,7 @@ class _VideoState extends State<Video> {
                         child: SizedBox(
                           height: 120,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircleButtonModis(
                                 icon: Icons.edit,

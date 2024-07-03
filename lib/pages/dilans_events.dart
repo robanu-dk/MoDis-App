@@ -320,6 +320,9 @@ class _DilansEventsState extends State<DilansEvents> {
                                                 child: SizedBox(
                                                   height: 120,
                                                   child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       CircleButtonModis(
                                                         icon: Icons.edit,
