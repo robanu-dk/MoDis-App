@@ -1020,6 +1020,10 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             'berhasil memperbarui berat badan',
                                                                           );
                                                                         } else {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          Navigator.pop(
+                                                                              context);
                                                                           snackbarMessenger(
                                                                             context,
                                                                             MediaQuery.of(context).size.width *
@@ -1027,6 +1031,12 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             Colors.red,
                                                                             response['message'],
                                                                           );
+
+                                                                          setState(
+                                                                              () {
+                                                                            isError =
+                                                                                true;
+                                                                          });
                                                                         }
                                                                       }).catchError(
                                                                               (error) {
