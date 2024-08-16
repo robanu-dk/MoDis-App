@@ -289,6 +289,9 @@ class _ListAccountState extends State<ListAccount> {
                         ? Image.asset('images/default_profile_image.jpg')
                         : Image.network(
                             'https://modis.techcreator.my.id/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                            fit: BoxFit.cover,
+                            width: 38,
+                            height: 38,
                           ),
                   ),
                   Container(
