@@ -66,7 +66,7 @@ class _BMICalculatorState extends State<BMICalculator> {
               ),
             ),
             const Text(
-              'Kalkulator BMI',
+              'Kalkulator Kesehatan',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.white,

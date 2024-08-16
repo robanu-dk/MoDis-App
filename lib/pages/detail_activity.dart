@@ -423,7 +423,7 @@ class _DetailActivityState extends State<DetailActivity> {
               ),
             ),
             const Text(
-              'Detail Aktivitas',
+              'Detail Kegiatan',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.white,
@@ -613,7 +613,7 @@ class _DetailActivityState extends State<DetailActivity> {
                           : Container(),
                       rowInformation(
                         context,
-                        'Nama Aktivitas',
+                        'Nama Kegiatan',
                         data[0]['name'].toString(),
                         25.0,
                       ),
@@ -947,7 +947,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                             ],
                                           ),
                                           content: const Text(
-                                            'Apakah anda yakin menyelesaikan aktivitas?',
+                                            'Apakah anda yakin menyelesaikan Kegiatan?',
                                           ),
                                           actions: [
                                             Row(
@@ -1512,7 +1512,7 @@ class _DetailActivityState extends State<DetailActivity> {
                                             ],
                                           ),
                                           content: const Text(
-                                            'Apakah anda yakin akan memulai aktivitas?',
+                                            'Apakah anda yakin akan memulai Kegiatan?',
                                           ),
                                           actions: [
                                             Row(
