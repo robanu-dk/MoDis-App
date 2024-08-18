@@ -145,7 +145,7 @@ class _EditVideoState extends State<EditVideo> {
               ),
             ),
             const Text(
-              'Buat Video',
+              'Ubah Video',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.white,
