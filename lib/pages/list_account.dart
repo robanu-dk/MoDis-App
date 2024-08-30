@@ -196,9 +196,7 @@ class _ListAccountState extends State<ListAccount> {
                 );
               },
             ),
-          ).then((value) {
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-          });
+          );
         },
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
