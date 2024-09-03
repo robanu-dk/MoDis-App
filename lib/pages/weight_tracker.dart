@@ -511,6 +511,9 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       horizontal: 10.0),
                                   child: OutlinedButton(
                                     onPressed: () {
+                                      ScaffoldMessenger.of(context)
+                                          .removeCurrentSnackBar();
+
                                       if (weight.listWeightUser != null &&
                                           weight.listWeightUser.length != 0) {
                                         if (user.userHeight == 0) {
@@ -540,7 +543,35 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       } else {
                                         showDialog(
                                           context: context,
-                                          builder: (context) => AlertDialog(),
+                                          builder: (context) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            surfaceTintColor: Colors.white,
+                                            title: const Text('Peringatan!!!'),
+                                            content: const Text(
+                                                'Silakan tambahkan berat badan terlebih dahulu'),
+                                            actionsAlignment:
+                                                MainAxisAlignment.center,
+                                            actions: [
+                                              FilledButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                style: const ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStatePropertyAll(
+                                                    Color.fromRGBO(
+                                                        248, 198, 48, 1),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  'Tutup',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         );
                                       }
                                     },
@@ -609,20 +640,19 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6.0, vertical: 5.0),
                                       decoration: BoxDecoration(
-                                          color: bmiResult <
-                                                  standarMaxWeightForBMI[
-                                                      'kurang']!
-                                              ? const Color(0xFFB2DFFC)
-                                              : (bmiResult <
-                                                      standarMaxWeightForBMI[
-                                                          'normal']!
-                                                  ? const Color(0xFF90EE90)
+                                          color: bmiResult < standarMaxWeightForBMI['kurang']!
+                                              ? const Color.fromARGB(
+                                                  120, 178, 222, 252)
+                                              : (bmiResult < standarMaxWeightForBMI['normal']!
+                                                  ? const Color.fromARGB(
+                                                      120, 144, 238, 144)
                                                   : (bmiResult <
                                                           standarMaxWeightForBMI[
                                                               'berlebih']!
-                                                      ? const Color(0xFFFFD700)
-                                                      : const Color(
-                                                          0xFFFF0000))),
+                                                      ? const Color.fromARGB(
+                                                          120, 255, 217, 0)
+                                                      : const Color.fromARGB(
+                                                          120, 255, 0, 0))),
                                           borderRadius: const BorderRadius.all(
                                               Radius.circular(8.0))),
                                       child: Column(
@@ -662,6 +692,9 @@ class _WeightTrackerState extends State<WeightTracker> {
                                             children: [
                                               OutlinedButton(
                                                 onPressed: () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .removeCurrentSnackBar();
+
                                                   tbBMI.text = user.userHeight
                                                       .toString();
 
@@ -700,6 +733,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                   )
                                 : (showFieldInformationCalory
                                     ? Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10.0),
                                         child: Text(
                                             'Informasi Kebutuhan kalori disertai tombol memperbarui'))
                                     : Container()),
@@ -935,7 +970,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     Container(
                                       height: 10.0,
                                       width: 10.0,
-                                      color: const Color(0xFFB2DFFC),
+                                      color: const Color.fromARGB(
+                                          120, 178, 222, 252),
                                     ),
                                     const Text(
                                       ': Kurang',
@@ -952,7 +988,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     Container(
                                       height: 10.0,
                                       width: 10.0,
-                                      color: const Color(0xFF90EE90),
+                                      color: const Color.fromARGB(
+                                          120, 144, 238, 144),
                                     ),
                                     const Text(
                                       ': Normal',
@@ -969,7 +1006,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     Container(
                                       height: 10.0,
                                       width: 10.0,
-                                      color: const Color(0xFFFFD700),
+                                      color: const Color.fromARGB(
+                                          120, 255, 217, 0),
                                     ),
                                     const Text(
                                       ': Berlebih',
@@ -986,7 +1024,8 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     Container(
                                       height: 10.0,
                                       width: 10.0,
-                                      color: const Color(0xFFFF0000),
+                                      color:
+                                          const Color.fromARGB(120, 255, 0, 0),
                                     ),
                                     const Text(
                                       ': Obesitas',
@@ -1890,6 +1929,14 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                           response[
                                                                               'message'],
                                                                         );
+
+                                                                        setState(
+                                                                            () {
+                                                                          showFieldInformationBMI =
+                                                                              false;
+                                                                          showFieldInformationCalory =
+                                                                              false;
+                                                                        });
                                                                       },
                                                                     ).catchError(
                                                                             (error) {
