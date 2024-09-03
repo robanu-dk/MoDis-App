@@ -43,10 +43,7 @@ class _WeightTrackerState extends State<WeightTracker> {
   late DateTime addDate, updateDate;
   String unit = '';
   int? indexUnit = 0, factorActivity;
-  bool isLoad = false,
-      isError = false,
-      showFieldInformationBMI = false,
-      showFieldInformationCalory = false;
+  bool isLoad = false, isError = false, showFieldInformationBMI = false;
   Map<String, double> standarMaxWeightForBMI = {
         'kurang': 18.5,
         'normal': 25.0,
@@ -57,13 +54,15 @@ class _WeightTrackerState extends State<WeightTracker> {
         'normal': 0.0,
         'berlebih': 0.0,
       };
-  double bmiResult = 0, caloryResult = 0;
+  double bmiResult = 0;
   TextEditingController tbBMI = TextEditingController(),
       bbCalory = TextEditingController(),
-      tbCalory = TextEditingController();
+      tbCalory = TextEditingController(),
+      ageCalory = TextEditingController();
   FocusNode fTbBMI = FocusNode(),
       fBbCalory = FocusNode(),
-      fTbCalory = FocusNode();
+      fTbCalory = FocusNode(),
+      fAgeCalory = FocusNode();
 
   final Map<String, String> month = {
     '01': 'Januari',
@@ -165,7 +164,6 @@ class _WeightTrackerState extends State<WeightTracker> {
     required double weight,
     required double height,
   }) {
-    print('weeigg $weight');
     double calculate = weight / (pow(height / 100, 2));
     double kurangWeight =
         standarMaxWeightForBMI['kurang']! * pow(height / 100, 2);
@@ -189,7 +187,7 @@ class _WeightTrackerState extends State<WeightTracker> {
     required double bb,
     required double tb,
     required double age,
-    required double activityFactor,
+    required int? activityFactor,
   }) {
     double activityFactor = factorActivity == 0
         ? 1.2
@@ -200,13 +198,49 @@ class _WeightTrackerState extends State<WeightTracker> {
                 : factorActivity == 3
                     ? 1.725
                     : 1.9));
-    setState(() {
-      if (gender == 0) {
-        caloryResult = (10 * bb + 6.25 * tb - 5 * age - 161) * activityFactor;
-      } else {
-        caloryResult = (10 * bb + 6.25 * tb - 5 * age + 5) * activityFactor;
-      }
-    });
+
+    double calorieResult = gender == 1
+        ? (10 * bb + 6.25 * tb - 5 * age - 161) * activityFactor
+        : (10 * bb + 6.25 * tb - 5 * age + 5) * activityFactor;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Kebutuhan Kalori',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.35,
+          child: Column(
+            children: [
+              Icon(
+                Ionicons.md_calculator,
+                size: MediaQuery.of(context).size.height * 0.2,
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 12.0),
+                child: Text(
+                  'Anda Membutuhkan',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text(
+                '${calorieResult.toStringAsFixed(2)} Kalori/Hari',
+                style: const TextStyle(
+                    fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+      ),
+    );
   }
 
   String dateToString(datetime) {
@@ -500,109 +534,76 @@ class _WeightTrackerState extends State<WeightTracker> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(bottom: 8.0),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Consumer<User>(
-                          builder: (context, user, child) => Consumer<Weight>(
-                            builder: (context, weight, child) => Row(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 10.0),
-                                  child: OutlinedButton(
-                                    onPressed: () {
-                                      ScaffoldMessenger.of(context)
-                                          .removeCurrentSnackBar();
+                      child: Consumer<User>(
+                        builder: (context, user, child) => Consumer<Weight>(
+                          builder: (context, weight, child) => Row(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context)
+                                        .removeCurrentSnackBar();
 
-                                      if (weight.listWeightUser != null &&
-                                          weight.listWeightUser.length != 0) {
-                                        if (user.userHeight == 0) {
-                                          tbBMI.text = '';
-                                          updateUserHeight(double.parse(weight
-                                              .listWeightUser
-                                              .toList()[0]['weight']
-                                              .toString()));
-                                        } else {
-                                          if (!showFieldInformationBMI) {
-                                            calculateBMI(
-                                                weight: double.parse(weight
-                                                    .listWeightUser
-                                                    .toList()[0]['weight']
-                                                    .toString()),
-                                                height: double.parse(user
-                                                    .userHeight
-                                                    .toString()));
-                                          }
-
-                                          setState(() {
-                                            showFieldInformationBMI =
-                                                !showFieldInformationBMI;
-                                            showFieldInformationCalory = false;
-                                          });
-                                        }
+                                    if (weight.listWeightUser != null &&
+                                        weight.listWeightUser.length != 0) {
+                                      if (user.userHeight == 0) {
+                                        tbBMI.text = '';
+                                        updateUserHeight(double.parse(weight
+                                            .listWeightUser
+                                            .toList()[0]['weight']
+                                            .toString()));
                                       } else {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor: Colors.white,
-                                            surfaceTintColor: Colors.white,
-                                            title: const Text('Peringatan!!!'),
-                                            content: const Text(
-                                                'Silakan tambahkan berat badan terlebih dahulu'),
-                                            actionsAlignment:
-                                                MainAxisAlignment.center,
-                                            actions: [
-                                              FilledButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                    Color.fromRGBO(
-                                                        248, 198, 48, 1),
-                                                  ),
-                                                ),
-                                                child: const Text(
-                                                  'Tutup',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                        if (!showFieldInformationBMI) {
+                                          calculateBMI(
+                                              weight: double.parse(weight
+                                                  .listWeightUser
+                                                  .toList()[0]['weight']
+                                                  .toString()),
+                                              height: double.parse(
+                                                  user.userHeight.toString()));
+                                        }
+
+                                        setState(() {
+                                          showFieldInformationBMI =
+                                              !showFieldInformationBMI;
+                                        });
+                                      }
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          surfaceTintColor: Colors.white,
+                                          title: const Text('Peringatan!!!'),
+                                          content: const Text(
+                                              'Silakan tambahkan berat badan terlebih dahulu'),
+                                          actionsAlignment:
+                                              MainAxisAlignment.center,
+                                          actions: [
+                                            FilledButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                  Color.fromRGBO(
+                                                      248, 198, 48, 1),
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    style: const ButtonStyle(
-                                      padding: MaterialStatePropertyAll(
-                                        EdgeInsets.symmetric(horizontal: 8.0),
-                                      ),
-                                      shape: MaterialStatePropertyAll(
-                                        RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
+                                              child: const Text(
+                                                'Tutup',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      showFieldInformationBMI
-                                          ? 'Tutup Informasi BMI'
-                                          : 'BMI',
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-                                ),
-                                OutlinedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      showFieldInformationCalory =
-                                          !showFieldInformationCalory;
-                                      showFieldInformationBMI = false;
-                                    });
+                                      );
+                                    }
                                   },
                                   style: const ButtonStyle(
                                     padding: MaterialStatePropertyAll(
@@ -617,14 +618,423 @@ class _WeightTrackerState extends State<WeightTracker> {
                                     ),
                                   ),
                                   child: Text(
-                                    showFieldInformationCalory
-                                        ? 'Tutup Informasi Kebutuhan Kalori'
-                                        : 'Kebutuhan Kalori',
+                                    showFieldInformationBMI
+                                        ? 'Tutup Informasi BMI'
+                                        : 'BMI',
                                     style: const TextStyle(color: Colors.black),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              OutlinedButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .removeCurrentSnackBar();
+
+                                  setState(() {
+                                    showFieldInformationBMI = false;
+                                  });
+
+                                  if (weight.listWeightUser != null &&
+                                      weight.listWeightUser.length != 0) {
+                                    if (user.userHeight != 0) {
+                                      tbCalory.text =
+                                          user.userHeight.toString();
+                                    }
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertInput(
+                                        header: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              'Hitung Kebutuhan Kalori',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              icon:
+                                                  const Icon(Ionicons.md_close),
+                                            )
+                                          ],
+                                        ),
+                                        headerPadding: EdgeInsets.zero,
+                                        contents: [
+                                          Input(
+                                            textController: tbCalory,
+                                            label: "Tinggi Badan",
+                                            suffixIcon: const SizedBox(
+                                              width: 10,
+                                              child: Center(
+                                                child: Text(
+                                                  'cm',
+                                                ),
+                                              ),
+                                            ),
+                                            focusNode: fTbCalory,
+                                            onChanged: (value) {
+                                              tbCalory.text = tbCalory.text
+                                                  .replaceAll(
+                                                      RegExp(r'[^0-9.]'), '');
+
+                                              if (RegExp(r'\.')
+                                                      .allMatches(tbCalory.text)
+                                                      .length >
+                                                  1) {
+                                                tbCalory.text = tbCalory.text
+                                                    .substring(
+                                                        0,
+                                                        tbCalory.text.length -
+                                                            1);
+                                              }
+                                            },
+                                            border: const OutlineInputBorder(),
+                                            keyboardType: TextInputType.number,
+                                          ),
+                                          Input(
+                                            textController: ageCalory,
+                                            label: "Usia",
+                                            focusNode: fAgeCalory,
+                                            onChanged: (value) {
+                                              ageCalory.text = ageCalory.text
+                                                  .replaceAll(
+                                                      RegExp(r'[^0-9.]'), '');
+
+                                              if (RegExp(r'\.')
+                                                  .allMatches(ageCalory.text)
+                                                  .isNotEmpty) {
+                                                ageCalory.text = ageCalory.text
+                                                    .substring(
+                                                        0,
+                                                        ageCalory.text.length -
+                                                            1);
+                                              }
+                                            },
+                                            border: const OutlineInputBorder(),
+                                            keyboardType: TextInputType.number,
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                top: 20.0),
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.9,
+                                            child: DropdownButtonFormField(
+                                              isExpanded: true,
+                                              padding: EdgeInsets.zero,
+                                              decoration: const InputDecoration(
+                                                border: OutlineInputBorder(),
+                                                contentPadding:
+                                                    EdgeInsets.all(8.0),
+                                              ),
+                                              value: factorActivity,
+                                              hint: const Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 4.0),
+                                                    child: Icon(
+                                                      Icons.event_sharp,
+                                                      color: Color.fromRGBO(
+                                                          120, 120, 120, 1),
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 4.0),
+                                                    child: Text(
+                                                        'Pilih Jenis Aktivitas'),
+                                                  ),
+                                                ],
+                                              ),
+                                              items: const [
+                                                DropdownMenuItem<int>(
+                                                  value: 0,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 4.0),
+                                                        child: Icon(
+                                                          Icons.event_sharp,
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0),
+                                                        child:
+                                                            Text('Tidak Aktif'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<int>(
+                                                  value: 1,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 4.0),
+                                                        child: Icon(
+                                                          Icons.event_sharp,
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0),
+                                                        child: Text(
+                                                            'Sedikit Aktif'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<int>(
+                                                  value: 2,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 4.0),
+                                                        child: Icon(
+                                                          Icons.event_sharp,
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0),
+                                                        child: Text('Aktif'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<int>(
+                                                  value: 3,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 4.0),
+                                                        child: Icon(
+                                                          Icons.event_sharp,
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0),
+                                                        child: Text(
+                                                            'Sangat Aktif'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<int>(
+                                                  value: 4,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 4.0),
+                                                        child: Icon(
+                                                          Icons.event_sharp,
+                                                          color: Color.fromRGBO(
+                                                              120, 120, 120, 1),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5.0),
+                                                        child: Text(
+                                                          'Sangat Aktif (Fisik)',
+                                                          overflow: TextOverflow
+                                                              .visible,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                              onChanged: (value) {
+                                                factorActivity = value;
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                        contentAligment: 'vertical',
+                                        contentPadding:
+                                            const EdgeInsets.only(top: 4.0),
+                                        actionAligment: 'horizontal',
+                                        actions: [
+                                          FilledButton(
+                                            onPressed: () {
+                                              fTbCalory.unfocus();
+                                              fAgeCalory.unfocus();
+
+                                              ScaffoldMessenger.of(context)
+                                                  .removeCurrentSnackBar();
+
+                                              if (tbCalory.text != '' &&
+                                                  ageCalory.text != '' &&
+                                                  factorActivity != null) {
+                                                loadingIndicator(context);
+
+                                                Provider.of<User>(context,
+                                                        listen: false)
+                                                    .updateUserHeight(
+                                                  isGuide: widget.isGuide,
+                                                  height: double.parse(
+                                                    tbCalory.text,
+                                                  ),
+                                                  childEmail: widget.userEmail,
+                                                )
+                                                    .then((response) {
+                                                  Navigator.of(context).pop();
+                                                  if (response['status'] ==
+                                                      'success') {
+                                                    Navigator.of(context).pop();
+
+                                                    calculateCalory(
+                                                        gender: user.userGender,
+                                                        bb: double.parse(weight
+                                                            .listWeightUser
+                                                            .toList()[0]
+                                                                ['weight']
+                                                            .toString()),
+                                                        tb: user.userHeight,
+                                                        age: double.parse(
+                                                            ageCalory.text),
+                                                        activityFactor:
+                                                            factorActivity);
+                                                  } else {
+                                                    snackbarMessenger(
+                                                      context,
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.5,
+                                                      Colors.red,
+                                                      response['message'],
+                                                    );
+                                                  }
+                                                }).catchError((error) {
+                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context).pop();
+
+                                                  snackbarMessenger(
+                                                    context,
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.5,
+                                                    Colors.red,
+                                                    'Gagal terhubung ke server',
+                                                  );
+
+                                                  setState(() {
+                                                    isError = true;
+                                                  });
+                                                });
+                                              } else {
+                                                snackbarMessenger(
+                                                  context,
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.5,
+                                                  Colors.red,
+                                                  'terdapat data yang kosong',
+                                                );
+                                              }
+                                            },
+                                            style: const ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStatePropertyAll(
+                                                Color.fromRGBO(1, 98, 104, 1.0),
+                                              ),
+                                            ),
+                                            child: const Text('Hitung'),
+                                          ),
+                                        ],
+                                        actionPadding: const EdgeInsets.only(
+                                          top: 14.0,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        surfaceTintColor: Colors.white,
+                                        title: const Text('Peringatan!!!'),
+                                        content: const Text(
+                                            'Silakan tambahkan berat badan terlebih dahulu'),
+                                        actionsAlignment:
+                                            MainAxisAlignment.center,
+                                        actions: [
+                                          FilledButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            style: const ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStatePropertyAll(
+                                                Color.fromRGBO(248, 198, 48, 1),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'Tutup',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                },
+                                style: const ButtonStyle(
+                                  padding: MaterialStatePropertyAll(
+                                    EdgeInsets.symmetric(horizontal: 8.0),
+                                  ),
+                                  shape: MaterialStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8.0),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Kebutuhan Kalori',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -731,13 +1141,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                       ),
                                     ),
                                   )
-                                : (showFieldInformationCalory
-                                    ? Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10.0),
-                                        child: Text(
-                                            'Informasi Kebutuhan kalori disertai tombol memperbarui'))
-                                    : Container()),
+                                : Container(),
                       ),
                     ),
                     const SubTitleLabel(
@@ -1698,8 +2102,6 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                         () {
                                                                       showFieldInformationBMI =
                                                                           false;
-                                                                      showFieldInformationCalory =
-                                                                          false;
                                                                     });
 
                                                                     fUpdateBB
@@ -1934,8 +2336,6 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                             () {
                                                                           showFieldInformationBMI =
                                                                               false;
-                                                                          showFieldInformationCalory =
-                                                                              false;
                                                                         });
                                                                       },
                                                                     ).catchError(
@@ -2165,7 +2565,6 @@ class _WeightTrackerState extends State<WeightTracker> {
 
                   setState(() {
                     showFieldInformationBMI = false;
-                    showFieldInformationCalory = false;
                   });
 
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
