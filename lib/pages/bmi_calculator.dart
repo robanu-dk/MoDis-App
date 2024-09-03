@@ -148,6 +148,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                       label: 'Tinggi Badan (cm)',
                       border: const OutlineInputBorder(),
                       width: MediaQuery.of(context).size.width * 0.9,
+                      onChanged: (value) {
+                        tb.text = tb.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                        if (RegExp(r'\.').allMatches(tb.text).length > 1) {
+                          tb.text = tb.text.substring(0, tb.text.length - 1);
+                        }
+                      },
                     ),
                     Input(
                       textController: bb,
@@ -156,6 +163,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                       label: 'Berat Badan (kg)',
                       border: const OutlineInputBorder(),
                       width: MediaQuery.of(context).size.width * 0.9,
+                      onChanged: (value) {
+                        bb.text = bb.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                        if (RegExp(r'\.').allMatches(bb.text).length > 1) {
+                          bb.text = bb.text.substring(0, bb.text.length - 1);
+                        }
+                      },
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
@@ -374,6 +388,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                       label: 'Tinggi Badan (cm)',
                       border: const OutlineInputBorder(),
                       width: MediaQuery.of(context).size.width * 0.9,
+                      onChanged: (value) {
+                        tb.text = tb.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                        if (RegExp(r'\.').allMatches(tb.text).length > 1) {
+                          tb.text = tb.text.substring(0, tb.text.length - 1);
+                        }
+                      },
                     ),
                     Input(
                       textController: bb,
@@ -382,6 +403,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                       label: 'Berat Badan (kg)',
                       border: const OutlineInputBorder(),
                       width: MediaQuery.of(context).size.width * 0.9,
+                      onChanged: (value) {
+                        bb.text = bb.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                        if (RegExp(r'\.').allMatches(bb.text).length > 1) {
+                          bb.text = bb.text.substring(0, bb.text.length - 1);
+                        }
+                      },
                     ),
                     Input(
                       textController: age,
@@ -390,6 +418,13 @@ class _BMICalculatorState extends State<BMICalculator> {
                       label: 'Usia',
                       border: const OutlineInputBorder(),
                       width: MediaQuery.of(context).size.width * 0.9,
+                      onChanged: (value) {
+                        age.text = age.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                        if (RegExp(r'\.').allMatches(age.text).isNotEmpty) {
+                          age.text = age.text.substring(0, age.text.length - 1);
+                        }
+                      },
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 20.0),
@@ -587,7 +622,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     title: const Text(
-                                      'Hasil Perhitungan BMI',
+                                      'Hasil Perhitungan Kebutuhan Kalori',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
@@ -597,7 +632,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                                     content: SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
-                                              0.3,
+                                              0.35,
                                       child: Column(
                                         children: [
                                           Icon(
