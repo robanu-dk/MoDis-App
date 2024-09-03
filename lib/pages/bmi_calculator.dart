@@ -340,7 +340,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                         ),
                         items: const [
                           DropdownMenuItem<int>(
-                            value: 0,
+                            value: 1,
                             child: Row(
                               children: [
                                 Padding(
@@ -358,7 +358,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                             ),
                           ),
                           DropdownMenuItem<int>(
-                            value: 1,
+                            value: 0,
                             child: Row(
                               children: [
                                 Padding(
@@ -370,7 +370,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(left: 15.0),
-                                  child: Text('Pria'),
+                                  child: Text('Laki-Laki'),
                                 ),
                               ],
                             ),
@@ -604,7 +604,7 @@ class _BMICalculatorState extends State<BMICalculator> {
                                             : activity == 3
                                                 ? 1.725
                                                 : 1.9));
-                                if (gender == 0) {
+                                if (gender == 1) {
                                   calorieResult = (10 * double.parse(bb.text) +
                                           6.25 * double.parse(tb.text) -
                                           5 * double.parse(age.text) -
