@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/alert_input_implement.dart';
 import 'package:modis/components/app_bar_implement.dart';
@@ -9,6 +12,7 @@ import 'package:modis/components/error.dart';
 import 'package:modis/components/floating_action_button_modis.dart';
 import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/tile_information_implement.dart';
+import 'package:modis/providers/user.dart';
 import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
 
@@ -38,8 +42,28 @@ class _WeightTrackerState extends State<WeightTracker> {
       fFilterValue = FocusNode();
   late DateTime addDate, updateDate;
   String unit = '';
-  int? indexUnit = 0;
-  bool isLoad = false, isError = false;
+  int? indexUnit = 0, factorActivity;
+  bool isLoad = false,
+      isError = false,
+      showFieldInformationBMI = false,
+      showFieldInformationCalory = false;
+  Map<String, double> standarMaxWeightForBMI = {
+        'kurang': 18.5,
+        'normal': 25.0,
+        'berlebih': 30.0,
+      },
+      maxWeightForBMI = {
+        'kurang': 0.0,
+        'normal': 0.0,
+        'berlebih': 0.0,
+      };
+  double bmiResult = 0, caloryResult = 0;
+  TextEditingController tbBMI = TextEditingController(),
+      bbCalory = TextEditingController(),
+      tbCalory = TextEditingController();
+  FocusNode fTbBMI = FocusNode(),
+      fBbCalory = FocusNode(),
+      fTbCalory = FocusNode();
 
   final Map<String, String> month = {
     '01': 'Januari',
@@ -60,6 +84,7 @@ class _WeightTrackerState extends State<WeightTracker> {
   void initState() {
     super.initState();
     getAllData();
+    getUserHeight();
   }
 
   getAllData() {
@@ -103,6 +128,87 @@ class _WeightTrackerState extends State<WeightTracker> {
     }
   }
 
+  void getUserHeight() {
+    Provider.of<User>(context, listen: false)
+        .getUserheight(
+      isGuide: widget.isGuide,
+      childEmail: widget.userEmail,
+    )
+        .then((response) {
+      if (response['status'] == 'error') {
+        snackbarMessenger(
+          context,
+          MediaQuery.of(context).size.width * 0.4,
+          Colors.red,
+          'Gagal terhubung server',
+        );
+
+        setState(() {
+          isError = true;
+        });
+      }
+    }).catchError((error) {
+      snackbarMessenger(
+        context,
+        MediaQuery.of(context).size.width * 0.4,
+        Colors.red,
+        'Gagal terhubung server',
+      );
+
+      setState(() {
+        isError = true;
+      });
+    });
+  }
+
+  void calculateBMI({
+    required double weight,
+    required double height,
+  }) {
+    print('weeigg $weight');
+    double calculate = weight / (pow(height / 100, 2));
+    double kurangWeight =
+        standarMaxWeightForBMI['kurang']! * pow(height / 100, 2);
+    double normalWeight =
+        standarMaxWeightForBMI['normal']! * pow(height / 100, 2);
+    double berlebihWeight =
+        standarMaxWeightForBMI['berlebih']! * pow(height / 100, 2);
+
+    setState(() {
+      bmiResult = round(calculate, decimals: 2);
+      maxWeightForBMI = {
+        'kurang': kurangWeight,
+        'normal': normalWeight,
+        'berlebih': berlebihWeight,
+      };
+    });
+  }
+
+  void calculateCalory({
+    required int gender,
+    required double bb,
+    required double tb,
+    required double age,
+    required double activityFactor,
+  }) {
+    double activityFactor = factorActivity == 0
+        ? 1.2
+        : (factorActivity == 1
+            ? 1.375
+            : (factorActivity == 2
+                ? 1.55
+                : factorActivity == 3
+                    ? 1.725
+                    : 1.9));
+    setState(() {
+      if (gender == 0) {
+        caloryResult = (10 * bb + 6.25 * tb - 5 * age - 161) * activityFactor;
+      } else {
+        caloryResult = (10 * bb + 6.25 * tb - 5 * age + 5) * activityFactor;
+      }
+    });
+  }
+
   String dateToString(datetime) {
     dynamic date = datetime.toString().split(' ')[0].split('-');
     return '${date[2]} ${month[date[1]]} ${date[0]}';
@@ -140,6 +246,138 @@ class _WeightTrackerState extends State<WeightTracker> {
             indicatorType: Indicator.ballSpinFadeLoader,
             colors: [Colors.white],
           ),
+        ),
+      ),
+    );
+  }
+
+  void updateUserHeight(double weight) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertInput(
+        header: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Masukkan Tinggi Badan',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Ionicons.md_close),
+            )
+          ],
+        ),
+        headerPadding: EdgeInsets.zero,
+        contents: [
+          Input(
+            textController: tbBMI,
+            label: "Tinggi Badan",
+            suffixIcon: const SizedBox(
+              width: 10,
+              child: Center(
+                child: Text(
+                  'cm',
+                ),
+              ),
+            ),
+            focusNode: fTbBMI,
+            onChanged: (value) {
+              tbBMI.text = tbBMI.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+              if (RegExp(r'\.').allMatches(tbBMI.text).length > 1) {
+                tbBMI.text = tbBMI.text.substring(0, tbBMI.text.length - 1);
+              }
+            },
+            border: const OutlineInputBorder(),
+            keyboardType: TextInputType.number,
+          )
+        ],
+        contentAligment: 'vertical',
+        contentPadding: const EdgeInsets.only(top: 4.0),
+        actionAligment: 'horizontal',
+        actions: [
+          FilledButton(
+            onPressed: () {
+              fTbBMI.unfocus();
+
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+              if (tbBMI.text != '') {
+                loadingIndicator(context);
+
+                Provider.of<User>(context, listen: false)
+                    .updateUserHeight(
+                  isGuide: widget.isGuide,
+                  height: double.parse(
+                    tbBMI.text,
+                  ),
+                  childEmail: widget.userEmail,
+                )
+                    .then((response) {
+                  Navigator.of(context).pop();
+                  if (response['status'] == 'success') {
+                    Navigator.of(context).pop();
+
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.5,
+                      const Color.fromARGB(255, 0, 120, 18),
+                      'berhasil memperbarui tinggi badan',
+                    );
+
+                    calculateBMI(
+                        weight: weight, height: double.parse(tbBMI.text));
+
+                    setState(() {
+                      showFieldInformationBMI = true;
+                    });
+                  } else {
+                    snackbarMessenger(
+                      context,
+                      MediaQuery.of(context).size.width * 0.5,
+                      Colors.red,
+                      response['message'],
+                    );
+                  }
+                }).catchError((error) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+
+                  snackbarMessenger(
+                    context,
+                    MediaQuery.of(context).size.width * 0.5,
+                    Colors.red,
+                    'Gagal terhubung ke server',
+                  );
+
+                  setState(() {
+                    isError = true;
+                  });
+                });
+              } else {
+                snackbarMessenger(
+                  context,
+                  MediaQuery.of(context).size.width * 0.5,
+                  Colors.red,
+                  'tinggi badan harus diisi',
+                );
+              }
+            },
+            style: const ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll(
+                Color.fromRGBO(1, 98, 104, 1.0),
+              ),
+            ),
+            child: const Text('Simpan'),
+          ),
+        ],
+        actionPadding: const EdgeInsets.only(
+          top: 14.0,
         ),
       ),
     );
@@ -260,6 +498,213 @@ class _WeightTrackerState extends State<WeightTracker> {
           : !isLoad
               ? ListView(
                   children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Consumer<User>(
+                          builder: (context, user, child) => Consumer<Weight>(
+                            builder: (context, weight, child) => Row(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 10.0),
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      if (weight.listWeightUser != null &&
+                                          weight.listWeightUser.length != 0) {
+                                        if (user.userHeight == 0) {
+                                          tbBMI.text = '';
+                                          updateUserHeight(double.parse(weight
+                                              .listWeightUser
+                                              .toList()[0]['weight']
+                                              .toString()));
+                                        } else {
+                                          if (!showFieldInformationBMI) {
+                                            calculateBMI(
+                                                weight: double.parse(weight
+                                                    .listWeightUser
+                                                    .toList()[0]['weight']
+                                                    .toString()),
+                                                height: double.parse(user
+                                                    .userHeight
+                                                    .toString()));
+                                          }
+
+                                          setState(() {
+                                            showFieldInformationBMI =
+                                                !showFieldInformationBMI;
+                                            showFieldInformationCalory = false;
+                                          });
+                                        }
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(),
+                                        );
+                                      }
+                                    },
+                                    style: const ButtonStyle(
+                                      padding: MaterialStatePropertyAll(
+                                        EdgeInsets.symmetric(horizontal: 8.0),
+                                      ),
+                                      shape: MaterialStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      showFieldInformationBMI
+                                          ? 'Tutup Informasi BMI'
+                                          : 'BMI',
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                ),
+                                OutlinedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      showFieldInformationCalory =
+                                          !showFieldInformationCalory;
+                                      showFieldInformationBMI = false;
+                                    });
+                                  },
+                                  style: const ButtonStyle(
+                                    padding: MaterialStatePropertyAll(
+                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                    ),
+                                    shape: MaterialStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8.0),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    showFieldInformationCalory
+                                        ? 'Tutup Informasi Kebutuhan Kalori'
+                                        : 'Kebutuhan Kalori',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Consumer<User>(
+                      builder: (context, user, child) => Consumer<Weight>(
+                        builder: (context, weight, child) =>
+                            showFieldInformationBMI
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6.0, vertical: 5.0),
+                                      decoration: BoxDecoration(
+                                          color: bmiResult <
+                                                  standarMaxWeightForBMI[
+                                                      'kurang']!
+                                              ? const Color(0xFFB2DFFC)
+                                              : (bmiResult <
+                                                      standarMaxWeightForBMI[
+                                                          'normal']!
+                                                  ? const Color(0xFF90EE90)
+                                                  : (bmiResult <
+                                                          standarMaxWeightForBMI[
+                                                              'berlebih']!
+                                                      ? const Color(0xFFFFD700)
+                                                      : const Color(
+                                                          0xFFFF0000))),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(8.0))),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 1.0),
+                                            child: const Text(
+                                              'Informasi BMI',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 1.0),
+                                            child: Text(
+                                                'Tinggi Badan: ${user.userHeight} cm'),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 1.0),
+                                            child: Text(
+                                                'Berat Badan Terakhir: ${weight.listWeightUser.toList()[0]["weight"]} Kg'),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 1.0),
+                                            child: Text(
+                                                'Hasil BMI: $bmiResult (${bmiResult < standarMaxWeightForBMI["kurang"]! ? "Kurang" : (bmiResult < standarMaxWeightForBMI["normal"]! ? "Normal" : (bmiResult < standarMaxWeightForBMI["berlebih"]! ? "Berlebih" : "Obesitas"))})'),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              OutlinedButton(
+                                                onPressed: () {
+                                                  tbBMI.text = user.userHeight
+                                                      .toString();
+
+                                                  updateUserHeight(double.parse(
+                                                      weight.listWeightUser
+                                                          .toList()[0]['weight']
+                                                          .toString()));
+                                                },
+                                                style: const ButtonStyle(
+                                                  padding:
+                                                      MaterialStatePropertyAll(
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 8.0),
+                                                  ),
+                                                  shape:
+                                                      MaterialStatePropertyAll(
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                        Radius.circular(8.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  'Perbarui Tinggi Badan',
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : (showFieldInformationCalory
+                                    ? Container(
+                                        child: Text(
+                                            'Informasi Kebutuhan kalori disertai tombol memperbarui'))
+                                    : Container()),
+                      ),
+                    ),
                     const SubTitleLabel(
                       label: 'Perubahan Berat Badan',
                     ),
@@ -456,7 +901,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                         child: SizedBox(
                           width: filter != 0
                               ? double.parse(
-                                  ('$filter $unit terakhir'.length * 8)
+                                  ('$filter $unit terakhir'.length * 8.5)
                                       .toString())
                               : 60.0,
                           child: Row(
@@ -478,6 +923,81 @@ class _WeightTrackerState extends State<WeightTracker> {
                         ),
                       ),
                     ),
+                    showFieldInformationBMI
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 10.0,
+                                      width: 10.0,
+                                      color: const Color(0xFFB2DFFC),
+                                    ),
+                                    const Text(
+                                      ': Kurang',
+                                      style: TextStyle(fontSize: 10.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 10.0,
+                                      width: 10.0,
+                                      color: const Color(0xFF90EE90),
+                                    ),
+                                    const Text(
+                                      ': Normal',
+                                      style: TextStyle(fontSize: 10.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 10.0,
+                                      width: 10.0,
+                                      color: const Color(0xFFFFD700),
+                                    ),
+                                    const Text(
+                                      ': Berlebih',
+                                      style: TextStyle(fontSize: 10.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 10.0,
+                                      width: 10.0,
+                                      color: const Color(0xFFFF0000),
+                                    ),
+                                    const Text(
+                                      ': Obesitas',
+                                      style: TextStyle(fontSize: 10.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(),
                     Container(
                       padding: EdgeInsets.zero,
                       decoration: const BoxDecoration(
@@ -566,47 +1086,188 @@ class _WeightTrackerState extends State<WeightTracker> {
                                               },
                                             ),
                                           ),
-                                          lineBarsData: [
-                                            LineChartBarData(
-                                              spots: weight.filter(
-                                                          weight.listWeightUser,
-                                                          filter,
-                                                          unit) !=
-                                                      null
-                                                  ? weight
-                                                      .filter(
-                                                          weight.listWeightUser,
-                                                          filter,
-                                                          unit)
-                                                      .map<FlSpot>(
-                                                      (element) {
-                                                        var index = weight
+                                          lineBarsData: showFieldInformationBMI
+                                              ? [
+                                                  // Underweight and normal weight area
+                                                  LineChartBarData(
+                                                    color: const Color.fromARGB(
+                                                        0, 255, 255, 255),
+                                                    show: true,
+                                                    spots: [
+                                                      FlSpot(
+                                                          0,
+                                                          maxWeightForBMI[
+                                                              'kurang']!),
+                                                      FlSpot(
+                                                          double.parse(weight
+                                                              .filter(
+                                                                  weight
+                                                                      .listWeightUser,
+                                                                  filter,
+                                                                  unit)
+                                                              .length
+                                                              .toString()),
+                                                          maxWeightForBMI[
+                                                              'kurang']!)
+                                                    ],
+                                                    belowBarData: BarAreaData(
+                                                      show: true,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              120,
+                                                              178,
+                                                              222,
+                                                              252),
+                                                      cutOffY: 0,
+                                                      applyCutOffY: true,
+                                                    ),
+                                                    aboveBarData: BarAreaData(
+                                                      show: true,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              120,
+                                                              144,
+                                                              238,
+                                                              144),
+                                                      cutOffY: maxWeightForBMI[
+                                                                  'normal']! >
+                                                              maxY(weight
+                                                                  .listWeightUser)
+                                                          ? maxY(weight
+                                                              .listWeightUser)
+                                                          : maxWeightForBMI[
+                                                              'normal']!,
+                                                      applyCutOffY: true,
+                                                    ),
+                                                  ),
+                                                  // overweight area
+                                                  LineChartBarData(
+                                                    color: const Color.fromARGB(
+                                                        0, 255, 255, 255),
+                                                    show: true,
+                                                    spots: [
+                                                      FlSpot(
+                                                          0,
+                                                          maxWeightForBMI[
+                                                              'berlebih']!),
+                                                      FlSpot(
+                                                          double.parse(weight
+                                                              .filter(
+                                                                  weight
+                                                                      .listWeightUser,
+                                                                  filter,
+                                                                  unit)
+                                                              .length
+                                                              .toString()),
+                                                          maxWeightForBMI[
+                                                              'berlebih']!)
+                                                    ],
+                                                    aboveBarData: BarAreaData(
+                                                      show: true,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              120, 255, 0, 0),
+                                                      cutOffY: maxY(weight
+                                                          .listWeightUser),
+                                                      applyCutOffY: true,
+                                                    ),
+                                                    belowBarData: BarAreaData(
+                                                      show: true,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              120, 255, 217, 0),
+                                                      cutOffY: maxWeightForBMI[
+                                                          'normal']!,
+                                                      applyCutOffY: true,
+                                                    ),
+                                                  ),
+                                                  LineChartBarData(
+                                                    spots: weight.filter(
+                                                                weight
+                                                                    .listWeightUser,
+                                                                filter,
+                                                                unit) !=
+                                                            null
+                                                        ? weight
                                                             .filter(
                                                                 weight
                                                                     .listWeightUser,
                                                                 filter,
                                                                 unit)
-                                                            .reversed
-                                                            .toList()
-                                                            .indexOf(element);
-                                                        return FlSpot(
-                                                          double.parse(
-                                                              index.toString()),
-                                                          double.parse(
-                                                            element['weight']
-                                                                .toString(),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ).toList()
-                                                  : [],
-                                              isCurved: true,
-                                              color: Colors.blue,
-                                              barWidth: 4,
-                                              dotData:
-                                                  const FlDotData(show: false),
-                                            ),
-                                          ],
+                                                            .map<FlSpot>(
+                                                            (element) {
+                                                              var index = weight
+                                                                  .filter(
+                                                                      weight
+                                                                          .listWeightUser,
+                                                                      filter,
+                                                                      unit)
+                                                                  .reversed
+                                                                  .toList()
+                                                                  .indexOf(
+                                                                      element);
+                                                              return FlSpot(
+                                                                double.parse(index
+                                                                    .toString()),
+                                                                double.parse(
+                                                                  element['weight']
+                                                                      .toString(),
+                                                                ),
+                                                              );
+                                                            },
+                                                          ).toList()
+                                                        : [],
+                                                    isCurved: true,
+                                                    color: Colors.blue,
+                                                    barWidth: 4,
+                                                    dotData: const FlDotData(
+                                                        show: false),
+                                                  ),
+                                                ]
+                                              : [
+                                                  LineChartBarData(
+                                                    spots: weight.filter(
+                                                                weight
+                                                                    .listWeightUser,
+                                                                filter,
+                                                                unit) !=
+                                                            null
+                                                        ? weight
+                                                            .filter(
+                                                                weight
+                                                                    .listWeightUser,
+                                                                filter,
+                                                                unit)
+                                                            .map<FlSpot>(
+                                                            (element) {
+                                                              var index = weight
+                                                                  .filter(
+                                                                      weight
+                                                                          .listWeightUser,
+                                                                      filter,
+                                                                      unit)
+                                                                  .reversed
+                                                                  .toList()
+                                                                  .indexOf(
+                                                                      element);
+                                                              return FlSpot(
+                                                                double.parse(index
+                                                                    .toString()),
+                                                                double.parse(
+                                                                  element['weight']
+                                                                      .toString(),
+                                                                ),
+                                                              );
+                                                            },
+                                                          ).toList()
+                                                        : [],
+                                                    isCurved: true,
+                                                    color: Colors.blue,
+                                                    barWidth: 4,
+                                                    dotData: const FlDotData(
+                                                        show: false),
+                                                  ),
+                                                ],
                                           minX: 0,
                                           maxX: weight.filter(
                                                       weight.listWeightUser,
@@ -841,6 +1502,25 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                       ),
                                                                     ),
                                                                   ),
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    updateBB.text = updateBB
+                                                                        .text
+                                                                        .replaceAll(
+                                                                            RegExp(r'[^0-9.]'),
+                                                                            '');
+
+                                                                    if (RegExp(r'\.')
+                                                                            .allMatches(updateBB.text)
+                                                                            .length >
+                                                                        1) {
+                                                                      updateBB.text = updateBB
+                                                                          .text
+                                                                          .substring(
+                                                                              0,
+                                                                              updateBB.text.length - 1);
+                                                                    }
+                                                                  },
                                                                 ),
                                                                 Padding(
                                                                   padding:
@@ -975,9 +1655,21 @@ class _WeightTrackerState extends State<WeightTracker> {
                                                                   ),
                                                                   onPressed:
                                                                       () {
+                                                                    setState(
+                                                                        () {
+                                                                      showFieldInformationBMI =
+                                                                          false;
+                                                                      showFieldInformationCalory =
+                                                                          false;
+                                                                    });
+
+                                                                    fUpdateBB
+                                                                        .unfocus();
+
                                                                     ScaffoldMessenger.of(
                                                                             context)
                                                                         .removeCurrentSnackBar();
+
                                                                     if (updateBB
                                                                             .text !=
                                                                         '') {
@@ -1326,6 +2018,13 @@ class _WeightTrackerState extends State<WeightTracker> {
                     ),
                   ),
                 ),
+                onChanged: (value) {
+                  addBB.text = addBB.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+                  if (RegExp(r'\.').allMatches(addBB.text).length > 1) {
+                    addBB.text = addBB.text.substring(0, addBB.text.length - 1);
+                  }
+                },
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 12.0),
@@ -1415,7 +2114,15 @@ class _WeightTrackerState extends State<WeightTracker> {
                   ),
                 ),
                 onPressed: () {
+                  fAddBB.unfocus();
+
+                  setState(() {
+                    showFieldInformationBMI = false;
+                    showFieldInformationCalory = false;
+                  });
+
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
                   if (addBB.text != '') {
                     loadingIndicator(context);
                     Provider.of<Weight>(context, listen: false)

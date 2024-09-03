@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class User with ChangeNotifier {
+  final String mainApiDomain = 'https://modis.techcreator.my.id/api';
   final String apiDomain = 'https://modis.techcreator.my.id/api/user';
   String userFullName = '',
       userName = '',
@@ -11,6 +12,7 @@ class User with ChangeNotifier {
       userEmail = '',
       userGuide = '';
   int userRole = 0, userGender = 0;
+  double userHeight = 0;
 
   getUserRole() {
     return userRole;
@@ -267,6 +269,88 @@ class User with ChangeNotifier {
         userProfileImage = '';
         userGuide = '';
         userRole = 0;
+        notifyListeners();
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> getUserheight({
+    required bool isGuide,
+    String? childEmail,
+  }) async {
+    try {
+      userHeight = 0;
+
+      Uri url = Uri.parse('$mainApiDomain/height/get-user-height');
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $userToken',
+        },
+        body: jsonEncode(
+          isGuide
+              ? {
+                  'email': userEmail,
+                  'child_email': childEmail!,
+                }
+              : {
+                  'email': userEmail,
+                },
+        ),
+      );
+
+      var response = jsonDecode(post.body);
+
+      if (response['status'] == 'success') {
+        if (response['height'] != null && response['height'] != '') {
+          userHeight = double.parse(response['height'].toString());
+          notifyListeners();
+        }
+      }
+
+      return response;
+    } catch (error) {
+      throw error.toString();
+    }
+  }
+
+  Future<dynamic> updateUserHeight({
+    required bool isGuide,
+    required double height,
+    String? childEmail,
+  }) async {
+    try {
+      Uri url = Uri.parse('$mainApiDomain/height/update-height');
+
+      var post = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': 'Bearer $userToken',
+        },
+        body: jsonEncode(
+          isGuide
+              ? {
+                  'email': userEmail,
+                  'child_email': childEmail!,
+                  'height': height,
+                }
+              : {
+                  'email': userEmail,
+                  'height': height,
+                },
+        ),
+      );
+
+      var response = jsonDecode(post.body);
+
+      if (response['status'] == 'success') {
+        userHeight = height;
         notifyListeners();
       }
 
