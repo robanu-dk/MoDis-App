@@ -641,6 +641,10 @@ class _WeightTrackerState extends State<WeightTracker> {
                                           user.userHeight.toString();
                                     }
 
+                                    bbCalory.text = weight.listWeightUser[0]
+                                            ['weight']
+                                        .toString();
+
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertInput(
@@ -695,6 +699,21 @@ class _WeightTrackerState extends State<WeightTracker> {
                                             },
                                             border: const OutlineInputBorder(),
                                             keyboardType: TextInputType.number,
+                                          ),
+                                          Input(
+                                            textController: bbCalory,
+                                            label: "Berat Badan",
+                                            suffixIcon: const SizedBox(
+                                              width: 10,
+                                              child: Center(
+                                                child: Text(
+                                                  'Kg',
+                                                ),
+                                              ),
+                                            ),
+                                            focusNode: fBbCalory,
+                                            border: const OutlineInputBorder(),
+                                            readonly: true,
                                           ),
                                           Input(
                                             textController: ageCalory,
