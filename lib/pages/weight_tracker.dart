@@ -620,7 +620,7 @@ class _WeightTrackerState extends State<WeightTracker> {
                                   child: Text(
                                     showFieldInformationBMI
                                         ? 'Tutup Informasi BMI'
-                                        : 'BMI',
+                                        : 'Hitung BMI',
                                     style: const TextStyle(color: Colors.black),
                                   ),
                                 ),
