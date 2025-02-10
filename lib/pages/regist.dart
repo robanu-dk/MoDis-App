@@ -391,6 +391,7 @@ class _RegistPageState extends State<RegistPage> {
                           _fEmail.unfocus();
                           _fPassword.unfocus();
                           _fPasswordConfirm.unfocus();
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
                           showDialog(
                             barrierDismissible: false,
                             context: context,
@@ -483,6 +484,8 @@ class _RegistPageState extends State<RegistPage> {
                           ),
                           InkWell(
                             onTap: () {
+                              ScaffoldMessenger.of(context)
+                                  .removeCurrentSnackBar();
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(

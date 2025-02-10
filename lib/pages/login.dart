@@ -319,6 +319,7 @@ class _LoginPageState extends State<LoginPage> {
                           _fUsername.unfocus();
                           _fPassword.unfocus();
                           loadingIndicator(context);
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
                           Provider.of<User>(context, listen: false)
                               .login(
                             _username.text,
@@ -398,6 +399,8 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           InkWell(
                             onTap: () {
+                              ScaffoldMessenger.of(context)
+                                  .removeCurrentSnackBar();
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
