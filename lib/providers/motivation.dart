@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class MotivationVideo extends ChangeNotifier {
-  String apiDomain = 'https://modis.techcreator.my.id/api/video';
-  String apiVideoCategories =
-      'https://modis.techcreator.my.id/api/video-categories';
+  String apiDomain = '${Env.apiUrl}/video';
+  String apiVideoCategories = '${Env.apiUrl}/video-categories';
   String token = '', email = '';
   dynamic listVideo, videoCategories;
   int lengthResponseData = 0;

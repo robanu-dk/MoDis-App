@@ -12,6 +12,7 @@ import 'package:modis/providers/events.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:modis/config/env.dart';
 
 class DilansEvents extends StatefulWidget {
   const DilansEvents({super.key});
@@ -627,7 +628,7 @@ class _DilansEventsState extends State<DilansEvents> {
                                                                             4.0,
                                                                         child: Image
                                                                             .network(
-                                                                          'https://modis.techcreator.my.id/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                                          '${Env.assetUrl}/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                                                         ),
                                                                       ),
                                                                     ),
@@ -637,7 +638,7 @@ class _DilansEventsState extends State<DilansEvents> {
                                                             },
                                                             child:
                                                                 Image.network(
-                                                              'https://modis.techcreator.my.id/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                              '${Env.assetUrl}/${event["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                                             ),
                                                           )
                                                         : Container(),

@@ -12,6 +12,7 @@ import 'package:modis/pages/login.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:modis/config/env.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -97,7 +98,7 @@ class _ProfileState extends State<Profile> {
                           builder: (context, user, child) =>
                               user.getUserProfileImage() != ''
                                   ? Image.network(
-                                      'https://modis.techcreator.my.id/${user.getUserProfileImage()}',
+                                      '${Env.assetUrl}/${user.getUserProfileImage()}?time=${DateTime.now().millisecondsSinceEpoch}',
                                       fit: BoxFit.cover,
                                       filterQuality: FilterQuality.high,
                                     )

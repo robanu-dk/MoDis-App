@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class EventsForDilans extends ChangeNotifier {
-  String email = '',
-      token = '',
-      apiDomain = 'https://modis.techcreator.my.id/api/event';
+  String email = '', token = '', apiDomain = '${Env.apiUrl}/event';
   dynamic listEvent;
 
   setUserEmailToken(email, token) {

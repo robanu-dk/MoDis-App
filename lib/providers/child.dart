@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class Child extends ChangeNotifier {
   String email = '', token = '';
   dynamic listChild, allAvailableChild;
-  String apiDomain = 'https://modis.techcreator.my.id/api/guide';
+  String apiDomain = '${Env.apiUrl}/guide';
 
   void updateUser(String email, String token) {
     this.email = email;

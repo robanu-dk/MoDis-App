@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:modis/config/env.dart';
 
 class Activity extends ChangeNotifier {
-  String email = '',
-      token = '',
-      apiDomain = 'https://modis.techcreator.my.id/api/activity';
+  String email = '', token = '', apiDomain = '${Env.apiUrl}/activity';
   dynamic listTodayActivity, listMyActivities, userCoordinates;
   List<String> dateActivities = [];
   bool loadingGetData = true, isError = false;

@@ -4,6 +4,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modis/components/app_bar_implement.dart';
 import 'package:modis/components/error.dart';
 import 'package:video_player/video_player.dart';
+import 'package:modis/config/env.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({super.key, required this.dataVideo});
@@ -46,7 +47,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(
-          'https://modis.techcreator.my.id/${widget.dataVideo["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
+          '${Env.assetUrl}/${widget.dataVideo["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
         ),
       );
 

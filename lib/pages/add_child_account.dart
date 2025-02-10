@@ -11,6 +11,7 @@ import 'package:modis/components/tab_button.dart';
 import 'package:modis/components/tile_information_implement.dart';
 import 'package:modis/providers/child.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class AddChildAccount extends StatefulWidget {
   const AddChildAccount({super.key});
@@ -364,7 +365,7 @@ class ListAvailableChild extends StatelessWidget {
                                           ? Image.asset(
                                               'images/default_profile_image.jpg')
                                           : Image.network(
-                                              'https://modis.techcreator.my.id/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                              '${Env.assetUrl}/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                               filterQuality: FilterQuality.high,
                                               fit: BoxFit.cover,
                                             ),
@@ -489,7 +490,7 @@ class ListAvailableChild extends StatelessWidget {
                                       ? Image.asset(
                                           'images/default_profile_image.jpg')
                                       : Image.network(
-                                          'https://modis.techcreator.my.id/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                          '${Env.assetUrl}/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                           filterQuality: FilterQuality.high,
                                           fit: BoxFit.cover,
                                         ),

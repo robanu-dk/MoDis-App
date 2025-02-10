@@ -16,6 +16,7 @@ import 'package:modis/pages/play_video.dart';
 import 'package:modis/providers/motivation.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class Video extends StatefulWidget {
   const Video({super.key});
@@ -665,7 +666,7 @@ class _VideoState extends State<Video> {
                           Radius.circular(10.0),
                         ),
                         child: Image.network(
-                          'https://modis.techcreator.my.id/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                          '${Env.assetUrl}/${element["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                           fit: BoxFit.cover,
                         ),
                       ),

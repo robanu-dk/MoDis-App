@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class Chats extends ChangeNotifier {
   String email = '', token = '';
-  String apiDomain = 'https://modis.techcreator.my.id/api/chats';
+  String apiDomain = '${Env.apiUrl}/chats';
   List<dynamic> listMessage = [];
 
   updateEmailToken(email, token) {

@@ -10,6 +10,7 @@ import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class CreateEditActivity extends StatefulWidget {
   const CreateEditActivity({super.key, this.activityId});
@@ -239,7 +240,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
               : ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(30.0)),
                   child: Image.network(
-                    'https://modis.techcreator.my.id/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                    '${Env.assetUrl}/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                     height: 30.0,
                     width: 30.0,
                     fit: BoxFit.cover,
@@ -726,7 +727,7 @@ class _CreateEditActivityState extends State<CreateEditActivity> {
                                                                         30.0)),
                                                             child:
                                                                 Image.network(
-                                                              'https://modis.techcreator.my.id/${participant["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                                                              '${Env.assetUrl}/${participant["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                                                               height: 30.0,
                                                               width: 30.0,
                                                               fit: BoxFit.cover,

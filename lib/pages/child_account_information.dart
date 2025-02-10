@@ -7,6 +7,7 @@ import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class ChildAccountInformation extends StatelessWidget {
   const ChildAccountInformation({
@@ -116,7 +117,7 @@ class ChildAccountInformation extends StatelessWidget {
                             fit: BoxFit.cover,
                           )
                         : Image.network(
-                            'https://modis.techcreator.my.id/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                            '${Env.assetUrl}/${data["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                             filterQuality: FilterQuality.high,
                             fit: BoxFit.cover,
                           ),

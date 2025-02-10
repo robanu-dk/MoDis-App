@@ -10,6 +10,7 @@ import 'package:modis/components/input_implement.dart';
 import 'package:modis/providers/motivation.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:modis/config/env.dart';
 
 class EditVideo extends StatefulWidget {
   const EditVideo({super.key, required this.videoOldData});
@@ -97,7 +98,7 @@ class _EditVideoState extends State<EditVideo> {
           ? VideoPlayerController.file(video!)
           : VideoPlayerController.networkUrl(
               Uri.parse(
-                'https://modis.techcreator.my.id/${widget.videoOldData["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                '${Env.assetUrl}/${widget.videoOldData["video"]}?timestap=${DateTime.fromMillisecondsSinceEpoch(100)}',
               ),
             );
 
@@ -309,7 +310,7 @@ class _EditVideoState extends State<EditVideo> {
                         width: MediaQuery.of(context).size.width,
                       )
                     : Image.network(
-                        'https://modis.techcreator.my.id/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                        '${Env.assetUrl}/${widget.videoOldData["thumbnail"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                         fit: BoxFit.cover,
                         height: MediaQuery.of(context).size.width,
                         width: MediaQuery.of(context).size.width,

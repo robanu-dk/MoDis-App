@@ -9,6 +9,7 @@ import 'package:modis/components/input_implement.dart';
 import 'package:modis/components/outline_button_implement.dart';
 import 'package:modis/providers/events.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class CreateEditEvent extends StatefulWidget {
   const CreateEditEvent({super.key, this.data});
@@ -498,7 +499,7 @@ class _CreateEditEventState extends State<CreateEditEvent> {
                         ),
                       ),
                       Image.network(
-                          'https://modis.techcreator.my.id/${widget.data["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
+                          '${Env.assetUrl}/${widget.data["poster"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}'),
                     ],
                   ),
                 )

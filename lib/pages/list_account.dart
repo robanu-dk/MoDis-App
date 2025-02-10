@@ -13,6 +13,7 @@ import 'package:modis/providers/activity.dart';
 import 'package:modis/providers/child.dart';
 import 'package:modis/providers/weight.dart';
 import 'package:provider/provider.dart';
+import 'package:modis/config/env.dart';
 
 class ListAccount extends StatefulWidget {
   const ListAccount({super.key});
@@ -286,7 +287,7 @@ class _ListAccountState extends State<ListAccount> {
                     child: element['profile_image'] == null
                         ? Image.asset('images/default_profile_image.jpg')
                         : Image.network(
-                            'https://modis.techcreator.my.id/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                            '${Env.assetUrl}/${element["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                             fit: BoxFit.cover,
                             width: 38,
                             height: 38,

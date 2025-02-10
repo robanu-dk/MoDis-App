@@ -9,6 +9,7 @@ import 'package:modis/components/logo.dart';
 import 'package:modis/providers/chats.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:modis/config/env.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -531,7 +532,7 @@ class _ChatState extends State<Chat> {
                               Radius.circular(24),
                             ),
                             child: Image.network(
-                              'https://modis.techcreator.my.id/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                              '${Env.assetUrl}/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                               fit: BoxFit.cover,
                               width: constraint.maxWidth,
                               height: constraint.maxWidth,
@@ -559,7 +560,7 @@ class _ChatState extends State<Chat> {
                   Radius.circular(36),
                 ),
                 child: Image.network(
-                  'https://modis.techcreator.my.id/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
+                  '${Env.assetUrl}/${chat.listMessage[index]["profile_image"]}?timestamp=${DateTime.fromMillisecondsSinceEpoch(100)}',
                   fit: BoxFit.cover,
                   width: 30,
                   height: 30,

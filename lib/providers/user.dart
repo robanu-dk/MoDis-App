@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class User with ChangeNotifier {
-  final String mainApiDomain = 'https://modis.techcreator.my.id/api';
-  final String apiDomain = 'https://modis.techcreator.my.id/api/user';
+  final String mainApiDomain = Env.apiUrl;
+  final String apiDomain = '${Env.apiUrl}/user';
   String userFullName = '',
       userName = '',
       userToken = '',

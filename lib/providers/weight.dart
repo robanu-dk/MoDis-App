@@ -2,11 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:modis/config/env.dart';
 
 class Weight extends ChangeNotifier {
-  String email = '',
-      token = '',
-      apiDomain = 'https://modis.techcreator.my.id/api/weight';
+  String email = '', token = '', apiDomain = '${Env.apiUrl}/weight';
 
   dynamic listWeightUser;
 

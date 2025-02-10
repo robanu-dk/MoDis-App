@@ -11,6 +11,7 @@ import 'package:modis/components/input_implement.dart';
 import 'package:modis/providers/user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:modis/config/env.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -170,7 +171,7 @@ class _EditProfileState extends State<EditProfile> {
                                   builder: (context, user, child) =>
                                       user.userProfileImage != ''
                                           ? Image.network(
-                                              'https://modis.techcreator.my.id/${user.userProfileImage}',
+                                              '${Env.assetUrl}/${user.userProfileImage}?time=${DateTime.now().millisecond}',
                                               fit: BoxFit.cover,
                                               filterQuality: FilterQuality.high,
                                             )
